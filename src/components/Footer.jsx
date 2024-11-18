@@ -2,7 +2,7 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-covenPurple text-white py-6 mt-auto">
+    <footer className="bg-covenPurple text-white py-8 mt-auto" style={{ paddingLeft: '92px', paddingRight: '92px' }}>
       <div className="container mx-auto flex justify-between text-sm">
         <div>© 2024 SoundCoven</div>
         <div className="flex space-x-4">

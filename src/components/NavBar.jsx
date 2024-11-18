@@ -1,11 +1,10 @@
 import React from "react";
+import Logo from "../assets/soundcoven-logo-white.png";
 
 const Navbar = () => {
   return (
-    <nav className="bg-covenPurple text-white p-4 flex justify-between items-center">
-      <h1 className="text-3xl font-bold">
-        SOUND<span className="text-red-500">COVEN</span>
-      </h1>
+    <nav className="bg-covenPurple text-white py-8 px-24 flex flex-col items-center">
+      <img src={Logo} alt="Logo" className="mb-4" style={{ width: '700px' }} />
       <ul className="flex space-x-6 text-lg">
         <li><a href="#artists" className="hover:text-red-400">Artists</a></li>
         <li><a href="#live" className="hover:text-red-400">Live</a></li>
