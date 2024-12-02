@@ -12,9 +12,27 @@ import Placeholder3 from "./assets/placeholder-image-3.jpg";
 
 const App = () => {
   const artists = [
-    { name: "Artist 1", location: "Northeastern", genre: "Punk Rock", image: Placeholder1 },
-    { name: "Artist 2", location: "Boston University", genre: "Punk Rock", image: Placeholder2 },
-    { name: "Artist 3", location: "Berklee", genre: "Punk Rock", image: Placeholder3 },
+    { 
+      name: "Raven Riot", 
+      location: "Northeastern University", 
+      genre: "Punk Rock", 
+      image: Placeholder1, 
+      bio: "Raven Riot channels raw energy into anthems that critique societal norms with blistering guitar riffs and unapologetic lyrics."
+    },
+    { 
+      name: "The Boston Banshees", 
+      location: "Boston University", 
+      genre: "Punk Rock", 
+      image: Placeholder2, 
+      bio: "The Boston Banshees bring a haunting edge to punk rock, blending aggressive beats with ethereal melodies and fiery vocals." 
+    },
+    { 
+      name: "NoiseCraft", 
+      location: "Berklee College of Music", 
+      genre: "Punk Rock", 
+      image: Placeholder3, 
+      bio: "NoiseCraft fuses technical mastery with the rebellious spirit of punk, creating a sound that’s both innovative and rebellious."
+    },
   ];
 
   return (

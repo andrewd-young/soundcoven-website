@@ -1,4 +1,8 @@
-import React from "react";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMapMarkerAlt, faCompactDisc } from '@fortawesome/free-solid-svg-icons';
 
 const Card = ({ artist, className = "", styles = {} }) => {
   if (!artist) {
@@ -6,16 +10,34 @@ const Card = ({ artist, className = "", styles = {} }) => {
   }
 
   return (
-    <div
-      className={`bg-gray-100 rounded-lg shadow-md p-6 ${className}`}
-      style={styles}
+    <Link to={`/artists/${artist.name}`}
+      className={`bg-gray-100 rounded-lg shadow-md ${className}`}
+      style={{ ...styles, height: '500px', width: '320px' }}
     >
-      <img src={artist.image} alt={artist.name} className="rounded-md mb-4" />
-      <h3 className="font-bold">{artist.name}</h3>
-      <p>{artist.location}</p>
-      <p>{artist.genre}</p>
-    </div>
+      <img 
+        src={artist.image} 
+        alt={artist.name} 
+        className="mb-6" 
+        style={{ 
+          width: '100%', height: '315px', objectFit: 'cover', borderTopRightRadius: '0.5rem', borderTopLeftRadius: '0.5rem' }} 
+      />
+      <div className="mx-4 mb-6" style={{ height: '65px', overflow: 'hidden' }}>
+        <h3 className="font-bold text-3xl">{artist.name}</h3>
+      </div>
+      <p className="card-text mx-4">
+        <FontAwesomeIcon icon={faMapMarkerAlt} /> {artist.location}
+      </p>
+      <p className="card-text mx-4">
+        <FontAwesomeIcon icon={faCompactDisc} /> {artist.genre}
+      </p>
+    </Link>
   );
+};
+
+Card.propTypes = {
+  artist: PropTypes.object.isRequired,
+  className: PropTypes.string,
+  styles: PropTypes.object
 };
 
 export default Card;
