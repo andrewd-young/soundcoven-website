@@ -6,6 +6,7 @@ import ArtistsCarousel from "./components/ArtistsCarousel";
 import Footer from "./components/Footer";
 import ArtistsPage from "./ArtistsPage";
 import ArtistBio from "./ArtistBio";
+import ApplyForm from "./ApplyForm";
 import Placeholder1 from "./assets/placeholder-image-1.png";
 import Placeholder2 from "./assets/placeholder-image-2.jpeg";
 import Placeholder3 from "./assets/placeholder-image-3.jpg";
@@ -47,6 +48,7 @@ const App = () => {
             </>
           } />
           <Route path="/artists" element={<ArtistsPage artists={artists} />} />
+          <Route path="/apply" element={<ApplyForm />} />
           <Route path="/artists/:artistName" element={<ArtistBio artists={artists} />} />
         </Routes>
         <Footer />

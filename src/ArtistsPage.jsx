@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import WideCard from "./components/WideCard";
 
 const ArtistsPage = ({ artists }) => {
@@ -12,6 +13,14 @@ const ArtistsPage = ({ artists }) => {
       </div>
     </section>
   );
+};
+ArtistsPage.propTypes = {
+  artists: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      name: PropTypes.string.isRequired,
+    })
+  ).isRequired,
 };
 
 export default ArtistsPage;
