@@ -14,28 +14,22 @@ const ApplyForm = () => {
                 <h1 className="text-4xl text-white mb-8">I am a</h1>
                 <div className="flex flex-col">
                     <button 
-                        className="w-64 text-white border border-white rounded-lg px-4 py-3 mb-4 hover:bg-white hover:text-gray-800 transition"
-                        onClick={() => handleOptionClick('solo-artist')}
+                        className="text-white border border-white rounded-lg px-4 py-3 mb-4 hover:bg-white hover:text-gray-800 transition"
+                        onClick={() => handleOptionClick('artist')}
                     >
-                        Solo Artist
+                        Solo Artist, Band, DJ, Producer
                     </button>
                     <button 
-                        className="w-64 text-white border border-white rounded-lg px-4 py-3 mb-4 hover:bg-white hover:text-gray-800 transition"
-                        onClick={() => handleOptionClick('band')}
+                        className="text-white border border-white rounded-lg px-4 py-3 mb-4 hover:bg-white hover:text-gray-800 transition"
+                        onClick={() => handleOptionClick('industry')}
                     >
-                        Band
+                        Manager, Talent Buyer, Venue Buyer, Booking Agent, Publicist
                     </button>
                     <button 
-                        className="w-64 text-white border border-white rounded-lg px-4 py-3 mb-4 hover:bg-white hover:text-gray-800 transition"
-                        onClick={() => handleOptionClick('dj')}
+                        className="text-white border border-white rounded-lg px-4 py-3 mb-4 hover:bg-white hover:text-gray-800 transition"
+                        onClick={() => handleOptionClick('instrumentalist')}
                     >
-                        DJ
-                    </button>
-                    <button 
-                        className="w-64 text-white border border-white rounded-lg px-4 py-3 mb-4 hover:bg-white hover:text-gray-800 transition"
-                        onClick={() => handleOptionClick('producer')}
-                    >
-                        Producer
+                        Instrumentalist
                     </button>
                 </div>
             </div>
