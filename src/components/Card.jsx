@@ -1,10 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { useExtractColors } from "react-extract-colors";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMapMarkerAlt, faCompactDisc } from '@fortawesome/free-solid-svg-icons';
 
 const Card = ({ artist, className = "", styles = {} }) => {
+  const { dominantColor } = useExtractColors(artist.image);
+  const bgColor = dominantColor || "#fff";
+
+
   if (!artist) {
     return null; // or return some fallback UI
   }
@@ -12,7 +17,7 @@ const Card = ({ artist, className = "", styles = {} }) => {
   return (
     <Link to={`/artists/${artist.name}`}
       className={`bg-gray-100 rounded-lg shadow-md ${className}`}
-      style={{ ...styles, height: '500px', width: '320px' }}
+      style={{ ...styles, height: '500px', width: '320px', backgroundColor: bgColor }}
     >
       <img 
         src={artist.image} 

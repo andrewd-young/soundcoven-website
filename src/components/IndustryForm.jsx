@@ -1,26 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
-const ArtistForm = () => {
+const IndustryForm = () => {
     const [formData, setFormData] = useState({
-        artistType: "",
+        role: "",
         name: "",
         email: "",
         school: "",
-        genres: "",
-        links: "",
         photo: null,
-        needs: "",
-        upcomingShow: "",
-        influences: "",
+        favoriteArtists: "",
         note: "",
     });
 
-    const influencesRef = useRef(null);
     const noteRef = useRef(null);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-    
         if (name === "note") {
             const words = value.trim().split(/\s+/);
             if (words.length <= 200) {
@@ -48,29 +42,29 @@ const ArtistForm = () => {
     };
 
     useEffect(() => {
-        adjustHeight(influencesRef);
         adjustHeight(noteRef);
-    }, [formData.influences, formData.note]);
+    }, [formData.note]);
 
     return (
         <form onSubmit={handleSubmit} className="text-white border border-white p-8 rounded-lg max-w-lg mx-auto mt-20">
-            <h1 className="font-bold text-3xl mb-4">Apply as an Artist</h1>
+            <h1 className="font-bold text-3xl mb-4">Apply as an Industry Pro</h1>
             <div className="mb-4">
-                <label className="block mb-2">Are you a Solo Artist, Band, DJ or Producer?</label>
-                <select name="artistType" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleChange} required>
+                <label className="block mb-2">Role</label>
+                <select name="role" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleChange} required>
                     <option value="">Choose one</option>
-                    <option value="Solo Artist">Solo Artist</option>
-                    <option value="Band">Band</option>
-                    <option value="DJ">DJ</option>
-                    <option value="Producer">Producer</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Talent Buyer">Talent Buyer</option>
+                    <option value="Venue Buyer">Venue Buyer</option>
+                    <option value="Booking Agent">Booking Agent</option>
+                    <option value="Publicist">Publicist</option>
                 </select>
             </div>
             <div className="mb-4">
-                <label className="block mb-2">Name(s)</label>
+                <label className="block mb-2">Name</label>
                 <input name="name" type="text" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleChange} required />
             </div>
             <div className="mb-4">
-                <label className="block mb-2">Email(s)</label>
+                <label className="block mb-2">Email</label>
                 <input name="email" type="email" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleChange} required />
             </div>
             <div className="mb-4">
@@ -78,46 +72,25 @@ const ArtistForm = () => {
                 <input name="school" type="text" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleChange} required />
             </div>
             <div className="mb-4">
-                <label className="block mb-2">Genre(s)</label>
-                <input name="genres" type="text" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleChange} required />
-            </div>
-            <div className="mb-4">
-                <label className="block mb-2">Links to streaming platforms</label>
-                <input name="links" type="text" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleChange} placeholder="Must provide at least one link to streamable music" required />
-            </div>
-            <div className="mb-4">
                 <label className="block mb-2">Professional Photo</label>
                 <input name="photo" type="file" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleFileChange} />
+                <p className="mt-2 text-sm text-gray-400">(preferably your LinkedIn profile photo)</p>
             </div>
             <div className="mb-4">
-                <label className="block mb-2">Are you currently in need of a manager, producer, publicist, etc.?</label>
-                <input name="needs" type="text" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleChange} placeholder="N/A if not applicable"/>
-            </div>
-            <div className="mb-4">
-                <label className="block mb-2">Upcoming live show</label>
-                <input name="upcomingShow" type="text" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleChange} placeholder="N/A if not applicable"/>
-            </div>
-            <div className="mb-4">
-                <label className="block mb-2">Influences on your music</label>
-                <textarea
-                    name="influences"
-                    className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-                    onChange={handleChange}
-                    ref={influencesRef}
-                    placeholder="Artists, producers, creatives, etc."
-                ></textarea>
+                <label className="block mb-2">Top 3 favorite artists</label>
+                <input name="favoriteArtists" type="text" className="w-full px-3 py-2 bg-[#432347] border border-white rounded" onChange={handleChange} required />
             </div>
             <div className="mb-4">
                 <label className="block mb-2">Note</label>
                 <textarea
                     name="note"
-                    className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+                    className="w-full px-3 py-2 bg-[#432347] border border-white rounded mb-0"
                     value={formData.note}
                     onChange={handleChange}
                     ref={noteRef}
                     placeholder="Anything you would want people to know about you?"
                 ></textarea>
-                <p className="text-sm text-gray-400">
+                <p className="mt-2 text-sm text-gray-400">
                     {formData.note.trim() ? formData.note.trim().split(/\s+/).length : 0} / 200 words
                 </p>
             </div>
@@ -126,4 +99,4 @@ const ArtistForm = () => {
     );
 };
 
-export default ArtistForm;
+export default IndustryForm;

@@ -8,6 +8,8 @@ import ArtistsPage from "./ArtistsPage";
 import ArtistBio from "./ArtistBio";
 import ApplyForm from "./ApplyForm";
 import ArtistForm from "./components/ArtistForm";
+import IndustryForm from "./components/IndustryForm";
+import InstrumentalistForm from "./components/InstrumentalistForm";
 import Placeholder1 from "./assets/placeholder-image-1.png";
 import Placeholder2 from "./assets/placeholder-image-2.jpeg";
 import Placeholder3 from "./assets/placeholder-image-3.jpg";
@@ -52,6 +54,8 @@ const App = () => {
           <Route path="/apply" element={<ApplyForm />} />
           <Route path="/artists/:artistName" element={<ArtistBio artists={artists} />} />
           <Route path="/apply/artist" element={<ArtistForm />} />
+          <Route path="/apply/industry" element={<IndustryForm />} />
+          <Route path="/apply/instrumentalist" element={<InstrumentalistForm />} />
         </Routes>
         <Footer />
       </div>

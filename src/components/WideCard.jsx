@@ -8,7 +8,6 @@ import { faMapMarkerAlt, faCompactDisc } from '@fortawesome/free-solid-svg-icons
 const WideCard = ({ artist }) => {
   const { dominantColor } = useExtractColors(artist.image);
   const bgColor = dominantColor || "#fff";
-  console.log(bgColor);
 
   if (!artist) {
     return null; // or return some fallback UI
