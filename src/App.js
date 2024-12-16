@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Navbar from "./components/NavBar";
 import HeroSection from "./components/HeroSection";
 import ArtistsCarousel from "./components/ArtistsCarousel";
+import About from "./components/About";
 import Footer from "./components/Footer";
 import ArtistsPage from "./ArtistsPage";
 import ArtistBio from "./ArtistBio";
@@ -48,6 +49,7 @@ const App = () => {
             <>
               <HeroSection />
               <ArtistsCarousel artists={artists} />
+              <About />
             </>
           } />
           <Route path="/artists" element={<ArtistsPage artists={artists} />} />
