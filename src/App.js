@@ -54,7 +54,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={
             <>
-              <HeroSection />
+              <HeroSection artist={artists[1]} />
               <ArtistsCarousel artists={artists} />
               <About />
             </>

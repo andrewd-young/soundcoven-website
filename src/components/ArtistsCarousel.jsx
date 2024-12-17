@@ -1,8 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import Card from "./Card";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 const ArtistsCarousel = ({ artists }) => {
   const carouselRef = useRef(null);
@@ -42,7 +42,10 @@ const ArtistsCarousel = ({ artists }) => {
   }, []);
 
   return (
-    <section id="artists" className="bg-covenPurple text-white py-8 px-24 relative">
+    <section
+      id="artists"
+      className="bg-covenPurple text-white py-8 px-24 relative"
+    >
       <h2 className="text-2xl font-bold mb-6">Artists You Might Like</h2>
       <div className="relative">
         {/* Gradient Effect */}
@@ -52,7 +55,7 @@ const ArtistsCarousel = ({ artists }) => {
         {!isScrolledToEnd && (
           <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-covenPurple pointer-events-none z-10" />
         )}
-        
+
         {/* Scrollable Artists */}
         <div
           ref={carouselRef}
