@@ -1,14 +1,16 @@
 import React from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faInstagram } from '@fortawesome/free-brands-svg-icons';
 
 const Footer = () => {
   return (
-    <footer className="bg-covenPurple text-white py-8 mt-auto" style={{ paddingLeft: '92px', paddingRight: '92px' }}>
-      <div className="container mx-auto flex justify-between text-sm">
-        <div>© 2024 SoundCoven</div>
-        <div className="flex space-x-4">
-          <a href="#facebook" className="hover:text-red-500">Facebook</a>
-          <a href="#twitter" className="hover:text-red-500">Twitter</a>
-          <a href="#instagram" className="hover:text-red-500">Instagram</a>
+    <footer className="bg-covenPurple text-white py-8 mt-auto px-24">
+      <div className="container mx-auto flex justify-between items-center">
+        <div className="text-sm">© 2024 SoundCoven</div>
+        <div>
+          <a href="https://www.instagram.com/soundcoven/" target="_blank" rel="noopener noreferrer" className="hover:text-red-500">
+            <FontAwesomeIcon icon={faInstagram} size="lg" />
+          </a>
         </div>
       </div>
     </footer>

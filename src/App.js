@@ -32,11 +32,18 @@ const App = () => {
       bio: "The Boston Banshees bring a haunting edge to punk rock, blending aggressive beats with ethereal melodies and fiery vocals." 
     },
     { 
-      name: "NoiseCraft", 
+      name: "Dark Room", 
       location: "Berklee College of Music", 
-      genre: "Punk Rock", 
+      genre: "Alt Pop", 
       image: Placeholder3, 
-      bio: "NoiseCraft fuses technical mastery with the rebellious spirit of punk, creating a sound that’s both innovative and rebellious."
+      bio: "Dark Room's dreamy soundscapes and introspective lyrics create a hauntingly beautiful listening experience."
+    },
+    { 
+      name: "Crystalline", 
+      location: "Northeastern University", 
+      genre: "Trap House", 
+      image: Placeholder1, 
+      bio: "Raven Riot channels raw energy into anthems that critique societal norms with blistering guitar riffs and unapologetic lyrics."
     },
   ];
 
