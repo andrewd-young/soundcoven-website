@@ -90,13 +90,6 @@ const ArtistsCarousel = ({ artists }) => {
           </button>
         )}
       </div>
-
-      {/* Link to more artists */}
-      <div className="mt-6 text-right">
-        <a href="/artists" className="text-teal-300 hover:underline">
-          See More Artists
-        </a>
-      </div>
     </section>
   );
 };

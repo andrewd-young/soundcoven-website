@@ -1,15 +1,14 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        covenTeal: "#094351",
-        covenPurple: "#301933",
-      },
+export const content = [
+  "./src/**/*.{js,jsx,ts,tsx}",
+];
+export const theme = {
+  extend: {
+    colors: {
+      covenTeal: "#094351",
+      covenPurple: "#301933",
+      covenRed: "#8B0000",
     },
   },
-  plugins: [],
 };
+export const plugins = [];

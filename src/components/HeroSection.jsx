@@ -1,56 +1,47 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Button from "./Button";
-import { useExtractColors } from "react-extract-colors";
+import { Link } from "react-router-dom";
 
 const HeroSection = ({ artist }) => {
-  const { dominantColor } = useExtractColors(artist.image);
-  const bgColor = dominantColor || "#1a1a1a"; // Fallback background color
-
-  if (!artist) {
-    return null;
-  }
-
   return (
-    <section
-      className="relative flex justify-center items-center min-h-[80vh] px-6 sm:px-12"
-      style={{ backgroundColor: bgColor }}
-    >
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${artist.image})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {/* Gradient to Background Color */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(to right, ${bgColor} 0%, ${bgColor} 20%, transparent 100%)`,
-          }}
-        ></div>
-      </div>
+    <section className="bg-covenPurple text-white py-8 px-24 relative">
+      <div className="grid md:grid-cols-2 items-center gap-8">
+        {/* Artist Image */}
+        <div className="relative z-10">
+          <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden shadow-2xl transform transition duration-500 hover:scale-105">
+            <img 
+              src={artist.image} 
+              alt={artist.name} 
+              className="w-full h-full object-cover object-center"
+            />
+          </div>
+        </div>
 
-      {/* Content Section */}
-      <div className="relative z-10 flex flex-col justify-center items-start text-left w-full max-w-screen-lg pl-6 sm:pl-12">
-        {/* Artist Name (Left Side, Italic) */}
-        <p className="text-white italic text-3xl sm:text-4xl font-light mb-4">
-          {artist.name}
-        </p>
+        {/* Artist Information */}
+        <div className="space-y-6 z-20">
+          <h3 className="italic text-2xl md:text-3xl lg:text-4xl">FEATURED</h3>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+            {artist.name}
+          </h1>
 
-        {/* Hero Title */}
-        <h2 className="text-white text-5xl sm:text-6xl font-bold mb-6">
-          FEATURED
-        </h2>
+          <div className="space-y-4">
+            <div className="flex space-x-4">
+              <Link
+                to={`/artists/${artist.name}`}
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-covenRed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-300 transform hover:-translate-y-1 hover:scale-105"
+              >
+                View Artist Profile
+              </Link>
 
-        {/* CTA Button */}
-        <Button 
-          text="Apply" 
-          className="bg-white text-black hover:bg-gray-200 transition duration-300 shadow-lg" 
-        />
+              <a
+                href="/artists"
+                className="inline-flex items-center px-6 py-3 border border-white text-base font-medium rounded-md text-white hover:bg-white hover:text-covenPurple transition duration-300 transform hover:-translate-y-1 hover:scale-105"
+              >
+                Explore More Artists
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

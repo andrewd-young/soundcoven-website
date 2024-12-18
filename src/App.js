@@ -25,11 +25,11 @@ const App = () => {
       bio: "Raven Riot channels raw energy into anthems that critique societal norms with blistering guitar riffs and unapologetic lyrics."
     },
     { 
-      name: "The Boston Banshees", 
+      name: "Inhaler", 
       location: "Boston University", 
-      genre: "Punk Rock", 
+      genre: "Indie Rock", 
       image: Placeholder2, 
-      bio: "The Boston Banshees bring a haunting edge to punk rock, blending aggressive beats with ethereal melodies and fiery vocals." 
+      bio: "Inhaler are an Irish rock band originating from Dublin. Formed in 2012, the band consist of vocalist and guitarist Elijah Hewson, bassist Robert Keating, guitarist Josh Jenkinson and drummer Ryan McMahon."
     },
     { 
       name: "Dark Room", 
