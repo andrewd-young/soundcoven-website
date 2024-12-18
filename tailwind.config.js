@@ -7,6 +7,7 @@ export const theme = {
     colors: {
       covenTeal: "#094351",
       covenPurple: "#301933",
+      covenLightPurple: "#4F1D4D",
       covenRed: "#8B0000",
     },
   },

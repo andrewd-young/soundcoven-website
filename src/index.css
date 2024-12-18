@@ -13,13 +13,16 @@ code {
 }
 
 .tag {
-  background-color: white;
+  background-color: #f0f0f0; /* Lighter version of the background color */
   color: black;
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.5rem; /* Adjusted padding */
   border-radius: 9999px;
   display: inline-flex;
   align-items: center;
   font-size: 1rem;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
 }
 
 @tailwind base;

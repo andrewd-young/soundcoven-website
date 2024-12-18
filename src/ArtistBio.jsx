@@ -23,10 +23,10 @@ const ArtistBio = ({ artists }) => {
           <p className="text-base mb-4">{artist.bio}</p>
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="tag">
-              <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2" /> {artist.location}
+              <FontAwesomeIcon icon={faMapMarkerAlt} className="w-6" /> {artist.location}
             </span>
             <span className="tag">
-              <FontAwesomeIcon icon={faCompactDisc} className="mr-2" /> {artist.genre}
+              <FontAwesomeIcon icon={faCompactDisc} className="w-6" /> {artist.genre}
             </span>
           </div>
         </div>

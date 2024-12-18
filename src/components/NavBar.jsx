@@ -27,6 +27,11 @@ const Navbar = () => {
           </Link>
         </li>
         <li>
+          <Link to="/industry-pros" className="hover:text-red-400">
+            Industry Pros
+          </Link>
+        </li>
+        <li>
           <a
             href="/#about"
             onClick={handleAboutClick}
@@ -35,11 +40,11 @@ const Navbar = () => {
             About
           </a>
         </li>
-        <li>
+        {/* <li>
           <a href="#contact" className="hover:text-red-400">
             Contact
           </a>
-        </li>
+        </li> */}
         <li>
           <a href="/apply" className="hover:text-red-400">
             Apply

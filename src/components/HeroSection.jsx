@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import Button from "./Button";
 
 const HeroSection = ({ artist }) => {
   return (
@@ -26,19 +26,15 @@ const HeroSection = ({ artist }) => {
 
           <div className="space-y-4">
             <div className="flex space-x-4">
-              <Link
-                to={`/artists/${artist.name}`}
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-covenRed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-300 transform hover:-translate-y-1 hover:scale-105"
-              >
-                View Artist Profile
-              </Link>
-
-              <a
-                href="/artists"
-                className="inline-flex items-center px-6 py-3 border border-white text-base font-medium rounded-md text-white hover:bg-white hover:text-covenPurple transition duration-300 transform hover:-translate-y-1 hover:scale-105"
-              >
-                Explore More Artists
-              </a>
+              <Button
+                text="View Artist Profile"
+                link={`/artists/${artist.name}`}
+                className="bg-covenRed border-0"
+              />
+              <Button
+                text="Explore More Artists"
+                link="/artists"
+              />
             </div>
           </div>
         </div>
