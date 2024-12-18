@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "./components/NavBar";
 import HeroSection from "./components/HeroSection";
 import ArtistsCarousel from "./components/ArtistsCarousel";
@@ -14,6 +14,21 @@ import InstrumentalistForm from "./components/InstrumentalistForm";
 import Placeholder1 from "./assets/placeholder-image-1.png";
 import Placeholder2 from "./assets/placeholder-image-2.jpeg";
 import Placeholder3 from "./assets/placeholder-image-3.jpg";
+
+const ScrollToHashElement = () => {
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash) {
+      const element = document.getElementById(hash.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [hash]);
+
+  return null;
+};
 
 const App = () => {
   const artists = [
@@ -49,6 +64,7 @@ const App = () => {
 
   return (
     <Router>
+      <ScrollToHashElement />
       <div className="bg-covenPurple min-h-screen flex flex-col">
         <Navbar />
         <Routes>

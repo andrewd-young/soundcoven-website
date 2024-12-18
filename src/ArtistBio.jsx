@@ -18,8 +18,20 @@ const ArtistBio = ({ artists }) => {
   return (
     <section id="artist-bio" className="bg-covenPurple text-white py-8 px-24">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="flex flex-col">
+          <h2 className="text-6xl font-bold mb-6">{artist.name}</h2>
+          <p className="text-base mb-4">{artist.bio}</p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className="tag">
+              <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2" /> {artist.location}
+            </span>
+            <span className="tag">
+              <FontAwesomeIcon icon={faCompactDisc} className="mr-2" /> {artist.genre}
+            </span>
+          </div>
+        </div>
         <div className="relative z-10">
-          <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden shadow-2xl transform transition duration-500 hover:scale-105">
+          <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden">
             <img
               src={artist.image}
               alt={artist.name}
@@ -27,20 +39,11 @@ const ArtistBio = ({ artists }) => {
             />
           </div>
         </div>
-        <div className="flex flex-col">
-          <h2 className="text-6xl font-bold mb-6">{artist.name}</h2>
-          <p className="text-base mb-4">{artist.bio}</p>
-          <p className="text-lg">
-            <FontAwesomeIcon icon={faMapMarkerAlt} /> {artist.location}
-          </p>
-          <p className="text-lg">
-            <FontAwesomeIcon icon={faCompactDisc} /> {artist.genre}
-          </p>
-        </div>
       </div>
     </section>
   );
 };
+
 ArtistBio.propTypes = {
   artists: PropTypes.arrayOf(
     PropTypes.shape({

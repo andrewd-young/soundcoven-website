@@ -1,8 +1,15 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../assets/soundcoven-logo-white.png";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const handleAboutClick = (e) => {
+    e.preventDefault();
+    navigate("/#about");
+  };
+
   return (
     <nav className="bg-covenPurple text-white py-8 px-24 flex flex-col items-center">
       <Link to="/">
@@ -20,7 +27,11 @@ const Navbar = () => {
           </Link>
         </li>
         <li>
-          <a href="#about" className="hover:text-red-400">
+          <a
+            href="/#about"
+            onClick={handleAboutClick}
+            className="hover:text-red-400"
+          >
             About
           </a>
         </li>

@@ -35,13 +35,16 @@ const WideCard = ({ artist }) => {
       />
       <div className="flex flex-col w-full md:w-2/3">
         <h3 className="text-4xl font-bold mb-2">{artist.name}</h3>
-        <p className="text-lg mb-1">
-          <FontAwesomeIcon icon={faMapMarkerAlt} /> {artist.location}
-        </p>
-        <p className="text-lg">
-          {" "}
-          <FontAwesomeIcon icon={faCompactDisc} /> {artist.genre}
-        </p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span className="tag">
+            <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2" />{" "}
+            {artist.location}
+          </span>
+          <span className="tag">
+            <FontAwesomeIcon icon={faCompactDisc} className="mr-2" />{" "}
+            {artist.genre}
+          </span>
+        </div>
       </div>
     </Link>
   );
