@@ -15,6 +15,7 @@ import IndustryProsPage from "./IndustryProsPage";
 import artists from "./artists";
 import industryPros from "./industryPros";
 import IndustryProBio from "./IndustryProBio";
+import { SpeedInsights } from "@vercel/speed-insights/react"
 
 const ScrollToHashElement = () => {
   const { hash } = useLocation();
@@ -34,6 +35,7 @@ const ScrollToHashElement = () => {
 const App = () => {
   return (
     <Router>
+      <SpeedInsights/>
       <ScrollToHashElement />
       <div className="bg-covenPurple min-h-screen flex flex-col overflow-x-hidden">
         <Navbar />
