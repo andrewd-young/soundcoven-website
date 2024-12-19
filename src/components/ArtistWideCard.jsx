@@ -19,21 +19,22 @@ const WideCard = ({ artist }) => {
   return (
     <Link
       to={`/artists/${artist.name}`}
-      className="h-80 rounded-lg shadow-md pl-6 w-full mb-4 flex flex-col md:flex-row-reverse items-center"
+      className="h-auto rounded-lg shadow-md w-full mb-4 flex flex-col md:flex-row-reverse items-center"
       style={{ backgroundColor: bgColor }}
     >
       <img
         src={artist.image}
         alt={artist.name}
-        className="mb-4 md:mb-0 md:w-1/3 h-full md:h-full md:ml-0"
+        className="w-full md:w-1/3 h-auto md:h-full mb-4 md:mb-0"
         style={{
-          width: "560px",
           objectFit: "cover",
+          borderTopLeftRadius: "0.5rem",
           borderTopRightRadius: "0.5rem",
           borderBottomRightRadius: "0.5rem",
+          borderBottomLeftRadius: "0.5rem",
         }}
       />
-      <div className="flex flex-col w-full md:w-2/3">
+      <div className="flex flex-col w-full md:w-2/3 p-6">
         <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">{artist.name}</h3>
         <div>
           <p className="card-text my-3">
@@ -49,6 +50,7 @@ const WideCard = ({ artist }) => {
     </Link>
   );
 };
+
 WideCard.propTypes = {
   artist: PropTypes.shape({
     name: PropTypes.string.isRequired,

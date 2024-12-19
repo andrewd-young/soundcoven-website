@@ -11,7 +11,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-covenPurple text-white py-8 px-24 flex flex-col items-center">
+    <nav className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24 flex flex-col items-center">
       <Link to="/">
         <img
           src={Logo}

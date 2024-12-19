@@ -49,7 +49,7 @@ const App = () => {
           <Route path="/industry-pros" element={<IndustryProsPage industryPros={industryPros} />} />
           <Route path="/apply" element={<ApplyForm />} />
           <Route path="/artists/:artistName" element={<ArtistBio artists={artists} />} />
-          <Route path="/industry-pros/:proName" element={<IndustryProBio industryPros={industryPros} />} />
+          <Route path="/pros/:proName" element={<IndustryProBio industryPros={industryPros} />} />
           <Route path="/apply/artist" element={<ArtistForm />} />
           <Route path="/apply/industry" element={<IndustryForm />} />
           <Route path="/apply/instrumentalist" element={<InstrumentalistForm />} />

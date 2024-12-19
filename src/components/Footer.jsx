@@ -4,7 +4,7 @@ import { faInstagram } from "@fortawesome/free-brands-svg-icons";
 
 const Footer = () => {
   return (
-    <footer className="bg-covenPurple text-white py-8 mt-auto px-24">
+    <footer className="bg-covenPurple text-white py-8 mt-auto px-6 md:px-12 lg:px-24">
       <div className="container mx-auto flex justify-between items-center">
         <div className="text-sm">© 2024 SoundCoven</div>
         <div>

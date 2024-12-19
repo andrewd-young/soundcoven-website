@@ -25,7 +25,7 @@ const ArtistBio = ({ artists }) => {
   }
 
   return (
-    <section id="artist-bio" className="bg-covenPurple text-white py-8 px-24">
+    <section id="artist-bio" className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="flex flex-col">
           <h2 className="text-6xl font-bold mb-6">{artist.name}</h2>

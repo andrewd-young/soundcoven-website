@@ -4,7 +4,7 @@ import Button from "./Button";
 
 const HeroSection = ({ artist }) => {
   return (
-    <section className="bg-covenPurple text-white py-8 px-24 relative">
+    <section className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24 relative">
       <div className="grid md:grid-cols-2 items-center gap-8">
         {/* Artist Image */}
         <div className="relative z-10">

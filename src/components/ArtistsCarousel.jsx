@@ -44,16 +44,16 @@ const ArtistsCarousel = ({ artists }) => {
   return (
     <section
       id="artists"
-      className="bg-covenPurple text-white py-8 px-24 relative"
+      className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24 relative"
     >
       <h2 className="text-2xl font-bold mb-6">Artists You Might Like</h2>
       <div className="relative">
         {/* Gradient Effect */}
         {!isScrolledToStart && (
-          <div className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-covenPurple pointer-events-none z-10" />
+          <div className="absolute top-0 left-0 w-20 h-full bg-gradient-to-r from-covenPurple pointer-events-none z-10 hidden sm:block" />
         )}
         {!isScrolledToEnd && (
-          <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-covenPurple pointer-events-none z-10" />
+          <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-covenPurple pointer-events-none z-10 hidden sm:block" />
         )}
 
         {/* Scrollable Artists */}

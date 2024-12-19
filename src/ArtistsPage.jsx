@@ -4,7 +4,7 @@ import ArtistWideCard from "./components/ArtistWideCard";
 
 const ArtistsPage = ({ artists }) => {
   return (
-    <section id="artists" className="bg-covenPurple text-white py-8 px-24">
+    <section id="artists" className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24">
       <div className="flex flex-col gap-6">
         {artists.map((artist, index) => (
           <ArtistWideCard key={index} artist={artist} />
