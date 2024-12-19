@@ -24,7 +24,7 @@ const ArtistsPage = ({ artists }) => {
   }, [artists, filters]);
 
   return (
-    <section id="artists" className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24">
+    <section id="artists" className="bg-covenPurple text-white pt-0 py-8 px-6 md:px-12 lg:px-24">
       <Filter filters={filterConfig} onFilterChange={setFilters} />
       <div className="flex flex-col gap-6">
         {filteredArtists.map((artist, index) => (

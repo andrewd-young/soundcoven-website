@@ -48,14 +48,14 @@ const IndustryForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="text-white border border-white p-8 rounded-lg max-w-lg mx-auto md:mt-2 lg:mt-5"
+      className="text-white p-8 rounded-lg md:w-2/3 lg:w-1/2 mx-auto md:mt-2 lg:mt-5"
     >
       <h1 className="font-bold text-3xl mb-4">Apply as an Industry Pro</h1>
       <div className="mb-4">
         <label className="block mb-2">Role</label>
         <select
           name="role"
-          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          className="w-full px-3 py-2 bg-[#432347] border md:border-white rounded"
           onChange={handleChange}
           required
         >

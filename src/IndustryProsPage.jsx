@@ -25,7 +25,7 @@ const IndustryProsPage = ({ industryPros }) => {
   }, [industryPros, filters]);
 
   return (
-    <section id="industry-pros" className="text-white py-8 px-6 md:px-12 lg:px-24">
+    <section id="industry-pros" className="text-white pt-0 py-8 px-6 md:px-12 lg:px-24">
       <Filter filters={filterConfig} onFilterChange={setFilters} />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {filteredPros.map((pro, index) => (

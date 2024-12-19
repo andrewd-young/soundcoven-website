@@ -43,7 +43,7 @@ const InstrumentalistForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="text-white border border-white p-8 rounded-lg max-w-lg mx-auto md:mt-2 lg:mt-5"
+      className="text-white p-8 rounded-lg md:w-2/3 lg:w-1/2 mx-auto md:mt-2 lg:mt-5"
     >
       <h1 className="font-bold text-3xl mb-4">Apply as an Instrumentalist</h1>
       <p className="mb-4">
