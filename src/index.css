@@ -23,6 +23,7 @@ code {
   white-space: nowrap; 
   overflow: hidden; 
   text-overflow: ellipsis; 
+  /* padding-right: 1rem; */
 }
 
 @tailwind base;

@@ -5,7 +5,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMapMarkerAlt,
   faCompactDisc,
+  faUser,
+  faClock,
+  faMusic,
+  faUsers,
 } from "@fortawesome/free-solid-svg-icons";
+// import {
+//   faSoundcloud,
+//   faSpotify,
+//   faItunes,
+// } from "@fortawesome/free-brands-svg-icons";
 
 const ArtistBio = ({ artists }) => {
   const { artistName } = useParams();
@@ -23,12 +32,52 @@ const ArtistBio = ({ artists }) => {
           <p className="text-base mb-4">{artist.bio}</p>
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="tag">
-              <FontAwesomeIcon icon={faMapMarkerAlt} className="w-6" /> {artist.location}
+              <FontAwesomeIcon icon={faMapMarkerAlt} className="w-6" />{" "}
+              {artist.location}
             </span>
             <span className="tag">
-              <FontAwesomeIcon icon={faCompactDisc} className="w-6" /> {artist.genre}
+              <FontAwesomeIcon icon={faCompactDisc} className="w-6" />{" "}
+              {artist.genre}
+            </span>
+            <span className="tag">
+              <FontAwesomeIcon icon={faUser} className="w-6" /> {artist.age}{" "}
+              years old
+            </span>
+            <span className="tag">
+              <FontAwesomeIcon icon={faUsers} className="w-6" /> {artist.type}
+            </span>
+            <span className="tag">
+              <FontAwesomeIcon icon={faClock} className="w-6" />{" "}
+              {artist.yearsActive} years active
+            </span>
+            <span className="tag">
+              <FontAwesomeIcon icon={faMusic} className="w-6" /> Influences:{" "}
+              {artist.influences}
             </span>
           </div>
+          {/* <div className="flex gap-4 mb-4">
+            <a
+              href={artist.soundcloudLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon icon={faSoundcloud} className="w-8 h-8" />
+            </a>
+            <a
+              href={artist.spotifyLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon icon={faSpotify} className="w-8 h-8" />
+            </a>
+            <a
+              href={artist.appleMusicLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon icon={faItunes} className="w-8 h-8" />
+            </a>
+          </div> */}
         </div>
         <div className="relative z-10">
           <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden">
@@ -52,6 +101,13 @@ ArtistBio.propTypes = {
       bio: PropTypes.string.isRequired,
       location: PropTypes.string.isRequired,
       genre: PropTypes.string.isRequired,
+      age: PropTypes.number.isRequired,
+      type: PropTypes.string.isRequired,
+      yearsActive: PropTypes.number.isRequired,
+      influences: PropTypes.string.isRequired,
+      soundcloudLink: PropTypes.string,
+      spotifyLink: PropTypes.string,
+      appleMusicLink: PropTypes.string,
     })
   ).isRequired,
 };
