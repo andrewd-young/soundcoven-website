@@ -28,7 +28,8 @@ const Navbar = () => {
         </li>
         <li>
           <Link to="/industry-pros" className="hover:text-red-400">
-            Industry Pros
+            <span className="hidden sm:inline">Industry Pros</span>
+            <span className="inline sm:hidden">Pros</span>
           </Link>
         </li>
         <li>
@@ -40,11 +41,6 @@ const Navbar = () => {
             About
           </a>
         </li>
-        {/* <li>
-          <a href="#contact" className="hover:text-red-400">
-            Contact
-          </a>
-        </li> */}
         <li>
           <a href="/apply" className="hover:text-red-400">
             Apply

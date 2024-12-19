@@ -10,7 +10,7 @@ const ApplyForm = () => {
   };
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center px-4 md:px-0">
       <div className="text-left mt-20">
         <h1 className="text-4xl text-white mb-8">I am a</h1>
         <div className="flex flex-col">
