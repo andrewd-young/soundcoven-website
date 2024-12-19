@@ -35,7 +35,7 @@ const App = () => {
   return (
     <Router>
       <ScrollToHashElement />
-      <div className="bg-covenPurple min-h-screen flex flex-col">
+      <div className="bg-covenPurple min-h-screen flex flex-col overflow-x-hidden">
         <Navbar />
         <Routes>
           <Route path="/" element={
