@@ -1,0 +1,21 @@
+{
+  "name": "SoundCoven",
+  "short_name": "MySite",
+  "icons": [
+    {
+      "src": "/public/favicon.ico/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/public/favicon.ico/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "theme_color": "#301933",
+  "background_color": "#301933",
+  "display": "standalone"
+}
