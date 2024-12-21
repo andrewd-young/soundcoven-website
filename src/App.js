@@ -17,6 +17,7 @@ import industryPros from "./industryPros";
 import IndustryProBio from "./IndustryProBio";
 import { SpeedInsights } from "@vercel/speed-insights/react"
 import { Analytics } from "@vercel/analytics/react"
+import Supabase from './supabaseClient'
 
 const ScrollToHashElement = () => {
   const { hash } = useLocation();
