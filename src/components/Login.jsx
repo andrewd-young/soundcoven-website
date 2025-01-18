@@ -4,14 +4,34 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import Button from './Button';
+import supabase from '../utils/supabase';
+import { useNavigate } from "react-router-dom";
 
 const Login = ({ title }) => {
-  const handleGoogleLogin = () => {
-    console.log("Google login");
+  const navigate = useNavigate();
+
+  const signInWithGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
+    });
+
+    if (error) {
+      console.error('Error signing in with Google:', error);
+    } else {
+      console.log('Successfully signed in with Google:', data);
+      // Handle successful sign-in (e.g., redirect to a dashboard)
+      navigate("/apply");
+    }
   };
 
-  const handleEmailLogin = () => {
-    console.log("Email login");
+  const signInWithEmail = () => {
+    // navigate("/apply");
   };
 
   return (
@@ -20,7 +40,7 @@ const Login = ({ title }) => {
         <h1 className="text-4xl font-bold text-white mb-6 text-center">{title}</h1>
         <div className="flex flex-col">
           <Button
-            onClick={handleGoogleLogin}
+            onClick={signInWithGoogle}
             className="w-full bg-covenRed mb-4 border-0"
             text={
               <>
@@ -30,7 +50,7 @@ const Login = ({ title }) => {
             }
           />
           <Button
-            onClick={handleEmailLogin}
+            onClick={signInWithEmail}
             className="w-full text-white"
             text={
               <>

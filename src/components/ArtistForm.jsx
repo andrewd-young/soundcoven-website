@@ -127,13 +127,20 @@ const ArtistForm = () => {
         />
       </div>
       <div className="mb-4">
-        <label className="block mb-2">Professional Photo</label>
+        <label className="block mb-2">
+          Professional Photo (best photo) of you/your band (PDF, Document or
+          Image)
+        </label>
         <input
           name="photo"
           type="file"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleFileChange}
+          accept=".pdf,.doc,.docx,image/*"
         />
+        <p className="text-sm text-gray-400">
+          Upload 1 supported file: PDF, document, or image. Max 100 MB.
+        </p>
       </div>
       <div className="mb-4">
         <label className="block mb-2">

@@ -46,7 +46,7 @@ const ArtistsCarousel = ({ artists }) => {
       id="artists"
       className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24 relative"
     >
-      <h2 className="text-2xl font-bold mb-6">Artists You Might Like</h2>
+      <h2 className="text-4xl font-bold mb-6">Newest Additions</h2>
       <div className="relative">
         {/* Gradient Effect */}
         {!isScrolledToStart && (
