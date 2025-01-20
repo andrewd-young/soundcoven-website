@@ -1,6 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import supabase from "../../utils/supabase";
 
 const InstrumentalistForm = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [applicationId, setApplicationId] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,9 +33,34 @@ const InstrumentalistForm = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    setLoading(true);
+
+    try {
+      const { error } = await supabase
+        .from('applications')
+        .update({
+          name: formData.name,
+          email: formData.email,
+          school: formData.school,
+          instrument: formData.instrument,
+          favorite_genres: formData.favoriteGenres,
+          note: formData.note,
+          status: 'pending',
+          updated_at: new Date()
+        })
+        .eq('id', applicationId);
+
+      if (error) throw error;
+      
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      alert('Error submitting application. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const adjustHeight = (ref) => {
@@ -40,10 +72,32 @@ const InstrumentalistForm = () => {
     adjustHeight(noteRef);
   }, [formData.note]);
 
+  useEffect(() => {
+    const fetchDraftApplication = async () => {
+      const { data } = await supabase
+        .from('applications')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('status', 'draft')
+        .eq('application_type', 'instrumentalist')
+        .single();
+      
+      if (data) {
+        setApplicationId(data.id);
+      } else {
+        navigate('/apply');
+      }
+    };
+
+    if (user) {
+      fetchDraftApplication();
+    }
+  }, [user, navigate]);
+
   return (
     <form
       onSubmit={handleSubmit}
-      className="text-white p-8 rounded-lg md:w-2/3 lg:w-1/2 mx-auto md:mt-2 lg:mt-5"
+      className="text-white p-8 rounded-lg mx-auto md:mt-2 lg:mt-5"
     >
       <h1 className="font-bold text-3xl mb-4">Apply as an Instrumentalist</h1>
       <p className="mb-4">
@@ -122,9 +176,10 @@ const InstrumentalistForm = () => {
       </div>
       <button
         type="submit"
-        className="w-full bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+        className="w-full bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:bg-gray-400"
+        disabled={loading}
       >
-        Submit
+        {loading ? 'Submitting...' : 'Submit'}
       </button>
     </form>
   );

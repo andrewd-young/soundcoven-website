@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import supabase from "../../utils/supabase";
 
 const ArtistForm = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [applicationId, setApplicationId] = useState(null);
   const [formData, setFormData] = useState({
     artistType: "",
     name: "",
@@ -17,6 +24,45 @@ const ArtistForm = () => {
 
   const influencesRef = useRef(null);
   const noteRef = useRef(null);
+
+  useEffect(() => {
+    const fetchDraftApplication = async () => {
+      const { data } = await supabase
+        .from('applications')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('status', 'draft')
+        .eq('application_type', 'artist')
+        .single();
+      
+      if (data) {
+        setApplicationId(data.id);
+      } else {
+        navigate('/apply'); // Redirect if no draft application exists
+      }
+    };
+
+    if (user) {
+      fetchDraftApplication();
+    }
+  }, [user, navigate]);
+
+  const uploadPhoto = async (file) => {
+    if (!file) return null;
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/${applicationId}.${fileExt}`;
+    
+    const { error: uploadError, data } = await supabase.storage
+      .from('application-photos')
+      .upload(fileName, file, { upsert: true });
+    
+    if (uploadError) {
+      throw uploadError;
+    }
+    
+    return data.path;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,9 +83,44 @@ const ArtistForm = () => {
     setFormData({ ...formData, photo: e.target.files[0] });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    setLoading(true);
+
+    try {
+      let photoUrl = null;
+      if (formData.photo) {
+        photoUrl = await uploadPhoto(formData.photo);
+      }
+
+      const { error } = await supabase
+        .from('applications')
+        .update({
+          name: formData.name,
+          email: formData.email,
+          school: formData.school,
+          artist_type: formData.artistType,
+          genres: formData.genres,
+          streaming_links: formData.links,
+          photo_url: photoUrl,
+          current_needs: formData.needs,
+          upcoming_show: formData.upcomingShow,
+          influences: formData.influences,
+          note: formData.note,
+          status: 'pending',
+          updated_at: new Date()
+        })
+        .eq('id', applicationId);
+
+      if (error) throw error;
+      
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      alert('Error submitting application. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const adjustHeight = (ref) => {
@@ -55,7 +136,7 @@ const ArtistForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="text-white p-8 rounded-lg md:w-2/3 lg:w-1/2 mx-auto md:mt-2 lg:mt-5"
+      className="text-white p-8 rounded-lg mx-auto md:mt-2 lg:mt-5"
     >
       <h1 className="font-bold text-3xl mb-4">Apply as an Artist</h1>
       <div className="mb-4">
@@ -191,9 +272,10 @@ const ArtistForm = () => {
       </div>
       <button
         type="submit"
-        className="w-full bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+        className="w-full bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:bg-gray-400"
+        disabled={loading}
       >
-        Submit
+        {loading ? 'Submitting...' : 'Submit'}
       </button>
     </form>
   );

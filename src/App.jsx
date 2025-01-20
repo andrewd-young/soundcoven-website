@@ -1,17 +1,13 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
-import Navbar from "./components/NavBar";
+import Layout from "./components/Layout";
 import HeroSection from "./components/HeroSection";
 import ArtistsCarousel from "./components/ArtistsCarousel";
 import About from "./components/About";
-import Footer from "./components/Footer";
 import ArtistsPage from "./ArtistsPage";
 import ArtistBio from "./ArtistBio";
 import ApplyForm from "./ApplyForm";
 import Login from "./components/Login";
-import ArtistForm from "./components/forms/ArtistForm";
-import IndustryForm from "./components/forms/IndustryForm";
-import InstrumentalistForm from "./components/forms/InstrumentalistForm";
 import IndustryProsPage from "./IndustryProsPage";
 import artists from "./artists";
 import industryPros from "./industryPros";
@@ -45,8 +41,7 @@ const App = () => {
         <SpeedInsights/>
         <Analytics/>
         <ScrollToHashElement />
-        <div className="bg-covenPurple min-h-screen flex flex-col overflow-x-hidden">
-          <Navbar />
+        <Layout>
           <Routes>
             <Route path="/" element={
               <>
@@ -66,25 +61,21 @@ const App = () => {
                 <IndustryProsPage industryPros={industryPros} />
               </ProtectedRoute>
             } />
-            <Route path="/apply" element={
-              <ProtectedRoute>
-                <ApplyForm />
-              </ProtectedRoute>
-            } />
+            <Route path="/apply" element={<ApplyForm />}>
+              <Route path="artist" element={<ApplyForm />} />
+              <Route path="industry" element={<ApplyForm />} />
+              <Route path="instrumentalist" element={<ApplyForm />} />
+            </Route>
             <Route path="/login" element={<Login title="Sign Up or Login" />} />
             <Route path="/artists/:artistName" element={<ArtistBio artists={artists} />} />
             <Route path="/pros/:proName" element={<IndustryProBio industryPros={industryPros} />} />
-            <Route path="/apply/artist" element={<ArtistForm />} />
-            <Route path="/apply/industry" element={<IndustryForm />} />
-            <Route path="/apply/instrumentalist" element={<InstrumentalistForm />} />
             <Route path="/account" element={
               <ProtectedRoute>
                 <Account />
               </ProtectedRoute>
             } />
           </Routes>
-          <Footer />
-        </div>
+        </Layout>
       </AuthProvider>
     </Router>
   );
