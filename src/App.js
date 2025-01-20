@@ -9,15 +9,19 @@ import ArtistsPage from "./ArtistsPage";
 import ArtistBio from "./ArtistBio";
 import ApplyForm from "./ApplyForm";
 import Login from "./components/Login";
-import ArtistForm from "./components/ArtistForm";
-import IndustryForm from "./components/IndustryForm";
-import InstrumentalistForm from "./components/InstrumentalistForm";
+import ArtistForm from "./components/forms/ArtistForm";
+import IndustryForm from "./components/forms/IndustryForm";
+import InstrumentalistForm from "./components/forms/InstrumentalistForm";
 import IndustryProsPage from "./IndustryProsPage";
 import artists from "./artists";
 import industryPros from "./industryPros";
 import IndustryProBio from "./IndustryProBio";
 import { SpeedInsights } from "@vercel/speed-insights/react"
 import { Analytics } from "@vercel/analytics/react"
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Account from "./components/Account";
+import CallToAction from "./components/CallToAction";
 
 const ScrollToHashElement = () => {
   const { hash } = useLocation();
@@ -37,31 +41,51 @@ const ScrollToHashElement = () => {
 const App = () => {
   return (
     <Router>
-      <SpeedInsights/>
-      <Analytics/>
-      <ScrollToHashElement />
-      <div className="bg-covenPurple min-h-screen flex flex-col overflow-x-hidden">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={
-            <>
-              <HeroSection artist={artists[1]} />
-              <ArtistsCarousel artists={artists} />
-              <About />
-            </>
-          } />
-          <Route path="/artists" element={<ArtistsPage artists={artists} />} />
-          <Route path="/industry-pros" element={<IndustryProsPage industryPros={industryPros} />} />
-          <Route path="/apply" element={<ApplyForm />} />
-          <Route path="/login" element={<Login title="Sign Up or Login" />} />
-          <Route path="/artists/:artistName" element={<ArtistBio artists={artists} />} />
-          <Route path="/pros/:proName" element={<IndustryProBio industryPros={industryPros} />} />
-          <Route path="/apply/artist" element={<ArtistForm />} />
-          <Route path="/apply/industry" element={<IndustryForm />} />
-          <Route path="/apply/instrumentalist" element={<InstrumentalistForm />} />
-        </Routes>
-        <Footer />
-      </div>
+      <AuthProvider>
+        <SpeedInsights/>
+        <Analytics/>
+        <ScrollToHashElement />
+        <div className="bg-covenPurple min-h-screen flex flex-col overflow-x-hidden">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={
+              <>
+                <HeroSection artist={artists[1]} />
+                <ArtistsCarousel artists={artists} />
+                <About />
+                <CallToAction />
+              </>
+            } />
+            <Route path="/artists" element={
+              <ProtectedRoute>
+                <ArtistsPage artists={artists} />
+              </ProtectedRoute>
+            } />
+            <Route path="/industry-pros" element={
+              <ProtectedRoute>
+                <IndustryProsPage industryPros={industryPros} />
+              </ProtectedRoute>
+            } />
+            <Route path="/apply" element={
+              <ProtectedRoute>
+                <ApplyForm />
+              </ProtectedRoute>
+            } />
+            <Route path="/login" element={<Login title="Sign Up or Login" />} />
+            <Route path="/artists/:artistName" element={<ArtistBio artists={artists} />} />
+            <Route path="/pros/:proName" element={<IndustryProBio industryPros={industryPros} />} />
+            <Route path="/apply/artist" element={<ArtistForm />} />
+            <Route path="/apply/industry" element={<IndustryForm />} />
+            <Route path="/apply/instrumentalist" element={<InstrumentalistForm />} />
+            <Route path="/account" element={
+              <ProtectedRoute>
+                <Account />
+              </ProtectedRoute>
+            } />
+          </Routes>
+          <Footer />
+        </div>
+      </AuthProvider>
     </Router>
   );
 };

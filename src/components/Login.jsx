@@ -1,43 +1,173 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-import Button from './Button';
-import supabase from '../utils/supabase';
+import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+import Button from "./common/Button";
+import supabase from "../utils/supabase";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Login = ({ title }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [mode, setMode] = useState("signup");
+
+  useEffect(() => {
+    if (user) {
+      navigate("/apply");
+    }
+  }, [user, navigate]);
 
   const signInWithGoogle = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
       options: {
         queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
+          access_type: "offline",
+          prompt: "consent",
         },
       },
     });
 
     if (error) {
-      console.error('Error signing in with Google:', error);
-    } else {
-      console.log('Successfully signed in with Google:', data);
-      // Handle successful sign-in (e.g., redirect to a dashboard)
-      navigate("/apply");
+      console.error("Error signing in with Google:", error);
     }
   };
 
-  const signInWithEmail = () => {
-    // navigate("/apply");
+  const handleEmailAuth = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      let result;
+      if (mode === 'signup') {
+        result = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/apply`,
+          },
+        });
+
+        if (result.error) {
+          // If the error indicates the user already exists but isn't confirmed,
+          // try to resend the confirmation email
+          if (result.error.message.includes('already registered')) {
+            const { error: resendError } = await supabase.auth.resend({
+              type: 'signup',
+              email,
+              options: {
+                emailRedirectTo: `${window.location.origin}/apply`,
+              },
+            });
+
+            if (resendError) throw resendError;
+            alert('Verification email has been resent. Please check your inbox.');
+            return;
+          }
+          throw result.error;
+        }
+
+        if (result.data?.user) {
+          alert('Please check your email to verify your account');
+        }
+      } else {
+        result = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (result.error) throw result.error;
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const toggleMode = () => {
+    setMode(mode === "login" ? "signup" : "login");
+    setError(null);
+  };
+
+  if (showEmailForm) {
+    return (
+      <div className="flex justify-center px-4 md:px-0">
+        <div className="text-left mt-20 w-full max-w-md">
+          <h1 className="text-4xl font-bold text-white mb-6 text-center">
+            {mode === "login" ? "Log In" : "Sign Up"} with Email
+          </h1>
+
+          <form onSubmit={handleEmailAuth} className="space-y-4 mb-4">
+            <div>
+              <label className="block text-white mb-2">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2 bg-[#432347] border border-white rounded text-white"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-white mb-2">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 bg-[#432347] border border-white rounded text-white"
+                required
+                minLength={6}
+              />
+            </div>
+
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+
+            <Button
+              type="submit"
+              className="w-full bg-covenRed border-0"
+              text={
+                loading ? "Loading..." : mode === "login" ? "Log In" : "Sign Up"
+              }
+              disabled={loading}
+            />
+          </form>
+
+          <button
+            onClick={toggleMode}
+            className="text-gray-400 hover:text-white text-sm w-full text-center mb-4"
+          >
+            {mode === "login"
+              ? "Don't have an account? Sign up"
+              : "Already have an account? Log in"}
+          </button>
+
+          <button
+            onClick={() => setShowEmailForm(false)}
+            className="text-white hover:text-gray-300 text-sm w-full text-center"
+          >
+            ← Back to all sign in options
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center px-4 md:px-0">
       <div className="text-left mt-20 w-full max-w-md">
-        <h1 className="text-4xl font-bold text-white mb-6 text-center">{title}</h1>
+        <h1 className="text-4xl font-bold text-white mb-6 text-center">
+          {title}
+        </h1>
         <div className="flex flex-col">
           <Button
             onClick={signInWithGoogle}
@@ -45,23 +175,43 @@ const Login = ({ title }) => {
             text={
               <>
                 <FontAwesomeIcon icon={faGoogle} className="mr-2" />
-                Sign Up with Google
+                Sign up with Google
               </>
             }
           />
           <Button
-            onClick={signInWithEmail}
+            onClick={() => setShowEmailForm(true)}
             className="w-full text-white"
             text={
               <>
                 <FontAwesomeIcon icon={faEnvelope} className="mr-2" />
-                Sign Up with Email
+                Sign up with Email
               </>
             }
           />
         </div>
+
         <p className="text-gray-400 text-sm mt-4 text-center">
-          By signing up, you agree to our <a href="/terms" className="underline text-white">Terms</a> & <a href="/privacy" className="underline text-white">Privacy Policy</a>
+          By signing up, you agree to our{" "}
+          <a href="/terms" className="underline text-white">
+            Terms
+          </a>{" "}
+          &{" "}
+          <a href="/privacy" className="underline text-white">
+            Privacy Policy
+          </a>
+        </p>
+        <p className="text-gray-400 text-sm mt-4 text-center">
+          Already have an account?{" "}
+          <button
+            onClick={() => {
+              setShowEmailForm(true);
+              setMode("login");
+            }}
+            className="underline text-white hover:text-gray-300"
+          >
+            Log in
+          </button>
         </p>
       </div>
     </div>
