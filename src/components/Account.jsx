@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../utils/supabase';
+import Button from './common/Button';
 
 const Account = () => {
   const { user } = useAuth();
@@ -14,16 +15,7 @@ const Account = () => {
   const [profile, setProfile] = useState(null);
   const [application, setApplication] = useState(null);
 
-  useEffect(() => {
-    if (user) {
-      setUserDetails({
-        email: user.email,
-      });
-      fetchProfileAndApplication();
-    }
-  }, [user]);
-
-  const fetchProfileAndApplication = async () => {
+  const fetchProfileAndApplication = useCallback(async () => {
     try {
       // Fetch profile with application details
       const { data: profile, error: profileError } = await supabase
@@ -41,7 +33,16 @@ const Account = () => {
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      setUserDetails({
+        email: user.email,
+      });
+      fetchProfileAndApplication();
+    }
+  }, [user, fetchProfileAndApplication]);
 
   const handleUpdateEmail = async (e) => {
     e.preventDefault();
@@ -82,6 +83,28 @@ const Account = () => {
     <div className="flex justify-center px-4 md:px-0">
       <div className="w-full max-w-md mt-20">
         <h1 className="text-4xl font-bold text-white mb-8">Account Settings</h1>
+        
+        {/* Success Box - Show when application is submitted and pending */}
+        {application?.status === 'pending' && (
+          <div className="mb-8 p-4 bg-green-900 rounded border border-green-500">
+            <h2 className="text-2xl text-white mb-2">Application Submitted!</h2>
+            <p className="text-white mb-4">
+              While we review your application, explore our community of artists and industry professionals.
+            </p>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => navigate('/artists')}
+                text="View Artists"
+                className=" text-white py-2 px-4 rounded"
+              />
+              <Button
+                onClick={() => navigate('/industry')}
+                text="View Industry Pros"
+                className=" text-white py-2 px-4 rounded"
+              />
+            </div>
+          </div>
+        )}
         
         {/* Profile Information */}
         <div className="mb-8 p-4 bg-[#432347] rounded border border-white">

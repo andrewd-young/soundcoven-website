@@ -1,17 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import supabase from "../../utils/supabase";
+import useApplicationForm from "../../hooks/useApplicationForm";
 
 const ArtistForm = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [applicationId, setApplicationId] = useState(null);
-  const [formData, setFormData] = useState({
-    artistType: "",
+
+  const initialFormData = {
     name: "",
     email: "",
+    artistType: "",
     school: "",
     genres: "",
     links: "",
@@ -20,112 +17,40 @@ const ArtistForm = () => {
     upcomingShow: "",
     influences: "",
     note: "",
-  });
+  };
+
+  const {
+    loading,
+    formData,
+    handleChange,
+    handleFileChange,
+    handleSubmit
+  } = useApplicationForm('artist', initialFormData);
 
   const influencesRef = useRef(null);
   const noteRef = useRef(null);
 
-  useEffect(() => {
-    const fetchDraftApplication = async () => {
-      const { data } = await supabase
-        .from('applications')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('status', 'draft')
-        .eq('application_type', 'artist')
-        .single();
-      
-      if (data) {
-        setApplicationId(data.id);
-      } else {
-        navigate('/apply'); // Redirect if no draft application exists
-      }
-    };
+  const transformData = (formData, photoUrl) => ({
+    name: formData.name,
+    email: formData.email,
+    school: formData.school,
+    artist_type: formData.artistType,
+    genres: formData.genres,
+    streaming_links: formData.links,
+    photo_url: photoUrl,
+    current_needs: formData.needs,
+    upcoming_show: formData.upcomingShow,
+    influences: formData.influences,
+    note: formData.note
+  });
 
-    if (user) {
-      fetchDraftApplication();
-    }
-  }, [user, navigate]);
-
-  const uploadPhoto = async (file) => {
-    if (!file) return null;
-    
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${applicationId}.${fileExt}`;
-    
-    const { error: uploadError, data } = await supabase.storage
-      .from('application-photos')
-      .upload(fileName, file, { upsert: true });
-    
-    if (uploadError) {
-      throw uploadError;
-    }
-    
-    return data.path;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    if (name === "note") {
-      const words = value.trim().split(/\s+/);
-      if (words.length <= 200) {
-        setFormData({ ...formData, [name]: value });
-      } else {
-        setFormData({ ...formData, [name]: words.slice(0, 200).join(" ") });
-      }
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
-
-  const handleFileChange = (e) => {
-    setFormData({ ...formData, photo: e.target.files[0] });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      let photoUrl = null;
-      if (formData.photo) {
-        photoUrl = await uploadPhoto(formData.photo);
-      }
-
-      const { error } = await supabase
-        .from('applications')
-        .update({
-          name: formData.name,
-          email: formData.email,
-          school: formData.school,
-          artist_type: formData.artistType,
-          genres: formData.genres,
-          streaming_links: formData.links,
-          photo_url: photoUrl,
-          current_needs: formData.needs,
-          upcoming_show: formData.upcomingShow,
-          influences: formData.influences,
-          note: formData.note,
-          status: 'pending',
-          updated_at: new Date()
-        })
-        .eq('id', applicationId);
-
-      if (error) throw error;
-      
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error submitting application:', error);
-      alert('Error submitting application. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const onSubmit = (e) => handleSubmit(e, transformData);
 
   const adjustHeight = (ref) => {
-    ref.current.style.height = "auto";
-    ref.current.style.height = ref.current.scrollHeight + "px";
+    if (ref.current) {
+      ref.current.style.height = "auto";
+      ref.current.style.height = ref.current.scrollHeight + "px";
+    }
   };
 
   useEffect(() => {
@@ -135,7 +60,7 @@ const ArtistForm = () => {
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={onSubmit}
       className="text-white p-8 rounded-lg mx-auto md:mt-2 lg:mt-5"
     >
       <h1 className="font-bold text-3xl mb-4">Apply as an Artist</h1>

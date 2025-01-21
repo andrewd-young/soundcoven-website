@@ -44,7 +44,7 @@ const ApplyForm = () => {
         // Only redirect if application is fully submitted
         if (profile?.has_applied && profile?.application_id && 
             profile?.applications?.status === 'submitted') {
-          navigate('/dashboard');
+          navigate('/account');
           return;
         }
 
@@ -137,6 +137,17 @@ const ApplyForm = () => {
                 text="Go Back"
                 onClick={() => setSelectedRole(null)}
                 className="px-4 py-3"
+              />
+            </div>
+          );
+        default:
+          return (
+            <div className="text-center text-white">
+              <p>Invalid role selected. Please try again.</p>
+              <Button
+                text="Go Back"
+                onClick={() => setSelectedRole(null)}
+                className="px-4 py-3 mt-4"
               />
             </div>
           );

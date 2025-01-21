@@ -1,102 +1,50 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import supabase from "../../utils/supabase";
+import React, { useRef, useEffect } from "react";
+import useApplicationForm from "../../hooks/useApplicationForm";
 
 const InstrumentalistForm = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [applicationId, setApplicationId] = useState(null);
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     name: "",
     email: "",
     instrument: "",
     school: "",
     favoriteGenres: "",
     note: "",
-  });
+  };
+
+  const {
+    loading,
+    formData,
+    handleChange,
+    handleSubmit
+  } = useApplicationForm('instrumentalist', initialFormData);
 
   const noteRef = useRef(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "note") {
-      const words = value.trim().split(/\s+/);
-      if (words.length <= 200) {
-        setFormData({ ...formData, [name]: value });
-      } else {
-        setFormData({ ...formData, [name]: words.slice(0, 200).join(" ") });
-      }
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
+  const transformData = (formData) => ({
+    name: formData.name,
+    email: formData.email,
+    school: formData.school,
+    instrument: formData.instrument,
+    favorite_genres: formData.favoriteGenres,
+    note: formData.note
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { error } = await supabase
-        .from('applications')
-        .update({
-          name: formData.name,
-          email: formData.email,
-          school: formData.school,
-          instrument: formData.instrument,
-          favorite_genres: formData.favoriteGenres,
-          note: formData.note,
-          status: 'pending',
-          updated_at: new Date()
-        })
-        .eq('id', applicationId);
-
-      if (error) throw error;
-      
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error submitting application:', error);
-      alert('Error submitting application. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const onSubmit = (e) => handleSubmit(e, transformData);
 
   const adjustHeight = (ref) => {
-    ref.current.style.height = "auto";
-    ref.current.style.height = ref.current.scrollHeight + "px";
+    if (ref.current) {
+      ref.current.style.height = "auto";
+      ref.current.style.height = ref.current.scrollHeight + "px";
+    }
   };
 
   useEffect(() => {
     adjustHeight(noteRef);
   }, [formData.note]);
 
-  useEffect(() => {
-    const fetchDraftApplication = async () => {
-      const { data } = await supabase
-        .from('applications')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('status', 'draft')
-        .eq('application_type', 'instrumentalist')
-        .single();
-      
-      if (data) {
-        setApplicationId(data.id);
-      } else {
-        navigate('/apply');
-      }
-    };
-
-    if (user) {
-      fetchDraftApplication();
-    }
-  }, [user, navigate]);
-
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={onSubmit}
       className="text-white p-8 rounded-lg mx-auto md:mt-2 lg:mt-5"
     >
       <h1 className="font-bold text-3xl mb-4">Apply as an Instrumentalist</h1>
