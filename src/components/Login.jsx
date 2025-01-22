@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
-import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+// import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import Button from "./common/Button";
 import supabase from "../utils/supabase";
 import { useNavigate } from "react-router-dom";
@@ -14,9 +14,11 @@ const Login = ({ title }) => {
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [mode, setMode] = useState("signup");
+  const [signupConfirmed, setSignupConfirmed] = useState(false);
 
   useEffect(() => {
     const checkExistingApplication = async () => {
@@ -42,6 +44,8 @@ const Login = ({ title }) => {
     checkExistingApplication();
   }, [user, navigate]);
 
+  // Commenting out Google sign-in as it's not implemented yet
+  /*
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -57,6 +61,7 @@ const Login = ({ title }) => {
       console.error("Error signing in with Google:", error);
     }
   };
+  */
 
   const handleEmailAuth = async (e) => {
     e.preventDefault();
@@ -66,6 +71,11 @@ const Login = ({ title }) => {
     try {
       let result;
       if (mode === 'signup') {
+        if (password !== confirmPassword) {
+          setError("Passwords do not match");
+          setLoading(false);
+          return;
+        }
         result = await supabase.auth.signUp({
           email,
           password,
@@ -75,8 +85,6 @@ const Login = ({ title }) => {
         });
 
         if (result.error) {
-          // If the error indicates the user already exists but isn't confirmed,
-          // try to resend the confirmation email
           if (result.error.message.includes('already registered')) {
             const { error: resendError } = await supabase.auth.resend({
               type: 'signup',
@@ -87,14 +95,14 @@ const Login = ({ title }) => {
             });
 
             if (resendError) throw resendError;
-            alert('Verification email has been resent. Please check your inbox.');
+            setSignupConfirmed(true);
             return;
           }
           throw result.error;
         }
 
         if (result.data?.user) {
-          alert('Please check your email to verify your account');
+          setSignupConfirmed(true);
         }
       } else {
         result = await supabase.auth.signInWithPassword({
@@ -117,6 +125,27 @@ const Login = ({ title }) => {
   };
 
   if (showEmailForm) {
+    if (signupConfirmed) {
+      return (
+        <div className="flex justify-center px-4 md:px-0">
+          <div className="text-left mt-20 w-full max-w-md">
+            <h1 className="text-4xl font-bold text-white mb-6 text-center">
+              Check Your Email
+            </h1>
+            <p className="text-white text-center mb-6">
+              We've sent a confirmation email to {email}. Please check your inbox and follow the instructions to complete your registration.
+            </p>
+            <button
+              onClick={() => setShowEmailForm(false)}
+              className="text-white hover:text-gray-300 text-sm w-full text-center"
+            >
+              ← Back to all sign in options
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex justify-center px-4 md:px-0">
         <div className="text-left mt-20 w-full max-w-md">
@@ -147,6 +176,20 @@ const Login = ({ title }) => {
                 minLength={6}
               />
             </div>
+
+            {mode === "signup" && (
+              <div>
+                <label className="block text-white mb-2">Confirm Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#432347] border border-white rounded text-white"
+                  required
+                  minLength={6}
+                />
+              </div>
+            )}
 
             {error && <div className="text-red-500 text-sm">{error}</div>}
 
@@ -187,6 +230,7 @@ const Login = ({ title }) => {
           {title}
         </h1>
         <div className="flex flex-col">
+          {/* Commenting out Google sign-in button
           <Button
             onClick={signInWithGoogle}
             className="w-full bg-covenRed mb-4 border-0"
@@ -197,6 +241,7 @@ const Login = ({ title }) => {
               </>
             }
           />
+          */}
           <Button
             onClick={() => setShowEmailForm(true)}
             className="w-full text-white"

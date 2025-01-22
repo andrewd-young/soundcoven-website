@@ -42,7 +42,12 @@ const useApplicationForm = (applicationType, initialFormData) => {
       throw uploadError;
     }
     
-    return data.path;
+    // Get the public URL for the uploaded file
+    const { data: { publicUrl } } = supabase.storage
+      .from('application-photos')
+      .getPublicUrl(fileName);
+    
+    return publicUrl;
   };
 
   const handleSubmit = async (e, transformData) => {

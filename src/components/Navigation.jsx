@@ -124,8 +124,9 @@ const Navigation = () => {
               ) : (
                 <Link 
                   to="/login" 
-                  className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors"
+                  className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors flex items-center gap-2"
                 >
+                  <FontAwesomeIcon icon={faUser} />
                   Login
                 </Link>
               )}
