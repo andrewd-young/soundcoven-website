@@ -19,9 +19,27 @@ const Login = ({ title }) => {
   const [mode, setMode] = useState("signup");
 
   useEffect(() => {
-    if (user) {
-      navigate("/apply");
-    }
+    const checkExistingApplication = async () => {
+      if (user) {
+        try {
+          const { data: application, error } = await supabase
+            .from('applications')
+            .select('id')
+            .eq('user_id', user.id)
+            .single();
+
+          if (error) throw error;
+          
+          // Navigate to account page if application exists, otherwise to apply page
+          navigate(application ? '/account' : '/apply');
+        } catch (error) {
+          console.error('Error checking application:', error);
+          navigate('/apply'); // Default to apply page if check fails
+        }
+      }
+    };
+
+    checkExistingApplication();
   }, [user, navigate]);
 
   const signInWithGoogle = async () => {

@@ -1,10 +1,54 @@
 import React, { useRef, useState, useEffect } from "react";
-import PropTypes from "prop-types";
-import Card from "./Card";
+import { useArtists } from "../hooks/useArtists";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { useExtractColors } from "react-extract-colors";
 
-const ArtistsCarousel = ({ artists }) => {
+const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
+const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
+
+const ArtistCard = ({ artist }) => {
+  const isUsingDefaultImage = !artist.image;
+  const { colors } = useExtractColors(artist.image || DEFAULT_IMAGE, {
+    crossOrigin: "anonymous",
+    defaultColor: DEFAULT_COLOR,
+    skip: isUsingDefaultImage,
+  });
+
+  const bgColor = isUsingDefaultImage
+    ? DEFAULT_COLOR
+    : colors?.[0] || DEFAULT_COLOR;
+
+  return (
+    <Link to={`/artists/${artist.id}`} className="block">
+      <div
+        className="w-64 flex-shrink-0 text-white rounded-lg overflow-hidden shadow-lg"
+        style={{ backgroundColor: bgColor }}
+      >
+        <div className="aspect-w-1 aspect-h-1">
+          <img
+            src={artist.image || DEFAULT_IMAGE}
+            alt={artist.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src = DEFAULT_IMAGE;
+            }}
+          />
+        </div>
+        <div className="p-4">
+          <h3 className="text-xl font-bold mb-2">{artist.name}</h3>
+          <p className="text-sm opacity-75">
+            {artist.genre || "Genre not specified"}
+          </p>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+const ArtistsCarousel = () => {
+  const { artists, loading, error } = useArtists();
   const carouselRef = useRef(null);
   const [isScrolledToEnd, setIsScrolledToEnd] = useState(false);
   const [isScrolledToStart, setIsScrolledToStart] = useState(true);
@@ -30,16 +74,21 @@ const ArtistsCarousel = ({ artists }) => {
   };
 
   useEffect(() => {
-    if (carouselRef.current) {
-      carouselRef.current.addEventListener("scroll", handleScroll);
+    const currentRef = carouselRef.current;
+    if (currentRef) {
+      currentRef.addEventListener("scroll", handleScroll);
       handleScroll(); // Initial check
     }
     return () => {
-      if (carouselRef.current) {
-        carouselRef.current.removeEventListener("scroll", handleScroll);
+      if (currentRef) {
+        currentRef.removeEventListener("scroll", handleScroll);
       }
     };
   }, []);
+
+  if (loading) return <div className="text-white">Loading...</div>;
+  if (error) return <div className="text-white">Error: {error}</div>;
+  if (!artists?.length) return null;
 
   return (
     <section
@@ -62,11 +111,7 @@ const ArtistsCarousel = ({ artists }) => {
           className="flex space-x-4 overflow-x-scroll no-scrollbar"
         >
           {artists.slice(0, 5).map((artist) => (
-            <Card
-              key={artist.id}
-              artist={artist}
-              className="w-64 flex-shrink-0 bg-teal-900 text-white"
-            />
+            <ArtistCard key={artist.id} artist={artist} />
           ))}
         </div>
 
@@ -92,16 +137,6 @@ const ArtistsCarousel = ({ artists }) => {
       </div>
     </section>
   );
-};
-
-ArtistsCarousel.propTypes = {
-  artists: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-      // Add other artist properties here
-    })
-  ).isRequired,
 };
 
 export default ArtistsCarousel;
