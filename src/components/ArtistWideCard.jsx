@@ -2,21 +2,26 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useExtractColors } from "react-extract-colors";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faMapMarkerAlt,
-  faCompactDisc,
-} from "@fortawesome/free-solid-svg-icons";
-
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
 
-const WideCard = ({ artist }) => {
+const ArtistWideCard = ({ artist }) => {
+  const {
+    id,
+    name,
+    genre,
+    artist_type,
+    location,
+    profile_image_url,
+    banner_image_url,
+    school,
+  } = artist;
+
   const isUsingDefaultImage = !artist.image;
   const { colors } = useExtractColors(artist.image || DEFAULT_IMAGE, {
     crossOrigin: "anonymous",
     defaultColor: DEFAULT_COLOR,
-    skip: isUsingDefaultImage, // Skip extraction if using default image
+    skip: isUsingDefaultImage,
   });
 
   const bgColor = isUsingDefaultImage
@@ -29,49 +34,50 @@ const WideCard = ({ artist }) => {
 
   return (
     <Link
-      to={`/artists/${artist.id}`}
-      className="h-auto rounded-lg shadow-md w-full mb-4 flex flex-col md:flex-row-reverse items-center transition-colors duration-200"
-      style={{ backgroundColor: bgColor }}
+      to={`/artists/${id}`}
+      className="block hover:scale-[1.02] transition-transform duration-200"
     >
-      <img
-        src={artist.image || DEFAULT_IMAGE}
-        alt={artist.name}
-        className="w-full md:w-1/3 h-auto md:h-full mb-4 md:mb-0"
-        onError={(e) => {
-          e.target.src = DEFAULT_IMAGE;
-        }}
-        style={{
-          objectFit: "cover",
-          borderRadius: "0.5rem",
-        }}
-      />
-      <div className="flex flex-col w-full md:w-2/3 p-6">
-        <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">
-          {artist.name}
-        </h3>
-        <div>
-          <p className="card-text my-3">
-            <FontAwesomeIcon icon={faMapMarkerAlt} className="w-7" />{" "}
-            {artist.location || "Location not specified"}
-          </p>
-          <p className="card-text my-3">
-            <FontAwesomeIcon icon={faCompactDisc} className="w-7" />{" "}
-            {artist.genre || "Genre not specified"}
-          </p>
+      <div className="bg-[#432347] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <div className="flex flex-row-reverse">
+          <div className="relative h-72 w-72 flex-shrink-0">
+            <img
+              src={artist.image || DEFAULT_IMAGE}
+              alt={artist.name}
+              className="w-full h-full object-cover rounded-l-lg"
+              onError={(e) => {
+                e.target.src = DEFAULT_IMAGE;
+              }}
+            />
+            {banner_image_url && (
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-l-lg" />
+            )}
+          </div>
+          <div className="p-8 flex-grow">
+            <h3 className="text-5xl font-bold mb-6">{name}</h3>
+            <div className="space-y-2 text-gray-300 text-lg">
+              {genre && <p>Genre: {genre}</p>}
+              {artist_type && <p>Type: {artist_type}</p>}
+              {location && <p>Location: {location}</p>}
+              {school && <p>School: {school}</p>}
+            </div>
+          </div>
         </div>
       </div>
     </Link>
   );
 };
 
-WideCard.propTypes = {
+ArtistWideCard.propTypes = {
   artist: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
-    image: PropTypes.string,
-    location: PropTypes.string,
     genre: PropTypes.string,
+    artist_type: PropTypes.string,
+    location: PropTypes.string,
+    profile_image_url: PropTypes.string,
+    banner_image_url: PropTypes.string,
+    school: PropTypes.string,
   }).isRequired,
 };
 
-export default WideCard;
+export default ArtistWideCard;

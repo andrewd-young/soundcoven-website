@@ -1,5 +1,7 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import useApplicationForm from "../../hooks/useApplicationForm";
+import { DEFAULT_PROFILE_IMAGE } from '../../constants/images';
+import ImageUpload from '../ImageUpload';
 
 const IndustryForm = () => {
   const initialFormData = {
@@ -20,7 +22,20 @@ const IndustryForm = () => {
     handleSubmit
   } = useApplicationForm('industry', initialFormData);
 
+  const [previewUrl, setPreviewUrl] = useState(DEFAULT_PROFILE_IMAGE);
   const noteRef = useRef(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleFileChange(e);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const transformData = (formData, photoUrl) => ({
     name: formData.name,
@@ -51,6 +66,12 @@ const IndustryForm = () => {
       className="text-white p-8 rounded-lg mx-auto md:mt-2 lg:mt-5"
     >
       <h1 className="font-bold text-3xl mb-4">Apply as an Industry Pro</h1>
+      
+      <ImageUpload 
+        onImageChange={handleFileChange}
+        label="Professional Headshot or Photo (PDF, Document or Image)"
+      />
+
       <div className="mb-4">
         <label className="block mb-2">Role</label>
         <select
@@ -67,6 +88,7 @@ const IndustryForm = () => {
           <option value="Publicist">Publicist</option>
         </select>
       </div>
+
       <div className="mb-4">
         <label className="block mb-2">Name</label>
         <input
@@ -77,6 +99,7 @@ const IndustryForm = () => {
           required
         />
       </div>
+
       <div className="mb-4">
         <label className="block mb-2">Email</label>
         <input
@@ -87,6 +110,7 @@ const IndustryForm = () => {
           required
         />
       </div>
+
       <div className="mb-4">
         <label className="block mb-2">School</label>
         <input
@@ -97,49 +121,37 @@ const IndustryForm = () => {
           required
         />
       </div>
+
       <div className="mb-4">
-        <label className="block mb-2">Professional Photo</label>
-        <input
-          name="photo"
-          type="file"
-          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleFileChange}
-        />
-        <p className="mt-2 text-sm text-gray-400">
-          (preferably your LinkedIn profile photo)
-        </p>
-      </div>
-      <div className="mb-4">
-        <label className="block mb-2">Top 3 favorite artists</label>
+        <label className="block mb-2">Favorite Artists</label>
         <input
           name="favoriteArtists"
           type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleChange}
-          required
+          placeholder="Separate artists with commas"
         />
       </div>
+
       <div className="mb-4">
-        <label className="block mb-2">Note</label>
+        <label className="block mb-2">Additional Notes (max 200 words)</label>
         <textarea
-          name="note"
-          className="w-full px-3 py-2 bg-[#432347] border border-white rounded mb-0"
-          value={formData.note}
-          onChange={handleChange}
           ref={noteRef}
-          placeholder="Anything you would want people to know about you?"
-        ></textarea>
-        <p className="mt-2 text-sm text-gray-400">
-          {formData.note.trim() ? formData.note.trim().split(/\s+/).length : 0}{" "}
-          / 200 words
-        </p>
+          name="note"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded resize-none"
+          onChange={handleChange}
+          rows="4"
+        />
       </div>
+
       <button
         type="submit"
-        className="w-full bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:bg-gray-400"
         disabled={loading}
+        className={`w-full bg-white text-purple-900 py-2 rounded font-semibold hover:bg-gray-100 transition-colors ${
+          loading ? "opacity-50 cursor-not-allowed" : ""
+        }`}
       >
-        {loading ? 'Submitting...' : 'Submit'}
+        {loading ? "Submitting..." : "Submit Application"}
       </button>
     </form>
   );

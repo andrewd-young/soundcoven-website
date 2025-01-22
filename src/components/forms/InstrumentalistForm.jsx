@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import useApplicationForm from "../../hooks/useApplicationForm";
+import ImageUpload from '../ImageUpload';
 
 const InstrumentalistForm = () => {
   const initialFormData = {
@@ -9,23 +10,26 @@ const InstrumentalistForm = () => {
     school: "",
     favoriteGenres: "",
     note: "",
+    photo: null,
   };
 
   const {
     loading,
     formData,
     handleChange,
-    handleSubmit
+    handleSubmit,
+    handleFileChange
   } = useApplicationForm('instrumentalist', initialFormData);
 
   const noteRef = useRef(null);
 
-  const transformData = (formData) => ({
+  const transformData = (formData, photoUrl) => ({
     name: formData.name,
     email: formData.email,
     school: formData.school,
     instrument: formData.instrument,
     favorite_genres: formData.favoriteGenres,
+    photo_url: photoUrl,
     note: formData.note
   });
 
@@ -57,6 +61,10 @@ const InstrumentalistForm = () => {
           Talent or Industry form!
         </strong>
       </p>
+      <ImageUpload 
+        onImageChange={handleFileChange}
+        label="Professional Photo of you with your instrument(s) (PDF, Document or Image)"
+      />
       <div className="mb-4">
         <label className="block mb-2">Name</label>
         <input
