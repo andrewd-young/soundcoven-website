@@ -2,34 +2,69 @@ import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import IndustryCard from './components/IndustryCard';
 import Filter from './components/Filter';
+import { useIndustryPros } from './hooks/useIndustryPros';
 
-const IndustryProsPage = ({ industryPros }) => {
+const IndustryProsPage = () => {
   const [filters, setFilters] = useState({});
+  const { industryPros, loading, error } = useIndustryPros();
 
-  const filterConfig = {
-    role: { type: 'select', options: [...new Set(industryPros.map(pro => pro.role))] },
-    location: { type: 'select', options: [...new Set(industryPros.map(pro => pro.location))] },
-    expertise: { type: 'select', options: [...new Set(industryPros.flatMap(pro => pro.expertise))] },
+  const filterConfig = useMemo(() => ({
+    role: { 
+      type: 'select', 
+      options: [...new Set(industryPros.map(pro => pro.role).filter(Boolean))] 
+    },
+    location: { 
+      type: 'select', 
+      options: [...new Set(industryPros.map(pro => pro.location).filter(Boolean))] 
+    },
     name: { type: 'search' },
-  };
+  }), [industryPros]);
 
   const filteredPros = useMemo(() => {
     return industryPros.filter(pro => {
       return Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
         if (key === 'name') return pro.name.toLowerCase().includes(value.toLowerCase());
-        if (key === 'expertise') return pro.expertise.includes(value);
         return pro[key] === value;
       });
     });
   }, [industryPros, filters]);
 
+  if (loading) return (
+    <div className="min-h-screen bg-covenPurple text-white p-8">
+      Loading...
+    </div>
+  );
+  
+  if (error) return (
+    <div className="min-h-screen bg-covenPurple text-white p-8">
+      Error: {error}
+    </div>
+  );
+
+  if (!industryPros?.length) return (
+    <div className="min-h-screen bg-covenPurple text-white p-8">
+      No industry professionals found
+    </div>
+  );
+
   return (
     <section id="industry-pros" className="text-white pt-0 py-8 px-6 md:px-12 lg:px-24">
       <Filter filters={filterConfig} onFilterChange={setFilters} />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        {filteredPros.map((pro, index) => (
-          <IndustryCard key={index} pro={pro} />
+        {filteredPros.map((pro) => (
+          <IndustryCard 
+            key={pro.id} 
+            pro={{
+              ...pro,
+              // Ensure all required fields have fallback values
+              role: pro.role || 'Role not specified',
+              company: pro.company || 'Company not specified',
+              location: pro.location || 'Location not specified',
+              email: pro.email || 'Email not specified',
+              phone: pro.phone || 'Phone not specified',
+            }} 
+          />
         ))}
       </div>
     </section>
@@ -41,15 +76,19 @@ IndustryProsPage.propTypes = {
     PropTypes.shape({
       id: PropTypes.number.isRequired,
       name: PropTypes.string.isRequired,
-      role: PropTypes.string.isRequired,
+      role: PropTypes.string,
       company: PropTypes.string,
+      school: PropTypes.string,
       location: PropTypes.string,
       email: PropTypes.string,
       phone: PropTypes.string,
-      expertise: PropTypes.arrayOf(PropTypes.string),
-      notableClients: PropTypes.arrayOf(PropTypes.string),
+      profile_image_url: PropTypes.string,
+      bio: PropTypes.string,
+      // These will be added later
+      // expertise: PropTypes.arrayOf(PropTypes.string),
+      // notableClients: PropTypes.arrayOf(PropTypes.string),
     })
-  ).isRequired,
+  ),
 };
 
 export default IndustryProsPage;

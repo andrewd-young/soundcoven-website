@@ -15,9 +15,9 @@ import { faSpotify, faInstagram } from "@fortawesome/free-brands-svg-icons";
 const DEFAULT_IMAGE = 'https://placehold.co/600x400?text=Artist+Image';
 
 const Tag = ({ icon, text }) => (
-  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm bg-white text-covenPurple hover:max-w-full max-w-[250px] transition-all duration-300 ease-in-out">
+  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm bg-white text-covenPurple overflow-hidden">
     <FontAwesomeIcon icon={icon} className="w-4 h-4 mr-2 flex-shrink-0" />
-    <span className="truncate hover:text-clip">{text}</span>
+    <span className="truncate">{text}</span>
   </span>
 );
 

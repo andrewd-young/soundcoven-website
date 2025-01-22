@@ -105,8 +105,8 @@ const App = () => {
                   }
                 />
                 <Route
-                  path="/pros/:proName"
-                  element={<IndustryProBio industryPros={industryPros} />}
+                  path="/industry-pros/:proId"
+                  element={<IndustryProBio />}
                 />
                 <Route
                   path="/account"
