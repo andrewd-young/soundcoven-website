@@ -56,7 +56,11 @@ const Layout = ({ children }) => {
       <div className="bg-covenPurple min-h-screen flex flex-col overflow-x-hidden">
         <Navbar />
         <div className="flex justify-center items-center flex-grow">
-          <div className="text-white">Loading...</div>
+          <div className="animate-pulse space-y-4 w-full max-w-2xl mx-auto p-4">
+            <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+            <div className="h-4 bg-gray-700 rounded w-5/6"></div>
+          </div>
         </div>
         <Footer />
       </div>

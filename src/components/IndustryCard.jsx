@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBriefcase, faUniversity } from "@fortawesome/free-solid-svg-icons";
 
-const DEFAULT_IMAGE = 'https://placehold.co/600x400?text=Profile+Image';
+const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Profile+Image";
 
 const IndustryCard = ({ pro, className = "", styles = {} }) => {
   if (!pro) {
@@ -47,9 +47,7 @@ const IndustryCard = ({ pro, className = "", styles = {} }) => {
           </p>
         )}
         {pro.company && (
-          <p className="card-text text-gray-300">
-            at {pro.company}
-          </p>
+          <p className="card-text text-gray-300">at {pro.company}</p>
         )}
       </div>
     </Link>

@@ -31,6 +31,8 @@ const ArtistCard = ({ artist }) => {
             src={artist.image || DEFAULT_IMAGE}
             alt={artist.name}
             className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
             onError={(e) => {
               e.target.src = DEFAULT_IMAGE;
             }}

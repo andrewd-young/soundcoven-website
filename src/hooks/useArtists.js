@@ -3,7 +3,6 @@ import supabase from '../utils/supabase';
 
 export const useArtists = () => {
   const fetchArtists = async () => {
-    console.log('Fetching artists...'); // Debug log
     const { data, error } = await supabase
       .from('artists')
       .select('*');
@@ -12,8 +11,6 @@ export const useArtists = () => {
       console.error('Supabase error:', error); // Debug log
       throw error;
     }
-
-    console.log('Raw artists data:', data); // Debug log
 
     return data.map(artist => ({
       id: artist.id,
