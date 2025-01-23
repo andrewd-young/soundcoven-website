@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, Navigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useIndustryPros } from './hooks/useIndustryPros';
+import { useIndustryPros } from "./hooks/useIndustryPros";
 import {
   faMapMarkerAlt,
   faEnvelope,
@@ -10,17 +10,27 @@ import {
   faBriefcase,
 } from "@fortawesome/free-solid-svg-icons";
 
-const DEFAULT_IMAGE = 'https://placehold.co/600x400?text=Profile+Image';
+const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Profile+Image";
 
 const IndustryProBio = () => {
   const { proId } = useParams();
   const { industryPros, loading, error } = useIndustryPros();
-  
-  if (loading) return <div className="min-h-screen bg-covenPurple text-white p-8">Loading...</div>;
-  if (error) return <div className="min-h-screen bg-covenPurple text-white p-8">Error: {error}</div>;
-  
+
+  if (loading)
+    return (
+      <div className="min-h-screen bg-covenPurple text-white p-8">
+        Loading...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="min-h-screen bg-covenPurple text-white p-8">
+        Error: {error}
+      </div>
+    );
+
   const pro = industryPros.find((p) => p.id === parseInt(proId));
-  
+
   if (!pro) {
     return <Navigate to="/industry-pros" replace />;
   }
@@ -34,7 +44,9 @@ const IndustryProBio = () => {
             <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
             {pro.role} at {pro.company}
           </p>
-          <p className="text-lg mb-4 text-white">{pro.bio || "No bio available."}</p>
+          <p className="text-lg mb-4 text-white">
+            {pro.bio || "No bio available."}
+          </p>
           <div className="flex flex-wrap gap-4 mb-4">
             <span className="tag bg-blue-200 text-blue-800 px-3 py-1 rounded">
               <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2" />
@@ -52,11 +64,15 @@ const IndustryProBio = () => {
           <div className="mt-4">
             <h3 className="text-2xl font-semibold mb-2">Expertise</h3>
             <div className="flex flex-wrap gap-2">
-              {pro.expertise && pro.expertise.map((area, index) => (
-                <span key={index} className="tag bg-purple-200 text-purple-800 px-3 py-1 rounded">
-                  {area}
-                </span>
-              ))}
+              {pro.expertise &&
+                pro.expertise.map((area, index) => (
+                  <span
+                    key={index}
+                    className="tag bg-purple-200 text-purple-800 px-3 py-1 rounded"
+                  >
+                    {area}
+                  </span>
+                ))}
             </div>
           </div>
           {pro.favoriteArtists && (
@@ -64,7 +80,10 @@ const IndustryProBio = () => {
               <h3 className="text-2xl font-semibold mb-2">Favorite Artists</h3>
               <div className="flex flex-wrap gap-2">
                 {pro.favoriteArtists.map((artist, index) => (
-                  <span key={index} className="tag bg-teal-200 text-teal-800 px-3 py-1 rounded">
+                  <span
+                    key={index}
+                    className="tag bg-teal-200 text-teal-800 px-3 py-1 rounded"
+                  >
                     {artist}
                   </span>
                 ))}

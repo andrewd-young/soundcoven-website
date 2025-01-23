@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import useApplicationForm from "../../hooks/useApplicationForm";
-import ImageUpload from '../ImageUpload';
+import ImageUpload from "../ImageUpload";
 
 const ArtistForm = () => {
   const { user } = useAuth();
@@ -20,13 +20,8 @@ const ArtistForm = () => {
     note: "",
   };
 
-  const {
-    loading,
-    formData,
-    handleChange,
-    handleFileChange,
-    handleSubmit
-  } = useApplicationForm('artist', initialFormData);
+  const { loading, formData, handleChange, handleFileChange, handleSubmit } =
+    useApplicationForm("artist", initialFormData);
 
   const influencesRef = useRef(null);
   const noteRef = useRef(null);
@@ -42,7 +37,7 @@ const ArtistForm = () => {
     current_needs: formData.needs,
     upcoming_show: formData.upcomingShow,
     influences: formData.influences,
-    note: formData.note
+    note: formData.note,
   });
 
   const onSubmit = (e) => handleSubmit(e, transformData);
@@ -65,7 +60,7 @@ const ArtistForm = () => {
       className="text-white p-8 rounded-lg mx-auto md:mt-2 lg:mt-5"
     >
       <h1 className="font-bold text-3xl mb-4">Apply as an Artist</h1>
-      <ImageUpload 
+      <ImageUpload
         onImageChange={handleFileChange}
         label="Professional Photo (best photo) of you/your band (PDF, Document or Image)"
       />
@@ -189,7 +184,7 @@ const ArtistForm = () => {
         className="w-full bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:bg-gray-400"
         disabled={loading}
       >
-        {loading ? 'Submitting...' : 'Submit'}
+        {loading ? "Submitting..." : "Submit"}
       </button>
     </form>
   );

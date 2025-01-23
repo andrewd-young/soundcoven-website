@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import useApplicationForm from "../../hooks/useApplicationForm";
-import { DEFAULT_PROFILE_IMAGE } from '../../constants/images';
-import ImageUpload from '../ImageUpload';
+import { DEFAULT_PROFILE_IMAGE } from "../../constants/images";
+import ImageUpload from "../ImageUpload";
 
 const IndustryForm = () => {
   const initialFormData = {
@@ -14,13 +14,8 @@ const IndustryForm = () => {
     note: "",
   };
 
-  const {
-    loading,
-    formData,
-    handleChange,
-    handleFileChange,
-    handleSubmit
-  } = useApplicationForm('industry', initialFormData);
+  const { loading, formData, handleChange, handleFileChange, handleSubmit } =
+    useApplicationForm("industry", initialFormData);
 
   const [previewUrl, setPreviewUrl] = useState(DEFAULT_PROFILE_IMAGE);
   const noteRef = useRef(null);
@@ -44,7 +39,7 @@ const IndustryForm = () => {
     industry_role: formData.role,
     photo_url: photoUrl,
     favorite_artists: formData.favoriteArtists,
-    note: formData.note
+    note: formData.note,
   });
 
   const onSubmit = (e) => handleSubmit(e, transformData);
@@ -66,8 +61,8 @@ const IndustryForm = () => {
       className="text-white p-8 rounded-lg mx-auto md:mt-2 lg:mt-5"
     >
       <h1 className="font-bold text-3xl mb-4">Apply as an Industry Pro</h1>
-      
-      <ImageUpload 
+
+      <ImageUpload
         onImageChange={handleFileChange}
         label="Professional Headshot or Photo (PDF, Document or Image)"
       />

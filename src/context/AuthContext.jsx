@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import supabase from '../utils/supabase';
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import supabase from "../utils/supabase";
 
 const AuthContext = createContext({});
 
@@ -14,20 +14,25 @@ export const AuthProvider = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
-      
+
       // If user exists and came from email verification (has access_token in URL)
-      if (session?.user && window.location.hash.includes('access_token')) {
-        navigate('/apply');
+      if (session?.user && window.location.hash.includes("access_token")) {
+        navigate("/apply");
       }
     });
 
     // Listen for changes on auth state
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      
+
       // Handle email verification redirect
-      if (_event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
-        navigate('/apply');
+      if (
+        _event === "SIGNED_IN" &&
+        window.location.hash.includes("access_token")
+      ) {
+        navigate("/apply");
       }
     });
 
@@ -43,4 +48,4 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
   return useContext(AuthContext);
-}; 
+};

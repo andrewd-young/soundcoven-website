@@ -25,18 +25,18 @@ const Login = ({ title }) => {
       if (user) {
         try {
           const { data: application, error } = await supabase
-            .from('applications')
-            .select('id')
-            .eq('user_id', user.id)
+            .from("applications")
+            .select("id")
+            .eq("user_id", user.id)
             .single();
 
           if (error) throw error;
-          
+
           // Navigate to account page if application exists, otherwise to apply page
-          navigate(application ? '/account' : '/apply');
+          navigate(application ? "/account" : "/apply");
         } catch (error) {
-          console.error('Error checking application:', error);
-          navigate('/apply'); // Default to apply page if check fails
+          console.error("Error checking application:", error);
+          navigate("/apply"); // Default to apply page if check fails
         }
       }
     };
@@ -70,7 +70,7 @@ const Login = ({ title }) => {
 
     try {
       let result;
-      if (mode === 'signup') {
+      if (mode === "signup") {
         if (password !== confirmPassword) {
           setError("Passwords do not match");
           setLoading(false);
@@ -85,9 +85,9 @@ const Login = ({ title }) => {
         });
 
         if (result.error) {
-          if (result.error.message.includes('already registered')) {
+          if (result.error.message.includes("already registered")) {
             const { error: resendError } = await supabase.auth.resend({
-              type: 'signup',
+              type: "signup",
               email,
               options: {
                 emailRedirectTo: `${window.location.origin}/apply`,
@@ -133,7 +133,8 @@ const Login = ({ title }) => {
               Check Your Email
             </h1>
             <p className="text-white text-center mb-6">
-              We've sent a confirmation email to {email}. Please check your inbox and follow the instructions to complete your registration.
+              We've sent a confirmation email to {email}. Please check your
+              inbox and follow the instructions to complete your registration.
             </p>
             <button
               onClick={() => setShowEmailForm(false)}
@@ -179,7 +180,9 @@ const Login = ({ title }) => {
 
             {mode === "signup" && (
               <div>
-                <label className="block text-white mb-2">Confirm Password</label>
+                <label className="block text-white mb-2">
+                  Confirm Password
+                </label>
                 <input
                   type="password"
                   value={confirmPassword}

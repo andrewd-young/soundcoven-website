@@ -3,7 +3,10 @@ import Star from "../assets/star.png";
 
 const About = () => {
   return (
-    <div id="about" className="flex text-black justify-center items-center px-6 md:px-12 lg:px-24 py-8">
+    <div
+      id="about"
+      className="flex text-black justify-center items-center px-6 md:px-12 lg:px-24 py-8"
+    >
       <div className="flex-1 justify-center items-center md:block hidden sm:mr-4">
         <img src={Star} alt="Star" className="w-80 mx-auto" />
       </div>

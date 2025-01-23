@@ -19,7 +19,7 @@ const Navbar = () => {
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
-      navigate('/');
+      navigate("/");
     }
     setShowDropdown(false);
   };
@@ -73,7 +73,7 @@ const Navbar = () => {
                   <FontAwesomeIcon icon={faUser} />
                   <span className="hidden sm:inline">{user.email}</span>
                 </button>
-                
+
                 {showDropdown && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                     <Link

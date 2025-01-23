@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import useApplicationForm from "../../hooks/useApplicationForm";
-import ImageUpload from '../ImageUpload';
+import ImageUpload from "../ImageUpload";
 
 const InstrumentalistForm = () => {
   const initialFormData = {
@@ -13,13 +13,8 @@ const InstrumentalistForm = () => {
     photo: null,
   };
 
-  const {
-    loading,
-    formData,
-    handleChange,
-    handleSubmit,
-    handleFileChange
-  } = useApplicationForm('instrumentalist', initialFormData);
+  const { loading, formData, handleChange, handleSubmit, handleFileChange } =
+    useApplicationForm("instrumentalist", initialFormData);
 
   const noteRef = useRef(null);
 
@@ -30,7 +25,7 @@ const InstrumentalistForm = () => {
     instrument: formData.instrument,
     favorite_genres: formData.favoriteGenres,
     photo_url: photoUrl,
-    note: formData.note
+    note: formData.note,
   });
 
   const onSubmit = (e) => handleSubmit(e, transformData);
@@ -61,7 +56,7 @@ const InstrumentalistForm = () => {
           Talent or Industry form!
         </strong>
       </p>
-      <ImageUpload 
+      <ImageUpload
         onImageChange={handleFileChange}
         label="Professional Photo of you with your instrument(s) (PDF, Document or Image)"
       />
@@ -135,7 +130,7 @@ const InstrumentalistForm = () => {
         className="w-full bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:bg-gray-400"
         disabled={loading}
       >
-        {loading ? 'Submitting...' : 'Submit'}
+        {loading ? "Submitting..." : "Submit"}
       </button>
     </form>
   );

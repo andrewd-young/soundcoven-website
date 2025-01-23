@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import supabase from '../utils/supabase';
-import Navbar from './NavBar';
-import Footer from './Footer';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import supabase from "../utils/supabase";
+import Navbar from "./NavBar";
+import Footer from "./Footer";
 
 const Layout = ({ children }) => {
   const { user } = useAuth();
@@ -20,27 +20,29 @@ const Layout = ({ children }) => {
 
       try {
         const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
           .single();
 
-        if (error && error.code !== 'PGRST116') {
+        if (error && error.code !== "PGRST116") {
           throw error;
         }
 
         // List of paths that are always accessible
-        const publicPaths = ['/apply', '/login', '/signup', '/', '/logout'];
-        const isPublicPath = publicPaths.some(path => 
-          location.pathname === path || location.pathname.startsWith('/apply/')
+        const publicPaths = ["/apply", "/login", "/signup", "/", "/logout"];
+        const isPublicPath = publicPaths.some(
+          (path) =>
+            location.pathname === path ||
+            location.pathname.startsWith("/apply/")
         );
 
         // If no profile and not on a public path, redirect to apply
         if (!profile && !isPublicPath && user) {
-          navigate('/apply');
+          navigate("/apply");
         }
       } catch (error) {
-        console.error('Error checking profile:', error);
+        console.error("Error checking profile:", error);
       } finally {
         setLoading(false);
       }
@@ -64,12 +66,10 @@ const Layout = ({ children }) => {
   return (
     <div className="bg-covenPurple min-h-screen flex flex-col overflow-x-hidden">
       <Navbar />
-      <main className="flex-grow">
-        {children}
-      </main>
+      <main className="flex-grow">{children}</main>
       <Footer />
     </div>
   );
 };
 
-export default Layout; 
+export default Layout;

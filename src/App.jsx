@@ -15,7 +15,6 @@ import ArtistBio from "./ArtistBio";
 import ApplyForm from "./ApplyForm";
 import Login from "./components/Login";
 import IndustryProsPage from "./IndustryProsPage";
-import industryPros from "./industryPros";
 import IndustryProBio from "./IndustryProBio";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
@@ -24,6 +23,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Account from "./components/Account";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import AdminDashboard from "./components/AdminDashboard";
 
 const ScrollToHashElement = () => {
   const { hash } = useLocation();
@@ -83,7 +83,7 @@ const App = () => {
                   path="/industry-pros"
                   element={
                     <ProtectedRoute>
-                      <IndustryProsPage industryPros={industryPros} />
+                      <IndustryProsPage/>
                     </ProtectedRoute>
                   }
                 />
@@ -113,6 +113,14 @@ const App = () => {
                   element={
                     <ProtectedRoute>
                       <Account />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
                     </ProtectedRoute>
                   }
                 />
