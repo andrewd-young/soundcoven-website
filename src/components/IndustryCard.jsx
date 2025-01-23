@@ -24,7 +24,7 @@ const IndustryCard = ({ pro, className = "", styles = {} }) => {
     >
       <div className="h-72 overflow-hidden rounded-t-lg">
         <img
-          src={pro.image || DEFAULT_IMAGE}
+          src={pro.profile_image_url || DEFAULT_IMAGE}
           alt={pro.name}
           className="w-full h-full object-cover object-top"
           onError={(e) => {
@@ -61,7 +61,7 @@ IndustryCard.propTypes = {
     role: PropTypes.string,
     company: PropTypes.string,
     school: PropTypes.string,
-    image: PropTypes.string,
+    profile_image_url: PropTypes.string,
   }).isRequired,
   className: PropTypes.string,
   styles: PropTypes.object,
