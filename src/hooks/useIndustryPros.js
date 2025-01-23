@@ -3,7 +3,6 @@ import supabase from '../utils/supabase';
 
 export const useIndustryPros = () => {
   const fetchIndustryPros = async () => {
-    console.log('Fetching industry professionals...'); // Debug log
     const { data, error } = await supabase
       .from('industry_professionals')
       .select('*');
@@ -12,8 +11,6 @@ export const useIndustryPros = () => {
       console.error('Supabase error:', error); // Debug log
       throw error;
     }
-
-    console.log('Raw industry professionals data:', data); // Debug log
 
     return data.map(pro => ({
       id: pro.id,
@@ -25,7 +22,9 @@ export const useIndustryPros = () => {
       location: pro.location,
       email: pro.email,
       phone: pro.phone,
-      image: pro.profile_image_url,
+      profile_image_url: pro.profile_image_url,
+      bio: pro.bio,
+      favorite_artists: pro.favorite_artists
     }));
   };
 
