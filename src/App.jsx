@@ -24,6 +24,7 @@ import Account from "./components/Account";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import AdminDashboard from "./components/AdminDashboard";
+import ApplicationView from "./components/ApplicationView";
 
 const ScrollToHashElement = () => {
   const { hash } = useLocation();
@@ -124,6 +125,7 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/admin/applications/:applicationId" element={<ApplicationView />} />
               </Routes>
             </main>
             <Footer />

@@ -77,6 +77,70 @@ const Account = () => {
       .join(" ");
   };
 
+  const handleAcceptProfile = async () => {
+    try {
+      setLoading(true);
+      
+      // Get the application data
+      const { data: applicationData, error: applicationError } = await supabase
+        .from("applications")
+        .select("*")
+        .eq("id", application.id)
+        .single();
+
+      if (applicationError) throw applicationError;
+
+      const profileData = applicationData.admin_approved_profile;
+
+      // Insert into appropriate table based on application type
+      const { error: insertError } = await supabase
+        .from(
+          application.application_type === "artist"
+            ? "artists"
+            : application.application_type === "industry"
+            ? "industry_pros"
+            : "instrumentalists"
+        )
+        .insert([
+          {
+            user_id: user.id,
+            ...profileData,
+          },
+        ]);
+
+      if (insertError) throw insertError;
+
+      // Update application status
+      const { error: statusError } = await supabase
+        .from("applications")
+        .update({
+          status: "approved",
+          user_accepted_at: new Date().toISOString(),
+        })
+        .eq("id", application.id);
+
+      if (statusError) throw statusError;
+
+      // Update profiles table
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          role: application.application_type,
+        })
+        .eq("id", user.id);
+
+      if (profileError) throw profileError;
+
+      // Refresh profile data
+      fetchProfileAndApplication();
+      setMessage("Profile approved successfully!");
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!user) return <div>Please sign in</div>;
 
   return (
@@ -102,6 +166,60 @@ const Account = () => {
                 onClick={() => navigate("/industry")}
                 text="View Industry Pros"
                 className=" text-white py-2 px-4 rounded"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Show admin-approved profile for user acceptance */}
+        {application?.status === "pending_user_approval" && application?.admin_approved_profile && (
+          <div className="mb-8 p-4 bg-green-900 rounded border border-green-500">
+            <h2 className="text-2xl text-white mb-2">Profile Ready for Review</h2>
+            <p className="text-white mb-4">
+              An admin has reviewed your application and prepared your profile. Please review the details below:
+            </p>
+            
+            <div className="bg-[#432347] rounded p-4 mb-4">
+              <h3 className="text-xl text-white mb-2">Your Profile Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
+                <div>
+                  <p><strong>Name:</strong> {application.admin_approved_profile.name}</p>
+                  <p><strong>Email:</strong> {application.admin_approved_profile.email}</p>
+                  <p><strong>Bio:</strong> {application.admin_approved_profile.bio}</p>
+                </div>
+                
+                {application.application_type === "artist" && (
+                  <div>
+                    <p><strong>Artist Type:</strong> {application.admin_approved_profile.artist_type}</p>
+                    <p><strong>Genres:</strong> {application.admin_approved_profile.genres.join(", ")}</p>
+                    <p><strong>Streaming Links:</strong> {application.admin_approved_profile.streaming_links.join(", ")}</p>
+                  </div>
+                )}
+
+                {application.application_type === "industry" && (
+                  <div>
+                    <p><strong>Industry Role:</strong> {application.admin_approved_profile.industry_role}</p>
+                    <p><strong>Company:</strong> {application.admin_approved_profile.company}</p>
+                    <p><strong>Years of Experience:</strong> {application.admin_approved_profile.years_experience}</p>
+                  </div>
+                )}
+
+                {application.application_type === "instrumentalist" && (
+                  <div>
+                    <p><strong>Instrument:</strong> {application.admin_approved_profile.instrument}</p>
+                    <p><strong>Favorite Genres:</strong> {application.admin_approved_profile.favorite_genres.join(", ")}</p>
+                    <p><strong>Equipment:</strong> {application.admin_approved_profile.equipment}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Button
+                onClick={handleAcceptProfile}
+                text={loading ? "Accepting..." : "Accept Profile"}
+                className="bg-green-600 hover:bg-green-700"
+                disabled={loading}
               />
             </div>
           </div>

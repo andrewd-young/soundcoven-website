@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import supabase from "../utils/supabase";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Button from "./common/Button";
 
 const AdminDashboard = () => {
@@ -32,7 +34,7 @@ const AdminDashboard = () => {
         const { data, error } = await supabase
           .from("applications")
           .select("*")
-          .eq("status", "pending")
+          .in("status", ["pending", "pending_user_approval"])
           .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -46,98 +48,6 @@ const AdminDashboard = () => {
 
     fetchApplications();
   }, [user, navigate]);
-
-  const handleApprove = async (application) => {
-    try {
-      setLoading(true);
-
-      // Update application status
-      const { error: applicationError } = await supabase
-        .from("applications")
-        .update({
-          status: "approved",
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user.id,
-        })
-        .eq("id", application.id);
-
-      if (applicationError) throw applicationError;
-
-      // Insert into appropriate table based on application type
-      const { error: insertError } = await supabase
-        .from(
-          application.application_type === "artist"
-            ? "artists"
-            : application.application_type === "industry"
-            ? "industry_pros"
-            : "instrumentalists"
-        )
-        .insert([
-          {
-            user_id: application.user_id,
-            name: application.name,
-            photo_url: application.photo_url,
-            email: application.email,
-            ...(application.application_type === "artist" && {
-              artist_type: application.artist_type,
-              genres: application.genres,
-              streaming_links: application.streaming_links,
-              current_needs: application.current_needs,
-              upcoming_show: application.upcoming_show,
-              influences: application.influences,
-            }),
-            ...(application.application_type === "industry" && {
-              industry_role: application.industry_role,
-              favorite_artists: application.favorite_artists,
-            }),
-            ...(application.application_type === "instrumentalist" && {
-              instrument: application.instrument,
-              favorite_genres: application.favorite_genres,
-            }),
-          },
-        ]);
-
-      if (insertError) throw insertError;
-
-      // Update profiles table
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          role: application.application_type,
-        })
-        .eq("id", application.user_id);
-
-      if (profileError) throw profileError;
-
-      // Remove approved application from state
-      setApplications(applications.filter((app) => app.id !== application.id));
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleReject = async (applicationId) => {
-    try {
-      setLoading(true);
-      const { error } = await supabase
-        .from("applications")
-        .update({
-          status: "rejected",
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user.id,
-        })
-        .eq("id", applicationId);
-
-      if (error) throw error;
-      setApplications(applications.filter((app) => app.id !== applicationId));
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading)
     return <div className="text-white text-center mt-8">Loading...</div>;
@@ -155,100 +65,93 @@ const AdminDashboard = () => {
           {applications.map((application) => (
             <div
               key={application.id}
-              className="bg-[#432347] rounded-lg p-6 border border-white"
+              className="bg-covenLightPurple rounded-lg p-6 border border-white transition-colors"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="text-2xl text-white font-semibold">
-                    {application.name}
-                  </h2>
-                  <p className="text-gray-300">
-                    {application.application_type.charAt(0).toUpperCase() +
-                      application.application_type.slice(1)}{" "}
-                    Application
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => handleApprove(application)}
-                    text="Approve"
-                    className="bg-green-600 hover:bg-green-700"
-                  />
-                  <Button
-                    onClick={() => handleReject(application.id)}
-                    text="Reject"
-                    className="bg-red-600 hover:bg-red-700"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
-                <div>
-                  <p>
-                    <strong>Email:</strong> {application.email}
-                  </p>
-                  <p>
-                    <strong>School:</strong> {application.school}
-                  </p>
-                  {application.note && (
-                    <p>
-                      <strong>Note:</strong> {application.note}
+              <Link 
+                to={`/admin/applications/${application.id}`}
+                className="block"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h2 className="text-2xl text-white font-semibold">
+                      {application.name}
+                    </h2>
+                    <p className="text-gray-300">
+                      {application.application_type.charAt(0).toUpperCase() +
+                        application.application_type.slice(1)}{" "}
+                      Application
                     </p>
-                  )}
-                </div>
-
-                <div>
-                  {application.application_type === "artist" && (
-                    <>
-                      <p>
-                        <strong>Artist Type:</strong> {application.artist_type}
-                      </p>
-                      <p>
-                        <strong>Genres:</strong> {application.genres}
-                      </p>
-                      <p>
-                        <strong>Streaming Links:</strong>{" "}
-                        {application.streaming_links}
-                      </p>
-                    </>
-                  )}
-
-                  {application.application_type === "industry" && (
-                    <>
-                      <p>
-                        <strong>Industry Role:</strong>{" "}
-                        {application.industry_role}
-                      </p>
-                      <p>
-                        <strong>Favorite Artists:</strong>{" "}
-                        {application.favorite_artists}
-                      </p>
-                    </>
-                  )}
-
-                  {application.application_type === "instrumentalist" && (
-                    <>
-                      <p>
-                        <strong>Instrument:</strong> {application.instrument}
-                      </p>
-                      <p>
-                        <strong>Favorite Genres:</strong>{" "}
-                        {application.favorite_genres}
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {application.photo_url && (
-                <div className="mt-4">
-                  <img
-                    src={application.photo_url}
-                    alt={`${application.name}'s photo`}
-                    className="w-32 h-32 object-cover rounded"
+                    <p className="text-gray-300">
+                      Status: {application.status === "pending_user_approval" ? "Waiting for user approval" : "Pending review"}
+                    </p>
+                  </div>
+                  <Button 
+                    text={
+                      <>
+                        View Application <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+                      </>
+                    }
+                    className="px-6 py-2 rounded  transition-color"
+                    link={`/admin/applications/${application.id}`}
                   />
                 </div>
-              )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
+                  <div>
+                    <p>
+                      <strong>Email:</strong> {application.email}
+                    </p>
+                    <p>
+                      <strong>School:</strong> {application.school}
+                    </p>
+                  </div>
+
+                  <div>
+                    {application.application_type === "artist" && (
+                      <>
+                        <p>
+                          <strong>Artist Type:</strong> {application.artist_type}
+                        </p>
+                        <p>
+                          <strong>Genres:</strong>{" "}
+                          {Array.isArray(application.genres)
+                            ? application.genres.join(", ")
+                            : application.genres}
+                        </p>
+                      </>
+                    )}
+
+                    {application.application_type === "industry" && (
+                      <>
+                        <p>
+                          <strong>Industry Role:</strong>{" "}
+                          {application.industry_role}
+                        </p>
+                        <p>
+                          <strong>Favorite Artists:</strong>{" "}
+                          {Array.isArray(application.favorite_artists)
+                            ? application.favorite_artists.join(", ")
+                            : application.favorite_artists}
+                        </p>
+                      </>
+                    )}
+
+                    {application.application_type === "instrumentalist" && (
+                      <>
+                        <p>
+                          <strong>Instrument:</strong> {application.instrument}
+                        </p>
+                        <p>
+                          <strong>Favorite Genres:</strong>{" "}
+                          {Array.isArray(application.favorite_genres)
+                            ? application.favorite_genres.join(", ")
+                            : application.favorite_genres}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </Link>
             </div>
           ))}
         </div>
