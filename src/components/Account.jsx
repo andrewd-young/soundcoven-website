@@ -163,7 +163,7 @@ const Account = () => {
                 className=" text-white py-2 px-4 rounded"
               />
               <Button
-                onClick={() => navigate("/industry")}
+                onClick={() => navigate("/industry-pros")}
                 text="View Industry Pros"
                 className=" text-white py-2 px-4 rounded"
               />
@@ -324,9 +324,9 @@ const Account = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-covenRed text-white py-2 px-4 rounded hover:bg-red-700 disabled:opacity-50"
+            className="w-full bg-white text-covenPurple py-2 px-4 rounded hover:bg-gray-100 disabled:opacity-50"
           >
-            {loading ? "Updating..." : "Update Email"}
+            {loading ? "Updating..." : "Change Email"}
           </button>
         </form>
       </div>

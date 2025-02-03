@@ -11,6 +11,17 @@ const IndustryCard = ({ pro, className = "", styles = {} }) => {
     return null;
   }
 
+  const isLightBackground = (color) => {
+    if (!color) return false; // Return false for undefined/null colors
+    // Convert color to RGB and check its brightness
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return brightness > 128;
+  };
+
   return (
     <Link
       to={`/industry-pros/${pro.id}`}
@@ -32,7 +43,9 @@ const IndustryCard = ({ pro, className = "", styles = {} }) => {
           }}
         />
       </div>
-      <div className="flex flex-col flex-grow p-4">
+      <div className={`flex flex-col flex-grow p-4 ${
+        isLightBackground(styles?.backgroundColor) ? 'text-on-light' : 'text-white'
+      }`}>
         <div className="mb-2">
           <h3 className="font-bold text-4xl truncate">{pro.name}</h3>
         </div>

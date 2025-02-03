@@ -2,9 +2,8 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Logo from "../assets/soundcoven-logo-white.png";
-import useApplicationForm from "../hooks/useApplicationForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faSignOutAlt, faCog } from "@fortawesome/free-solid-svg-icons";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 import supabase from "../utils/supabase";
 
 const Navigation = () => {
@@ -64,7 +63,7 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-covenPurple text-white py-4 px-6 md:px-12 lg:px-24">
+    <nav className="bg-covenPurple text-white py-4 px-6 md:px-12 lg:px-24 text-lg space-x-6">
       <div className="flex flex-col items-center">
         <Link to="/">
           <img
@@ -132,7 +131,7 @@ const Navigation = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors flex items-center gap-2"
+                  className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors flex items-center gap-2 w-[120px] justify-center"
                 >
                   <FontAwesomeIcon icon={faUser} />
                   Login
@@ -152,7 +151,7 @@ const Navigation = () => {
                     </span>
                     <Link
                       to="/apply"
-                      className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors"
+                      className="bg-white text-covenPurple px-6 py-2 rounded w-[120px] hover:bg-gray-100 transition-colors"
                     >
                       Apply Now
                     </Link>
@@ -167,7 +166,7 @@ const Navigation = () => {
                 </span>
                 <Link
                   to="/login"
-                  className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors"
+                  className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors w-[120px] text-center flex-shrink-0"
                 >
                   Join
                 </Link>

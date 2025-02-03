@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import Button from "./common/Button";
 import { useArtists } from "../hooks/useArtists";
 
@@ -55,13 +54,13 @@ const HeroSection = () => {
         </div>
 
         {/* Artist Information */}
-        <div className="space-y-6 z-20">
-          <h3 className="italic text-2xl md:text-3xl lg:text-4xl" style={{ minHeight: '2.5rem' }}>FEATURED</h3>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight" style={{ minHeight: '4rem' }}>
+        <div className="space-y-4 z-20">
+          <h3 className="italic text-3xl md:text-4xl lg:text-5xl" style={{ minHeight: '2rem' }}>FEATURED</h3>
+          <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight pb-4" style={{ minHeight: '3rem' }}>
             {featuredArtist.name}
           </h1>
 
-          <div className="space-y-4" style={{ minHeight: '3rem' }}>
+          <div className="space-y-4" style={{ minHeight: '2rem' }}>
             <div className="flex space-x-4">
               <Button
                 text="View Artist Profile"

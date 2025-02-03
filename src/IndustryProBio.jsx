@@ -40,6 +40,8 @@ const IndustryProBio = () => {
     ? pro.favorite_artists.split(',').map(artist => artist.trim()) 
     : [];
 
+  const someCondition = ((pro.location || pro.email || pro.phone) && pro.school);
+
   return (
     <section id="pro-bio" className="text-white py-8 px-6 md:px-12 lg:px-24">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -53,7 +55,7 @@ const IndustryProBio = () => {
           <p className="text-lg mb-4 text-white">
             {pro.bio || "No bio available."}
           </p>
-          {pro.location || pro.email || pro.phone && (
+          {someCondition && (
           <div className="flex flex-wrap gap-4 mb-4">
             {pro.location && (
               <span className="tag bg-blue-200 text-blue-800 px-3 py-1 rounded">

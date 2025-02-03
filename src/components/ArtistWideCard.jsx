@@ -2,6 +2,10 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { useExtractColors } from "react-extract-colors";
+import { isLightColor } from "../utils/colorUtils";
+import Tag from "./common/Tag";
+import { faMapMarkerAlt, faCompactDisc, faSchool } from "@fortawesome/free-solid-svg-icons";
+
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
 
@@ -10,10 +14,7 @@ const ArtistWideCard = ({ artist }) => {
     id,
     name,
     genre,
-    artist_type,
     location,
-    profile_image_url,
-    banner_image_url,
     school,
   } = artist;
 
@@ -37,29 +38,27 @@ const ArtistWideCard = ({ artist }) => {
       to={`/artists/${id}`}
       className="block hover:scale-[1.02] transition-transform duration-200"
     >
-      <div className="bg-[#432347] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <div className="flex flex-row-reverse">
-          <div className="relative h-72 w-72 flex-shrink-0">
-            <img
-              src={artist.image || DEFAULT_IMAGE}
-              alt={artist.name}
-              className="w-full h-full object-cover rounded-l-lg"
-              onError={(e) => {
-                e.target.src = DEFAULT_IMAGE;
-              }}
-            />
-            {banner_image_url && (
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-l-lg" />
-            )}
-          </div>
-          <div className="p-8 flex-grow">
-            <h3 className="text-5xl font-bold mb-6">{name}</h3>
-            <div className="space-y-2 text-gray-300 text-lg">
-              {genre && <p>Genre: {genre}</p>}
-              {artist_type && <p>Type: {artist_type}</p>}
-              {location && <p>Location: {location}</p>}
-              {school && <p>School: {school}</p>}
-            </div>
+      <div
+        className="flex flex-col md:flex-row rounded-lg overflow-hidden shadow-lg"
+        style={{ backgroundColor: bgColor }}
+      >
+        <div className="md:w-1/3">
+          <img
+            src={artist.image || DEFAULT_IMAGE}
+            alt={artist.name}
+            className="w-full h-48 md:h-full object-cover"
+            onError={(e) => {
+              e.target.src = DEFAULT_IMAGE;
+            }}
+          />
+        </div>
+        <div className={`flex-1 p-6 flex flex-col justify-center ${isLightColor(bgColor) ? 'text-gray-800' : 'text-white'}`}>
+          <h2 className="text-7xl font-bold mb-8">{name}</h2>
+          
+          <div className="flex flex-wrap gap-4 py-2">
+            {genre && <Tag icon={faCompactDisc} text={genre} darkMode={!isLightColor(bgColor)} />}
+            {location && <Tag icon={faMapMarkerAlt} text={location} darkMode={!isLightColor(bgColor)} />}
+            {school && <Tag icon={faSchool} text={school} darkMode={!isLightColor(bgColor)} />}
           </div>
         </div>
       </div>
@@ -72,10 +71,7 @@ ArtistWideCard.propTypes = {
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     genre: PropTypes.string,
-    artist_type: PropTypes.string,
     location: PropTypes.string,
-    profile_image_url: PropTypes.string,
-    banner_image_url: PropTypes.string,
     school: PropTypes.string,
   }).isRequired,
 };

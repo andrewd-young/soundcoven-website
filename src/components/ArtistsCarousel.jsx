@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useExtractColors } from "react-extract-colors";
+import { isLightColor } from "../utils/colorUtils";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
@@ -23,7 +24,7 @@ const ArtistCard = ({ artist }) => {
   return (
     <Link to={`/artists/${artist.id}`} className="block">
       <div
-        className="w-64 flex-shrink-0 text-white rounded-lg overflow-hidden shadow-lg"
+        className="w-64 flex-shrink-0 rounded-lg overflow-hidden shadow-lg"
         style={{ backgroundColor: bgColor }}
       >
         <div className="aspect-w-1 aspect-h-1">
@@ -38,7 +39,7 @@ const ArtistCard = ({ artist }) => {
             }}
           />
         </div>
-        <div className="p-4">
+        <div className={`p-4 ${isLightColor(bgColor) ? 'text-on-light' : 'text-white'}`}>
           <h3 className="text-xl font-bold mb-2">{artist.name}</h3>
           <p className="text-sm opacity-75">
             {artist.genre || "Genre not specified"}

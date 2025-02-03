@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import useApplicationForm from "../../hooks/useApplicationForm";
 import { DEFAULT_PROFILE_IMAGE } from "../../constants/images";
 import ImageUpload from "../ImageUpload";
@@ -17,20 +17,7 @@ const IndustryForm = () => {
   const { loading, formData, handleChange, handleFileChange, handleSubmit } =
     useApplicationForm("industry", initialFormData);
 
-  const [previewUrl, setPreviewUrl] = useState(DEFAULT_PROFILE_IMAGE);
   const noteRef = useRef(null);
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      handleFileChange(e);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const transformData = (formData, photoUrl) => ({
     name: formData.name,

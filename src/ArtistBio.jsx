@@ -11,15 +11,9 @@ import {
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { faSpotify, faInstagram } from "@fortawesome/free-brands-svg-icons";
+import Tag from './components/common/Tag';
 
 const DEFAULT_IMAGE = 'https://placehold.co/600x400?text=Artist+Image';
-
-const Tag = ({ icon, text }) => (
-  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm bg-white text-covenPurple overflow-hidden">
-    <FontAwesomeIcon icon={icon} className="w-4 h-4 mr-2 flex-shrink-0" />
-    <span className="truncate">{text}</span>
-  </span>
-);
 
 const SocialButton = ({ icon, text, link, primary = false, instagram = false }) => (
   <a
@@ -78,41 +72,47 @@ const ArtistBio = () => {
           </div>
 
           {/* Tags */}
-          <div className="flex flex-wrap gap-3 mb-4">
+          <div className="flex flex-wrap gap-4 mb-4">
             {artist.location && (
               <Tag 
                 icon={faMapMarkerAlt} 
-                text={artist.location} 
+                text={artist.location}
+                darkMode={false}
               />
             )}
             {artist.genre && (
               <Tag 
                 icon={faCompactDisc} 
-                text={artist.genre} 
+                text={artist.genre}
+                darkMode={false}
               />
             )}
             {artist.age && (
               <Tag 
                 icon={faUser} 
-                text={`${artist.age} years old`} 
+                text={`${artist.age} years old`}
+                darkMode={false}
               />
             )}
             {artist.type && (
               <Tag 
                 icon={faUsers} 
-                text={artist.type} 
+                text={artist.type}
+                darkMode={false}
               />
             )}
             {artist.yearsActive && (
               <Tag 
                 icon={faClock} 
-                text={`${artist.yearsActive} years active`} 
+                text={`${artist.yearsActive} years active`}
+                darkMode={false}
               />
             )}
             {artist.influences && (
               <Tag 
                 icon={faMusic} 
-                text={`Influences: ${artist.influences}`} 
+                text={`Influences: ${artist.influences}`}
+                darkMode={false}
               />
             )}
           </div>

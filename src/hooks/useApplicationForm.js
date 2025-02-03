@@ -34,7 +34,7 @@ const useApplicationForm = (applicationType, initialFormData) => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}/${applicationId || 'temp'}.${fileExt}`;
     
-    const { error: uploadError, data } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('application-photos')
       .upload(fileName, file, { upsert: true });
     

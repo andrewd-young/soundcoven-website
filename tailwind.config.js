@@ -10,6 +10,9 @@ export const theme = {
       covenLightPurple: "#4F1D4D",
       covenRed: "#8B0000",
     },
+    textColor: {
+      'on-light': '#1a1a1a', // Dark text for light backgrounds
+    }
   },
 };
 export const plugins = [];
