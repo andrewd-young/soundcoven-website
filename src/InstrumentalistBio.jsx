@@ -9,6 +9,7 @@ import {
   faMusic,
 } from "@fortawesome/free-solid-svg-icons";
 import Tag from './components/common/Tag';
+import { OptimizedImage } from './components/common/OptimizedImage';
 
 const DEFAULT_IMAGE = 'https://placehold.co/600x400?text=Instrumentalist+Image';
 
@@ -59,13 +60,14 @@ const InstrumentalistBio = () => {
         </div>
         <div className="relative z-10">
           <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden shadow-2xl">
-            <img
+            <OptimizedImage
               src={instrumentalist.profileImageUrl || DEFAULT_IMAGE}
               alt={instrumentalist.name}
-              className="w-full h-full object-cover object-center"
-              onError={(e) => {
-                e.target.src = DEFAULT_IMAGE;
-              }}
+              width={800}
+              height={800}
+              className="w-full h-full"
+              objectFit="cover"
+              quality={85}
             />
           </div>
         </div>

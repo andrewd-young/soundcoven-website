@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import supabase from "../utils/supabase";
 import Button from "./common/Button";
+import { OptimizedImage } from './common/OptimizedImage';
 
 const ApplicationView = () => {
   const { applicationId } = useParams();
@@ -183,10 +184,13 @@ const ApplicationView = () => {
           <div className="relative h-24 bg-[#432347]">
             <div className="absolute -bottom-16 left-6 flex items-end">
               {application.photo_url ? (
-                <img
+                <OptimizedImage
                   src={application.photo_url}
                   alt={`${application.name}'s profile`}
-                  className="w-32 h-32 rounded-lg border-4 border-[#432347] object-cover"
+                  width={128}
+                  height={128}
+                  className="w-32 h-32 rounded-lg border-4 border-[#432347]"
+                  objectFit="cover"
                 />
               ) : (
                 <div className="w-32 h-32 rounded-lg border-4 border-[#432347] bg-gray-700 flex items-center justify-center">

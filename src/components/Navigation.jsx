@@ -155,7 +155,7 @@ const Navigation = () => {
                     </span>
                     <Link
                       to="/apply"
-                      className="bg-white text-covenPurple px-6 py-2 rounded w-[120px] hover:bg-gray-100 transition-colors"
+                      className="bg-white text-covenPurple px-6 py-2 rounded w-[120px] text-center hover:bg-gray-100 transition-colors"
                     >
                       Apply
                     </Link>

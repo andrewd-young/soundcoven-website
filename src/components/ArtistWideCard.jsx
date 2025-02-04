@@ -5,6 +5,7 @@ import { useExtractColors } from "react-extract-colors";
 import { isLightColor } from "../utils/colorUtils";
 import Tag from "./common/Tag";
 import { faMapMarkerAlt, faCompactDisc, faSchool } from "@fortawesome/free-solid-svg-icons";
+import { OptimizedImage } from "./common/OptimizedImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
@@ -43,13 +44,13 @@ const ArtistWideCard = ({ artist }) => {
         style={{ backgroundColor: bgColor }}
       >
         <div className="md:w-1/3">
-          <img
+          <OptimizedImage
             src={artist.image || DEFAULT_IMAGE}
             alt={artist.name}
-            className="w-full h-48 md:h-full object-cover"
-            onError={(e) => {
-              e.target.src = DEFAULT_IMAGE;
-            }}
+            width={400}
+            height={300}
+            className="w-full h-48 md:h-full"
+            objectFit="cover"
           />
         </div>
         <div className={`flex-1 p-6 flex flex-col justify-center ${isLightColor(bgColor) ? 'text-gray-800' : 'text-white'}`}>

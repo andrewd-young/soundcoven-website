@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useExtractColors } from "react-extract-colors";
 import { isLightColor } from "../utils/colorUtils";
+import { OptimizedImage } from "./common/OptimizedImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
@@ -28,15 +29,14 @@ const ArtistCard = ({ artist }) => {
         style={{ backgroundColor: bgColor }}
       >
         <div className="aspect-w-1 aspect-h-1">
-          <img
+          <OptimizedImage
             src={artist.image || DEFAULT_IMAGE}
             alt={artist.name}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => {
-              e.target.src = DEFAULT_IMAGE;
-            }}
+            width={256}
+            height={256}
+            className="w-full h-full"
+            objectFit="cover"
+            quality={75}
           />
         </div>
         <div className={`p-4 ${isLightColor(bgColor) ? 'text-on-light' : 'text-white'}`}>

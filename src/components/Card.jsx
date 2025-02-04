@@ -7,6 +7,7 @@ import {
   faMapMarkerAlt,
   faCompactDisc,
 } from "@fortawesome/free-solid-svg-icons";
+import { OptimizedImage } from "./common/OptimizedImage";
 
 const Card = ({ artist, className = "", styles = {} }) => {
   const { dominantColor } = useExtractColors(artist.image);
@@ -27,16 +28,16 @@ const Card = ({ artist, className = "", styles = {} }) => {
         backgroundColor: bgColor,
       }}
     >
-      <img
+      <OptimizedImage
         src={artist.image}
         alt={artist.name}
+        width={320}
+        height={315}
         className="mb-6"
+        objectFit="cover"
         style={{
-          width: "100%",
-          height: "315px",
-          objectFit: "cover",
-          borderTopRightRadius: "0.5rem",
-          borderTopLeftRadius: "0.5rem",
+          borderTopRightRadius: '0.5rem',
+          borderTopLeftRadius: '0.5rem',
         }}
       />
       <div className="mx-4 mb-6" style={{ overflow: "hidden" }}>

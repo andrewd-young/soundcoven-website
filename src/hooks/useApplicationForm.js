@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import supabase from '../utils/supabase';
+import { compressImage } from '../utils/imageUtils';
 
 const useApplicationForm = (applicationType, initialFormData) => {
   const { user } = useAuth();
@@ -28,26 +29,52 @@ const useApplicationForm = (applicationType, initialFormData) => {
     setFormData(prev => ({ ...prev, photo: e.target.files[0] }));
   };
 
+  const handleImageUpload = async (file) => {
+    try {
+      // Compress image before upload
+      const compressedImage = await compressImage(file);
+      
+      const { data, error } = await supabase.storage
+        .from('your-bucket-name')
+        .upload(`path/to/images/${Date.now()}-${file.name}`, compressedImage, {
+          cacheControl: '3600',
+          upsert: false
+        });
+        
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  };
+
   const uploadPhoto = async (file, applicationId) => {
     if (!file) return null;
     
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${applicationId || 'temp'}.${fileExt}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from('application-photos')
-      .upload(fileName, file, { upsert: true });
-    
-    if (uploadError) {
-      throw uploadError;
+    try {
+      const compressedImage = await compressImage(file);
+      const fileExt = 'jpg';
+      const fileName = `${user.id}/${applicationId || 'temp'}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('application-photos')
+        .upload(fileName, compressedImage, { 
+          upsert: true,
+          cacheControl: '31536000' // 1 year cache
+        });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('application-photos')
+        .getPublicUrl(fileName);
+      
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      throw error;
     }
-    
-    // Get the public URL for the uploaded file
-    const { data: { publicUrl } } = supabase.storage
-      .from('application-photos')
-      .getPublicUrl(fileName);
-    
-    return publicUrl;
   };
 
   const handleSubmit = async (e, transformData) => {

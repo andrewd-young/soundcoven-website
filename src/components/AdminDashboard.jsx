@@ -6,6 +6,7 @@ import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Button from "./common/Button";
 import { Tab } from '@headlessui/react';
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
+import { OptimizedImage } from "./common/OptimizedImage";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -60,6 +61,15 @@ const AdminDashboard = () => {
       default:
         return 'bg-gray-500/20 text-gray-300';
     }
+  };
+
+  const getOptimizedImageUrl = (url) => {
+    if (!url) return url;
+    // Only add transformation parameters if it's a Supabase storage URL
+    if (url.includes('storage.googleapis.com') || url.includes('supabase')) {
+      return `${url}?width=1200&quality=75&format=jpeg`;
+    }
+    return url;
   };
 
   if (loading)
