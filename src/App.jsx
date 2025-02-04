@@ -25,6 +25,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import AdminDashboard from "./components/AdminDashboard";
 import ApplicationView from "./components/ApplicationView";
+import InstrumentalistsPage from "./InstrumentalistsPage";
+import InstrumentalistBio from "./InstrumentalistBio";
+import UserApplicationView from "./components/UserApplicationView";
 
 const ScrollToHashElement = () => {
   const { hash } = useLocation();
@@ -126,6 +129,23 @@ const App = () => {
                   }
                 />
                 <Route path="/admin/applications/:applicationId" element={<ApplicationView />} />
+                <Route
+                  path="/instrumentalists"
+                  element={
+                    <ProtectedRoute>
+                      <InstrumentalistsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/instrumentalists/:instrumentalistId"
+                  element={
+                    <ProtectedRoute>
+                      <InstrumentalistBio />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/applications/:applicationId/review" element={<UserApplicationView />} />
               </Routes>
             </main>
             <Footer />

@@ -53,7 +53,7 @@ const ArtistWideCard = ({ artist }) => {
           />
         </div>
         <div className={`flex-1 p-6 flex flex-col justify-center ${isLightColor(bgColor) ? 'text-gray-800' : 'text-white'}`}>
-          <h2 className="text-7xl font-bold mb-8">{name}</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-8">{name}</h2>
           
           <div className="flex flex-wrap gap-4 py-2">
             {genre && <Tag icon={faCompactDisc} text={genre} darkMode={!isLightColor(bgColor)} />}

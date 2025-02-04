@@ -22,6 +22,10 @@ const ArtistsPage = () => {
         type: "select",
         options: [...new Set(artists.map((artist) => artist.location))],
       },
+      school: {
+        type: "select",
+        options: [...new Set(artists.map((artist) => artist.school).filter(Boolean))],
+      },
       name: { type: "search" },
     }),
     [artists]

@@ -63,9 +63,17 @@ const useApplicationForm = (applicationType, initialFormData) => {
       const applicationData = {
         ...transformData(formData, photoUrl),
         status: 'pending',
+        status_history: [
+          {
+            status: 'pending',
+            timestamp: new Date().toISOString(),
+            user_id: user.id
+          }
+        ],
         updated_at: new Date().toISOString(),
         application_type: applicationType,
-        user_id: user.id
+        user_id: user.id,
+        current_revision: 1
       };
 
       let response;

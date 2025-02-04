@@ -109,7 +109,6 @@ const ApplicationView = () => {
     try {
       setLoading(true);
 
-      // Update application status
       const { error: applicationError } = await supabase
         .from("applications")
         .update({
@@ -117,11 +116,18 @@ const ApplicationView = () => {
           reviewed_at: new Date().toISOString(),
           reviewed_by: user.id,
           admin_approved_profile: profileData,
+          status_history: [...(application.status_history || []), {
+            status: "pending_user_approval",
+            timestamp: new Date().toISOString(),
+            user_id: user.id
+          }],
+          current_revision: (application.current_revision || 1) + 1,
+          last_modified_at: new Date().toISOString(),
+          last_modified_by: user.id
         })
         .eq("id", application.id);
 
       if (applicationError) throw applicationError;
-
       navigate("/admin");
     } catch (err) {
       setError(err.message);
@@ -139,6 +145,11 @@ const ApplicationView = () => {
           status: "rejected",
           reviewed_at: new Date().toISOString(),
           reviewed_by: user.id,
+          status_history: [...(application.status_history || []), {
+            status: "rejected",
+            timestamp: new Date().toISOString(),
+            user_id: user.id
+          }]
         })
         .eq("id", application.id);
 

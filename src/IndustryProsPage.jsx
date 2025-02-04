@@ -22,6 +22,12 @@ const IndustryProsPage = () => {
           ...new Set(industryPros.map((pro) => pro.location).filter(Boolean)),
         ],
       },
+      school: {
+        type: "select",
+        options: [
+          ...new Set(industryPros.map((pro) => pro.school).filter(Boolean)),
+        ],
+      },
       name: { type: "search" },
     }),
     [industryPros]
@@ -62,7 +68,7 @@ const IndustryProsPage = () => {
   return (
     <section
       id="industry-pros"
-      className="text-white pt-0 py-8 px-6 md:px-12 lg:px-24"
+      className="bg-covenPurple text-white pt-0 py-8 md:px-12 lg:px-24"
     >
       <Filter filters={filterConfig} onFilterChange={setFilters} />
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">

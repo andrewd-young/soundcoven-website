@@ -1,53 +1,66 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import supabase from "../utils/supabase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Button from "./common/Button";
+import { Tab } from '@headlessui/react';
+import { useAdminDashboard } from "../hooks/useAdminDashboard";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const {
+    filteredApplications,
+    loading,
+    error,
+    selectedStatus,
+    setSelectedStatus,
+    handleFinalizeProfile
+  } = useAdminDashboard(user);
 
-  useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        // Simplified profile query
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
+  const statusCategories = [
+    { key: 'pending', label: 'New' },
+    { key: 'pending_user_approval', label: 'Reviewed' },
+    { key: 'approved', label: 'User Approved' },
+    { key: 'changes_requested', label: 'Changes Requested' },
+    { key: 'finalized', label: 'Finalized' }
+  ];
 
-        if (profileError) throw profileError;
+  // Helper function to get status display text
+  const getStatusDisplay = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'Pending Review';
+      case 'pending_user_approval':
+        return 'Waiting for User Approval';
+      case 'changes_requested':
+        return 'Changes Requested';
+      case 'approved':
+        return 'Approved';
+      case 'rejected':
+        return 'Rejected';
+      default:
+        return status;
+    }
+  };
 
-        if (profile?.role !== "admin") {
-          navigate("/");
-          return;
-        }
-
-        // Simplified applications query
-        const { data, error } = await supabase
-          .from("applications")
-          .select("*")
-          .in("status", ["pending", "pending_user_approval"])
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        setApplications(data || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchApplications();
-  }, [user, navigate]);
+  // Helper function to get status color classes
+  const getStatusColorClasses = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-500/20 text-yellow-300';
+      case 'pending_user_approval':
+        return 'bg-blue-500/20 text-blue-300';
+      case 'changes_requested':
+        return 'bg-orange-500/20 text-orange-300';
+      case 'approved':
+        return 'bg-green-500/20 text-green-300';
+      case 'rejected':
+        return 'bg-red-500/20 text-red-300';
+      default:
+        return 'bg-gray-500/20 text-gray-300';
+    }
+  };
 
   if (loading)
     return <div className="text-white text-center mt-8">Loading...</div>;
@@ -58,20 +71,39 @@ const AdminDashboard = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-white mb-8">Admin Dashboard</h1>
 
-      {applications.length === 0 ? (
-        <p className="text-white text-center">No pending applications</p>
+      <Tab.Group onChange={(index) => setSelectedStatus(statusCategories[index].key)}>
+        <Tab.List className="flex space-x-1 rounded-xl bg-covenPurple p-1 mb-6">
+          {statusCategories.map((category) => (
+            <Tab
+              key={category.key}
+              className={({ selected }) =>
+                `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+                 ${selected 
+                   ? 'bg-white text-covenPurple'
+                   : 'text-white hover:bg-white/[0.12]'
+                 }`
+              }
+            >
+              {category.label} ({filteredApplications.filter(app => app.status === category.key).length})
+            </Tab>
+          ))}
+        </Tab.List>
+      </Tab.Group>
+
+      {filteredApplications.length === 0 ? (
+        <p className="text-white text-center">No applications found</p>
       ) : (
         <div className="grid gap-6">
-          {applications.map((application) => (
+          {filteredApplications.map((application) => (
             <div
               key={application.id}
               className="bg-covenLightPurple rounded-lg p-6 border border-white transition-colors"
             >
-              <Link 
-                to={`/admin/applications/${application.id}`}
-                className="block"
-              >
-                <div className="flex justify-between items-start mb-4">
+              <div className="flex justify-between items-start mb-4">
+                <Link 
+                  to={`/admin/applications/${application.id}`}
+                  className="flex-grow cursor-pointer"
+                >
                   <div>
                     <h2 className="text-2xl text-white font-semibold">
                       {application.name}
@@ -81,21 +113,28 @@ const AdminDashboard = () => {
                         application.application_type.slice(1)}{" "}
                       Application
                     </p>
-                    <p className="text-gray-300">
-                      Status: {application.status === "pending_user_approval" ? "Waiting for user approval" : "Pending review"}
+                    <p className={`inline-block px-3 py-1 rounded-full text-sm ${getStatusColorClasses(application.status)}`}>
+                      {getStatusDisplay(application.status)}
                     </p>
                   </div>
+                </Link>
+                <div className="ml-4">
                   <Button 
                     text={
                       <>
                         View Application <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
                       </>
                     }
-                    className="px-6 py-2 rounded  transition-color"
+                    className="px-6 py-2 rounded transition-color"
                     link={`/admin/applications/${application.id}`}
                   />
                 </div>
+              </div>
 
+              <Link 
+                to={`/admin/applications/${application.id}`}
+                className="block"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
                   <div>
                     <p>
@@ -152,6 +191,15 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </Link>
+
+              {application.status === "approved" && (
+                <Button 
+                  onClick={() => handleFinalizeProfile(application)}
+                  text="Create Artist Page"
+                  className="bg-green-600 hover:bg-green-700 text-white mt-4"
+                  disabled={loading}
+                />
+              )}
             </div>
           ))}
         </div>

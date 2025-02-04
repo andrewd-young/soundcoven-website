@@ -75,18 +75,22 @@ const Navigation = () => {
         </Link>
         <div className="flex flex-col w-full gap-4">
           <div className="flex justify-between items-center w-full">
-            <div className="flex items-center space-x-6">
-              <Link to="/artists" className="hover:text-gray-300">
+            <div className="flex items-center space-x-8">
+              <Link to="/artists" className="hover:text-gray-300 text-xl">
                 Artists
               </Link>
-              <Link to="/industry-pros" className="hover:text-gray-300">
+              <Link to="/industry-pros" className="hover:text-gray-300 text-xl">
                 <span className="hidden sm:inline">Industry Pros</span>
                 <span className="inline sm:hidden">Pros</span>
+              </Link>
+              <Link to="/instrumentalists" className="hover:text-gray-300 text-xl">
+                <span className="hidden sm:inline">Instrumentalists</span>
+                <span className="inline sm:hidden">Musicians</span>
               </Link>
               <a
                 href="/#about"
                 onClick={handleAboutClick}
-                className="hover:text-gray-300"
+                className="hover:text-gray-300 text-xl"
               >
                 About
               </a>
@@ -96,7 +100,7 @@ const Navigation = () => {
                 <div className="relative">
                   <button
                     onClick={toggleDropdown}
-                    className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors flex items-center gap-2"
+                    className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors flex items-center gap-2 text-lg"
                   >
                     <FontAwesomeIcon icon={faUser} />
                     Account
@@ -153,7 +157,7 @@ const Navigation = () => {
                       to="/apply"
                       className="bg-white text-covenPurple px-6 py-2 rounded w-[120px] hover:bg-gray-100 transition-colors"
                     >
-                      Apply Now
+                      Apply
                     </Link>
                   </>
                 )}
