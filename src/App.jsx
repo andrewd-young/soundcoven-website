@@ -29,6 +29,8 @@ import InstrumentalistsPage from "./InstrumentalistsPage";
 import InstrumentalistBio from "./InstrumentalistBio";
 import UserApplicationView from "./components/UserApplicationView";
 import { HelmetProvider } from "react-helmet-async";
+import Terms from "./components/Terms";
+import MetaTags from "./components/MetaTags";
 
 const ScrollToHashElement = () => {
   const { hash } = useLocation();
@@ -60,6 +62,11 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <Router>
           <AuthProvider>
+            <MetaTags 
+              title="Coven"
+              description="Connect with artists, industry professionals, and instrumentalists in the music industry"
+              image={`${window.location.origin}/og-image.jpg`}
+            />
             <SpeedInsights />
             <Analytics />
             <ScrollToHashElement />
@@ -154,6 +161,7 @@ const App = () => {
                     path="/applications/:applicationId/review"
                     element={<UserApplicationView />}
                   />
+                  <Route path="/terms" element={<Terms />} />
                 </Routes>
               </main>
               <Footer />
