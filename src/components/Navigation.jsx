@@ -83,7 +83,10 @@ const Navigation = () => {
                 <span className="hidden sm:inline">Industry Pros</span>
                 <span className="inline sm:hidden">Pros</span>
               </Link>
-              <Link to="/instrumentalists" className="hover:text-gray-300 text-xl">
+              <Link
+                to="/instrumentalists"
+                className="hover:text-gray-300 text-xl"
+              >
                 <span className="hidden sm:inline">Instrumentalists</span>
                 <span className="inline sm:hidden">Musicians</span>
               </Link>
@@ -147,10 +150,10 @@ const Navigation = () => {
             {user && profile?.role !== "admin" && (
               <>
                 {application?.status === "pending" ? (
-                  <span className="text-md">Application Pending</span>
+                  <span className="text-xl">Application Pending</span>
                 ) : (
                   <>
-                    <span className="text-md">
+                    <span className="text-xl">
                       Interested in joining the coven?
                     </span>
                     <Link
