@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { useOptimizedImage } from '../../hooks/useOptimizedImage';
+import React, { useState, useEffect } from "react";
+import { useOptimizedImage } from "../../hooks/useOptimizedImage";
 
 // Create a loading state cache to prevent multiple loading states for the same image
 const loadingCache = new Map();
 
-export const OptimizedImage = ({ 
-  src, 
-  alt, 
-  width, 
-  height, 
+export const OptimizedImage = ({
+  src,
+  alt,
+  width,
+  height,
   className,
-  objectFit = 'cover',
+  objectFit = "cover",
   quality,
-  imageWidth
+  imageWidth,
 }) => {
   const optimizedSrc = useOptimizedImage(src, {
     width: imageWidth || width,
-    quality: quality || 75
+    quality: quality || 75,
   });
-  
+
   const [isLoading, setIsLoading] = useState(() => {
     // Check if we already have this image loaded
     return !loadingCache.has(optimizedSrc);
@@ -35,12 +35,12 @@ export const OptimizedImage = ({
     // Preload the image
     const img = new Image();
     img.src = optimizedSrc;
-    
+
     img.onload = () => {
       setIsLoading(false);
       loadingCache.set(optimizedSrc, true);
     };
-    
+
     img.onerror = () => {
       setError(true);
       setIsLoading(false);
@@ -49,7 +49,7 @@ export const OptimizedImage = ({
 
   if (error) {
     return (
-      <div 
+      <div
         className={`bg-gray-200 flex items-center justify-center ${className}`}
         style={{ width, height }}
       >
@@ -66,21 +66,20 @@ export const OptimizedImage = ({
         width="100%"
         height="100%"
         loading="lazy"
-        style={{ 
+        style={{
           objectFit,
-          width: '100%',
-          height: '100%'
+          width: "100%",
+          height: "100%",
+          display: "block",
         }}
         className={`
-          transition-opacity duration-300
-          ${isLoading ? 'opacity-0' : 'opacity-100'}
+          transition-opacity duration-300 w-full h-full
+          ${isLoading ? "opacity-0" : "opacity-100"}
         `}
       />
       {isLoading && (
-        <div 
-          className="absolute inset-0 bg-gray-200 animate-pulse"
-        />
+        <div className="absolute inset-0 bg-gray-200 animate-pulse" />
       )}
     </div>
   );
-}; 
+};

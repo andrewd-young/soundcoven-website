@@ -63,7 +63,7 @@ const App = () => {
         <Router>
           <AuthProvider>
             <MetaTags 
-              title="Coven"
+              title="SoundCoven"
               description="Connect with artists, industry professionals, and instrumentalists in the music industry"
               image={`${window.location.origin}/og-image.jpg`}
             />
