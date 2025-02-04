@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 const Footer = () => {
   return (
     <footer className="bg-covenPurple text-white py-8 mt-auto px-6 md:px-12 lg:px-24">
-      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center">
+      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-4">
         <div className="text-sm mb-4 md:mb-0">© 2024 SoundCoven</div>
         <div className="flex items-center space-x-6">
           <Link to="/terms" className="text-sm hover:text-red-500">

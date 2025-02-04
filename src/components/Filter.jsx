@@ -1,58 +1,44 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-const capitalizeFirstLetter = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
 const Filter = ({ filters, onFilterChange }) => {
-  const [activeFilters, setActiveFilters] = useState({});
-
-  const handleFilterChange = (filterName, value) => {
-    const newFilters = { ...activeFilters, [filterName]: value };
-    setActiveFilters(newFilters);
-    onFilterChange(newFilters);
-  };
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="filter-container mb-6">
-      <div className="flex flex-wrap gap-4">
-        {Object.entries(filters).map(([filterName, filterOptions]) => (
-          <div key={filterName} className="filter-group mb-4">
-            <h3 className="text-lg font-semibold mb-2">{capitalizeFirstLetter(filterName)}</h3>
-            {filterOptions.type === 'select' && (
+    <div className="mb-8">
+      <button 
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="md:hidden w-full bg-white bg-opacity-10 text-white py-2 px-4 rounded mb-2 text-left flex justify-between items-center"
+      >
+        Filters
+        <span>{isExpanded ? '▼' : '▶'}</span>
+      </button>
+      <div className={`${isExpanded ? 'flex' : 'hidden'} md:flex flex-wrap gap-4`}>
+        {Object.entries(filters).map(([key, config]) => (
+          <div key={key} className="w-full md:w-auto">
+            {config.type === "select" ? (
               <select
-                className="p-2 bg-covenLightPurple text-white rounded"
-                onChange={(e) => handleFilterChange(filterName, e.target.value)}
-                value={activeFilters[filterName] || ''}
+                className="w-full md:w-48 p-2 rounded bg-white bg-opacity-10 text-white"
+                onChange={(e) => onFilterChange((prev) => ({ ...prev, [key]: e.target.value }))}
               >
-                <option value="">All</option>
-                {filterOptions.options.map((option) => (
+                <option value="">All {key}s</option>
+                {config.options.map((option) => (
                   <option key={option} value={option}>
                     {option}
                   </option>
                 ))}
               </select>
-            )}
-            {filterOptions.type === 'search' && (
+            ) : (
               <input
                 type="text"
-                className="p-2 bg-covenLightPurple text-white rounded"
-                placeholder={`Search ${capitalizeFirstLetter(filterName)}...`}
-                onChange={(e) => handleFilterChange(filterName, e.target.value)}
-                value={activeFilters[filterName] || ''}
+                placeholder={`Search by ${key}...`}
+                className="w-full md:w-48 p-2 rounded bg-white bg-opacity-10 text-white"
+                onChange={(e) =>
+                  onFilterChange((prev) => ({ ...prev, [key]: e.target.value }))
+                }
               />
             )}
           </div>
-        ))}
-      </div>
-      <div className="flex flex-wrap gap-2 mt-4">
-        {Object.entries(activeFilters).map(([filterName, filterValue]) => (
-          filterValue && (
-            <div key={filterName} className="tag">
-              {capitalizeFirstLetter(filterName)}: {filterValue}
-            </div>
-          )
         ))}
       </div>
     </div>

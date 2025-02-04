@@ -63,29 +63,28 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-covenPurple text-white py-4 px-6 md:px-12 lg:px-24 text-lg space-x-6">
+    <nav className="bg-covenPurple text-white py-4 px-6 md:px-12 lg:px-24 text-lg">
       <div className="flex flex-col items-center">
         <Link to="/">
           <img
             src={Logo}
             alt="Sound Coven Logo"
-            className="mb-2"
-            style={{ width: "600px" }}
+            className="mb-2 w-full max-w-[300px] sm:max-w-[400px] md:max-w-[600px]"
           />
         </Link>
         <div className="flex flex-col w-full gap-4">
-          <div className="flex justify-between items-center w-full">
-            <div className="flex items-center space-x-8">
-              <Link to="/artists" className="hover:text-gray-300 text-xl">
+          <div className="flex flex-wrap justify-between items-center w-full gap-y-2">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-8">
+              <Link to="/artists" className="hover:text-gray-300 text-base sm:text-xl">
                 Artists
               </Link>
-              <Link to="/industry-pros" className="hover:text-gray-300 text-xl">
+              <Link to="/industry-pros" className="hover:text-gray-300 text-base sm:text-xl">
                 <span className="hidden sm:inline">Industry Pros</span>
                 <span className="inline sm:hidden">Pros</span>
               </Link>
               <Link
                 to="/instrumentalists"
-                className="hover:text-gray-300 text-xl"
+                className="hover:text-gray-300 text-base sm:text-xl"
               >
                 <span className="hidden sm:inline">Instrumentalists</span>
                 <span className="inline sm:hidden">Musicians</span>
@@ -93,7 +92,7 @@ const Navigation = () => {
               <a
                 href="/#about"
                 onClick={handleAboutClick}
-                className="hover:text-gray-300 text-xl"
+                className="hidden sm:block hover:text-gray-300 text-base sm:text-xl"
               >
                 About
               </a>
@@ -103,7 +102,7 @@ const Navigation = () => {
                 <div className="relative">
                   <button
                     onClick={toggleDropdown}
-                    className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors flex items-center gap-2 text-lg"
+                    className="bg-white text-covenPurple px-4 sm:px-6 py-2 rounded hover:bg-gray-100 transition-colors flex items-center gap-2 text-base sm:text-lg"
                   >
                     <FontAwesomeIcon icon={faUser} />
                     Account
@@ -138,7 +137,7 @@ const Navigation = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors flex items-center gap-2 w-[120px] justify-center"
+                  className="bg-white text-covenPurple px-4 sm:px-6 py-2 rounded hover:bg-gray-100 transition-colors flex items-center gap-2 w-[100px] sm:w-[120px] justify-center text-base sm:text-lg"
                 >
                   <FontAwesomeIcon icon={faUser} />
                   Login
@@ -146,19 +145,19 @@ const Navigation = () => {
               )}
             </div>
           </div>
-          <div className="flex items-center justify-start space-x-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             {user && profile?.role !== "admin" && (
               <>
                 {application?.status === "pending" ? (
-                  <span className="text-xl">Application Pending</span>
-                ) : (
+                  <span className="text-base sm:text-xl">Application Pending</span>
+                ) : application?.status !== "approved" && (
                   <>
-                    <span className="text-xl">
+                    <span className="hidden sm:inline text-base sm:text-xl">
                       Interested in joining the coven?
                     </span>
                     <Link
                       to="/apply"
-                      className="bg-white text-covenPurple px-6 py-2 rounded w-[120px] text-center hover:bg-gray-100 transition-colors"
+                      className="bg-white text-covenPurple px-4 sm:px-6 py-2 rounded w-full sm:w-[120px] text-center hover:bg-gray-100 transition-colors text-base sm:text-lg"
                     >
                       Apply
                     </Link>
@@ -168,12 +167,12 @@ const Navigation = () => {
             )}
             {!user && (
               <>
-                <span className="text-md">
+                <span className="hidden sm:inline text-sm sm:text-md">
                   Interested in joining the coven?
                 </span>
                 <Link
                   to="/login"
-                  className="bg-white text-covenPurple px-6 py-2 rounded hover:bg-gray-100 transition-colors w-[120px] text-center flex-shrink-0"
+                  className="bg-white text-covenPurple px-4 sm:px-6 py-2 rounded hover:bg-gray-100 transition-colors w-full sm:w-[120px] text-center flex-shrink-0 text-base sm:text-lg"
                 >
                   Join
                 </Link>
