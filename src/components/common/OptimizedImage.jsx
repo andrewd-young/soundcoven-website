@@ -53,21 +53,26 @@ export const OptimizedImage = ({
 
   useEffect(() => {
     const fetchImage = async () => {
-      if (!src) {
-        setError(true);
+      // Reset error state at start of each fetch
+      setError(false);
+      
+      // Don't treat empty src as error - just skip validation
+      if (!src || src === fallbackSrc) {
         return;
       }
 
       try {
+        // Only validate actual URLs
+        if (!src.startsWith('http')) {
+          return;
+        }
+
         // Try to fetch the image
         const response = await fetch(src);
         
         if (!response.ok) {
-          // If unauthorized or not found, use fallback
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        setError(false);
       } catch (error) {
         console.error('Error loading image:', error);
         setError(true);
@@ -75,10 +80,11 @@ export const OptimizedImage = ({
     };
 
     fetchImage();
-  }, [src]);
+  }, [src, fallbackSrc]);
 
   const handleError = () => {
-    if (!error) {
+    // Only set error if we have a non-empty src that isn't the fallback
+    if (!error && src && src !== fallbackSrc) {
       setError(true);
     }
   };

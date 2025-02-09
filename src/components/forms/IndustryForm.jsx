@@ -9,9 +9,14 @@ const IndustryForm = () => {
     name: "",
     email: "",
     school: "",
+    location: "",
+    company: "",
+    phone: "",
+    bio: "",
     photo: null,
     favoriteArtists: "",
     note: "",
+    socialLinks: "",
   };
 
   const { loading, formData, handleChange, handleFileChange, handleSubmit } =
@@ -23,11 +28,42 @@ const IndustryForm = () => {
     name: formData.name,
     email: formData.email,
     school: formData.school,
+    location: formData.location,
+    company: formData.company,
+    phone: formData.phone,
+    bio: formData.bio,
     industry_role: formData.role,
     photo_url: photoUrl,
     favorite_artists: formData.favoriteArtists,
     note: formData.note,
+    social_links: formData.socialLinks,
   });
+
+  const validatePhoneNumber = (phone) => {
+    const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    return phoneRegex.test(phone);
+  };
+
+  const formatPhoneNumber = (value) => {
+    const phoneNumber = value.replace(/\D/g, '');
+    
+    if (phoneNumber.length >= 10) {
+      return `(${phoneNumber.slice(0,3)}) ${phoneNumber.slice(3,6)}-${phoneNumber.slice(6,10)}`;
+    }
+    return value;
+  };
+
+  const handlePhoneChange = (e) => {
+    const formattedNumber = formatPhoneNumber(e.target.value);
+    handleChange({
+      ...e,
+      target: {
+        ...e.target,
+        value: formattedNumber,
+        name: 'phone'
+      }
+    });
+  };
 
   const onSubmit = (e) => handleSubmit(e, transformData);
 
@@ -105,6 +141,64 @@ const IndustryForm = () => {
       </div>
 
       <div className="mb-4">
+        <label className="block mb-2">Location</label>
+        <input
+          name="location"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="City, State"
+          required
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block mb-2">Company</label>
+        <input
+          name="company"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block mb-2">Phone</label>
+        <input
+          name="phone"
+          type="tel"
+          className={`w-full px-3 py-2 bg-[#432347] border border-white rounded ${
+            formData.phone && !validatePhoneNumber(formData.phone) 
+              ? 'border-red-500' 
+              : 'border-white'
+          }`}
+          onChange={handlePhoneChange}
+          value={formData.phone}
+          placeholder="(123) 456-7890"
+          pattern="\(\d{3}\)\s\d{3}-\d{4}"
+          required
+        />
+        {formData.phone && !validatePhoneNumber(formData.phone) && (
+          <p className="text-red-500 text-sm mt-1">
+            Please enter a valid phone number: (XXX) XXX-XXXX
+          </p>
+        )}
+      </div>
+
+      <div className="mb-4">
+        <label className="block mb-2">Bio</label>
+        <textarea
+          name="bio"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Tell us about your experience and what you're looking for"
+          rows="4"
+          required
+        ></textarea>
+      </div>
+
+      <div className="mb-4">
         <label className="block mb-2">Favorite Artists</label>
         <input
           name="favoriteArtists"
@@ -112,6 +206,17 @@ const IndustryForm = () => {
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleChange}
           placeholder="Separate artists with commas"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block mb-2">Social Media Links</label>
+        <input
+          name="socialLinks"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Instagram, Twitter, TikTok, etc. (separate with commas)"
         />
       </div>
 

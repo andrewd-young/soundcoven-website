@@ -29,46 +29,29 @@ const useApplicationForm = (applicationType, initialFormData) => {
     setFormData(prev => ({ ...prev, photo: e.target.files[0] }));
   };
 
-  const handleImageUpload = async (file) => {
-    try {
-      // Compress image before upload
-      const compressedImage = await compressImage(file);
-      
-      const { data, error } = await supabase.storage
-        .from('your-bucket-name')
-        .upload(`path/to/images/${Date.now()}-${file.name}`, compressedImage, {
-          cacheControl: '3600',
-          upsert: false
-        });
-        
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      throw error;
-    }
-  };
-
   const uploadPhoto = async (file, applicationId) => {
     if (!file) return null;
     
     try {
       const compressedImage = await compressImage(file);
-      const fileExt = 'jpg';
-      const fileName = `${user.id}/${applicationId || 'temp'}.${fileExt}`;
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      const fileName = `${applicationId || Date.now()}.${fileExt}`;
+      const filePath = `applications/${applicationType}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('application-photos')
-        .upload(fileName, compressedImage, { 
+        .upload(filePath, compressedImage, { 
           upsert: true,
+          contentType: file.type,
           cacheControl: '31536000' // 1 year cache
         });
       
       if (uploadError) throw uploadError;
       
+      // Get the public URL using the correct bucket name
       const { data: { publicUrl } } = supabase.storage
         .from('application-photos')
-        .getPublicUrl(fileName);
+        .getPublicUrl(filePath);
       
       return publicUrl;
     } catch (error) {
@@ -82,11 +65,19 @@ const useApplicationForm = (applicationType, initialFormData) => {
     setLoading(true);
 
     try {
+      // First upload the photo if one exists
       let photoUrl = null;
       if (formData.photo) {
-        photoUrl = await uploadPhoto(formData.photo, applicationId);
+        // Generate a temporary ID for the photo upload
+        const tempId = `temp_${Date.now()}`;
+        try {
+          photoUrl = await uploadPhoto(formData.photo, tempId);
+        } catch (error) {
+          throw new Error('Photo upload failed. Please try again.');
+        }
       }
 
+      // Only proceed with application creation if photo upload succeeded (if photo was provided)
       const applicationData = {
         ...transformData(formData, photoUrl),
         status: 'pending',
@@ -103,29 +94,29 @@ const useApplicationForm = (applicationType, initialFormData) => {
         current_revision: 1
       };
 
-      let response;
-      if (applicationId) {
-        response = await supabase
-          .from('applications')
-          .update(applicationData)
-          .eq('id', applicationId)
-          .select()
-          .single();
-      } else {
-        response = await supabase
-          .from('applications')
-          .insert([applicationData])
-          .select()
-          .single();
+      const { data: newApplication, error: insertError } = await supabase
+        .from('applications')
+        .insert([applicationData])
+        .select()
+        .single();
+
+      if (insertError) {
+        // If application creation fails, we should clean up the uploaded photo
+        if (photoUrl) {
+          const filePath = new URL(photoUrl).pathname.split('/').slice(-3).join('/');
+          await supabase.storage
+            .from('application-photos')
+            .remove([filePath]);
+        }
+        throw insertError;
       }
 
-      if (response.error) throw response.error;
-
+      // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
           has_applied: true,
-          application_id: response.data.id,
+          application_id: newApplication.id,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
@@ -135,7 +126,7 @@ const useApplicationForm = (applicationType, initialFormData) => {
       navigate('/account');
     } catch (error) {
       console.error('Error submitting application:', error);
-      alert('Error submitting application. Please try again.');
+      alert(error.message || 'Error submitting application. Please try again.');
     } finally {
       setLoading(false);
     }

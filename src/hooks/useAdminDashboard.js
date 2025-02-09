@@ -42,130 +42,99 @@ export const useAdminDashboard = (user) => {
     try {
       setLoading(true);
       
-      // Extract only the fields that match our database schema
-      const { type, upcoming_show, ...rawProfileData } = application.admin_approved_profile;
-      
-      // Define allowed fields for each profile type
-      const profileData = {};
-      
-      if (application.application_type === "artist") {
-        const { name, email, bio, artist_type, genres, streaming_links } = rawProfileData;
-        
-        // Check if artist already exists
-        const { data: existingArtist, error: checkError } = await supabase
-          .from("artists")
-          .select("*")
-          .eq("user_id", application.user_id)
-          .single();
-
-        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" error
-          throw checkError;
-        }
-
-        if (existingArtist) {
-          console.log('Artist already exists, skipping creation');
-        } else {
-          // Ensure artist_type matches the database constraint values
-          const validArtistTypes = ['Band', 'Solo', 'DJ', 'Producer'];
-          
-          if (!validArtistTypes.includes(artist_type)) {
-            throw new Error(`Invalid artist type. Must be one of: ${validArtistTypes.join(', ')}`);
-          }
-          
-          Object.assign(profileData, {
-            name,
-            email,
-            bio,
-            artist_type,
-            genres,
-            streaming_links
-          });
-
-          // Insert only if artist doesn't exist
-          const { error: insertError } = await supabase
-            .from("artists")
-            .insert([
-              {
-                user_id: application.user_id,
-                ...profileData,
-              },
-            ]);
-
-          if (insertError) throw insertError;
-        }
-      } else if (application.application_type === "industry") {
-        // Check if industry pro already exists
-        const { data: existingPro, error: checkError } = await supabase
-          .from("industry_pros")
-          .select("*")
-          .eq("user_id", application.user_id)
-          .single();
-
-        if (checkError && checkError.code !== 'PGRST116') {
-          throw checkError;
-        }
-
-        if (existingPro) {
-          console.log('Industry pro already exists, skipping creation');
-        } else {
-          const { name, email, bio, industry_role, company, years_experience } = rawProfileData;
-          Object.assign(profileData, {
-            name,
-            email,
-            bio,
-            industry_role,
-            company,
-            years_experience
-          });
-
-          const { error: insertError } = await supabase
-            .from("industry_pros")
-            .insert([
-              {
-                user_id: application.user_id,
-                ...profileData,
-              },
-            ]);
-
-          if (insertError) throw insertError;
-        }
-      } else {
-        // Check if instrumentalist already exists
-        const { data: existingInstrumentalist, error: checkError } = await supabase
-          .from("instrumentalists")
-          .select("*")
-          .eq("user_id", application.user_id)
-          .single();
-
-        if (checkError && checkError.code !== 'PGRST116') {
-          throw checkError;
-        }
-
-        if (existingInstrumentalist) {
-          console.log('Instrumentalist already exists, skipping creation');
-        } else {
-          const { name, email, bio, instrument, favorite_genres, equipment } = rawProfileData;
-          Object.assign(profileData, {
-            name,
-            email,
-            bio,
-            instrument,
-            favorite_genres,
-            equipment
-          });
-
-          const { error: insertError } = await supabase
-            .from("instrumentalists")
-            .insert([
-              {
-                user_id: application.user_id,
-                ...profileData,
-              },
-            ]);
-
-          if (insertError) throw insertError;
-        }
+      if (!application?.admin_approved_profile) {
+        throw new Error('No approved profile data found');
       }
+
+      // Check if profile already exists in any of the profile tables
+      const tableName = application.application_type === "artist"
+        ? "artists"
+        : application.application_type === "industry"
+        ? "industry_pros"
+        : "instrumentalists";
+
+      const { data: existingProfile, error: checkError } = await supabase
+        .from(tableName)
+        .select("*")
+        .eq("user_id", application.user_id)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" error
+        throw checkError;
+      }
+
+      if (existingProfile) {
+        throw new Error(`A ${application.application_type} profile already exists for this user`);
+      }
+
+      // Transform the admin_approved_profile data to match the table schema
+      const transformedProfile = {
+        user_id: application.user_id,
+        name: application.admin_approved_profile.name || '',
+        email: application.admin_approved_profile.email || '',
+        bio: application.admin_approved_profile.bio || '',
+        location: application.admin_approved_profile.location || '',
+        photo_url: application.admin_approved_profile.photo_url || null,
+        profile_image_url: application.admin_approved_profile.photo_url || null,
+        years_experience: application.admin_approved_profile.years_experience || null,
+        social_links: Array.isArray(application.admin_approved_profile.social_links) 
+          ? application.admin_approved_profile.social_links 
+          : [],
+      };
+
+      // Add type-specific fields
+      if (application.application_type === "artist") {
+        Object.assign(transformedProfile, {
+          artist_type: application.admin_approved_profile.type || '',
+          genres: Array.isArray(application.admin_approved_profile.genres) 
+            ? application.admin_approved_profile.genres 
+            : [],
+          streaming_links: Array.isArray(application.admin_approved_profile.streaming_links)
+            ? application.admin_approved_profile.streaming_links
+            : [],
+          influences: Array.isArray(application.admin_approved_profile.influences)
+            ? application.admin_approved_profile.influences
+            : [],
+          current_needs: Array.isArray(application.admin_approved_profile.current_needs)
+            ? application.admin_approved_profile.current_needs
+            : [],
+          upcoming_shows: Array.isArray(application.admin_approved_profile.upcoming_shows)
+            ? application.admin_approved_profile.upcoming_shows
+            : [],
+          instagram_link: application.admin_approved_profile.instagram_link || ''
+        });
+      } else if (application.application_type === "industry") {
+        Object.assign(transformedProfile, {
+          industry_role: application.admin_approved_profile.industry_role || '',
+          company: application.admin_approved_profile.company || '',
+          favorite_artists: Array.isArray(application.admin_approved_profile.favorite_artists)
+            ? application.admin_approved_profile.favorite_artists
+            : typeof application.admin_approved_profile.favorite_artists === 'string'
+              ? application.admin_approved_profile.favorite_artists.split(',').map(a => a.trim())
+              : []
+        });
+      } else if (application.application_type === "instrumentalist") {
+        Object.assign(transformedProfile, {
+          instrument: application.admin_approved_profile.instrument || '',
+          favorite_genres: Array.isArray(application.admin_approved_profile.favorite_genres)
+            ? application.admin_approved_profile.favorite_genres
+            : typeof application.admin_approved_profile.favorite_genres === 'string'
+              ? application.admin_approved_profile.favorite_genres.split(',').map(g => g.trim())
+              : [],
+          equipment: Array.isArray(application.admin_approved_profile.equipment)
+            ? application.admin_approved_profile.equipment
+            : typeof application.admin_approved_profile.equipment === 'string'
+              ? application.admin_approved_profile.equipment.split(',').map(e => e.trim())
+              : []
+        });
+      }
+      
+      // Insert into appropriate table
+      const { error: insertError } = await supabase
+        .from(tableName)
+        .insert([transformedProfile]);
+
+      if (insertError) throw insertError;
 
       // Update profiles table
       const { error: profileError } = await supabase
@@ -198,7 +167,8 @@ export const useAdminDashboard = (user) => {
       fetchApplications();
     } catch (error) {
       console.error('Error finalizing profile:', error);
-      alert('Error finalizing profile. Please try again.');
+      setError(error.message);
+      throw error; // Re-throw to prevent further execution
     } finally {
       setLoading(false);
     }

@@ -8,9 +8,13 @@ const InstrumentalistForm = () => {
     email: "",
     instrument: "",
     school: "",
+    location: "",
+    bio: "",
     favoriteGenres: "",
+    favoriteArtists: "",
     note: "",
     photo: null,
+    socialLinks: "",
   };
 
   const { loading, formData, handleChange, handleSubmit, handleFileChange } =
@@ -22,10 +26,14 @@ const InstrumentalistForm = () => {
     name: formData.name,
     email: formData.email,
     school: formData.school,
+    location: formData.location,
+    bio: formData.bio,
     instrument: formData.instrument,
     favorite_genres: formData.favoriteGenres,
-    photo_url: photoUrl,
+    favorite_artists: formData.favoriteArtists,
+    profile_image_url: photoUrl,
     note: formData.note,
+    social_links: formData.socialLinks,
   });
 
   const onSubmit = (e) => handleSubmit(e, transformData);
@@ -101,6 +109,39 @@ const InstrumentalistForm = () => {
         />
       </div>
       <div className="mb-4">
+        <label className="block mb-2">Location</label>
+        <input
+          name="location"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="City, State"
+          required
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Bio</label>
+        <textarea
+          name="bio"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Tell us about your musical background and experience"
+          rows="4"
+          required
+        ></textarea>
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Favorite Artists</label>
+        <input
+          name="favoriteArtists"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Separate artists with commas"
+          required
+        />
+      </div>
+      <div className="mb-4">
         <label className="block mb-2">Favorite genres to play</label>
         <input
           name="favoriteGenres"
@@ -108,6 +149,16 @@ const InstrumentalistForm = () => {
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleChange}
           required
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Social Media Links</label>
+        <input
+          name="socialLinks"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Instagram, Twitter, TikTok, etc. (separate with commas)"
         />
       </div>
       <div className="mb-4">

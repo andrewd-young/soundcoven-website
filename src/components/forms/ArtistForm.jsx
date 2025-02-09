@@ -11,8 +11,14 @@ const ArtistForm = () => {
     email: "",
     artistType: "",
     school: "",
+    location: "",
+    bio: "",
+    age: "",
+    yearsActive: "",
+    phone: "",
     genres: "",
     links: "",
+    socialLinks: "",
     photo: null,
     needs: "",
     upcomingShow: "",
@@ -30,12 +36,17 @@ const ArtistForm = () => {
     name: formData.name,
     email: formData.email,
     school: formData.school,
-    artist_type: formData.artistType,
-    genres: formData.genres,
-    streaming_links: formData.links,
+    location: formData.location,
+    bio: formData.bio,
+    age: parseInt(formData.age),
+    years_active: parseInt(formData.yearsActive),
+    contact_phone: formData.phone,
+    genres: formData.genres.split(',').map(g => g.trim()),
+    streaming_links: formData.links.split(',').map(l => l.trim()),
+    social_links: formData.socialLinks,
     photo_url: photoUrl,
-    current_needs: formData.needs,
-    upcoming_show: formData.upcomingShow,
+    current_needs: formData.needs.split(',').map(n => n.trim()),
+    upcoming_shows: formData.upcomingShow.split(',').map(s => s.trim()),
     influences: formData.influences,
     note: formData.note,
   });
@@ -112,6 +123,59 @@ const ArtistForm = () => {
         />
       </div>
       <div className="mb-4">
+        <label className="block mb-2">Location</label>
+        <input
+          name="location"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="City, State"
+          required
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Bio</label>
+        <textarea
+          name="bio"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Tell us about yourself and your music"
+          rows="4"
+          required
+        ></textarea>
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Age</label>
+        <input
+          name="age"
+          type="number"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Years Active</label>
+        <input
+          name="yearsActive"
+          type="number"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          required
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Phone</label>
+        <input
+          name="phone"
+          type="tel"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="(123) 456-7890"
+          required
+        />
+      </div>
+      <div className="mb-4">
         <label className="block mb-2">Genre(s)</label>
         <input
           name="genres"
@@ -163,6 +227,16 @@ const ArtistForm = () => {
           ref={influencesRef}
           placeholder="Artists, producers, creatives, etc."
         ></textarea>
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Social Media Links</label>
+        <input
+          name="socialLinks"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Instagram, Twitter, TikTok, etc. (separate with commas)"
+        />
       </div>
       <div className="mb-4">
         <label className="block mb-2">Note</label>

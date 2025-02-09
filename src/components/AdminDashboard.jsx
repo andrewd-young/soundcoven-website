@@ -94,7 +94,7 @@ const AdminDashboard = () => {
                  }`
               }
             >
-              {category.label} ({filteredApplications.filter(app => app.status === category.key).length})
+              {category.label}
             </Tab>
           ))}
         </Tab.List>
