@@ -22,6 +22,7 @@ export const useInstrumentalists = () => {
       favoriteGenres: instrumentalist.favorite_genres,
       note: instrumentalist.note,
       profileImageUrl: instrumentalist.profile_image_url,
+      bio: instrumentalist.bio,
     }));
   };
 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useOptimizedImage } from "../../hooks/useOptimizedImage";
+import supabase from '../../utils/supabase';
+import { useAuth } from '../../context/AuthContext';
 
 // Create a loading state cache to prevent multiple loading states for the same image
 const loadingCache = new Map();
@@ -13,6 +15,7 @@ export const OptimizedImage = ({
   objectFit = "cover",
   quality,
   imageWidth,
+  fallbackSrc = '/default-profile.jpg'
 }) => {
   const optimizedSrc = useOptimizedImage(src, {
     width: imageWidth || width,
@@ -24,6 +27,7 @@ export const OptimizedImage = ({
     return !loadingCache.has(optimizedSrc);
   });
   const [error, setError] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     // If the image is already loaded in cache, skip loading state
@@ -47,6 +51,38 @@ export const OptimizedImage = ({
     };
   }, [optimizedSrc]);
 
+  useEffect(() => {
+    const fetchImage = async () => {
+      if (!src) {
+        setError(true);
+        return;
+      }
+
+      try {
+        // Try to fetch the image
+        const response = await fetch(src);
+        
+        if (!response.ok) {
+          // If unauthorized or not found, use fallback
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        setError(false);
+      } catch (error) {
+        console.error('Error loading image:', error);
+        setError(true);
+      }
+    };
+
+    fetchImage();
+  }, [src]);
+
+  const handleError = () => {
+    if (!error) {
+      setError(true);
+    }
+  };
+
   if (error) {
     return (
       <div
@@ -61,7 +97,7 @@ export const OptimizedImage = ({
   return (
     <div className={`relative ${className}`} style={{ width, height }}>
       <img
-        src={optimizedSrc}
+        src={src || fallbackSrc}
         alt={alt}
         width="100%"
         height="100%"
@@ -76,6 +112,7 @@ export const OptimizedImage = ({
           transition-opacity duration-300 w-full h-full
           ${isLoading ? "opacity-0" : "opacity-100"}
         `}
+        onError={handleError}
       />
       {isLoading && (
         <div className="absolute inset-0 bg-gray-200 animate-pulse" />

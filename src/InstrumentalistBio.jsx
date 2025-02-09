@@ -1,9 +1,7 @@
 import React from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useInstrumentalists } from './hooks/useInstrumentalists';
 import {
-  faMapMarkerAlt,
   faGuitar,
   faGraduationCap,
   faMusic,
@@ -31,7 +29,11 @@ const InstrumentalistBio = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="flex flex-col">
           <h2 className="text-6xl font-bold mb-6">{instrumentalist.name}</h2>
-          <p className="text-lg mb-8 leading-relaxed">{instrumentalist.note || 'No additional information available'}</p>
+          <p className="text-lg mb-8 leading-relaxed">
+            {instrumentalist.bio && (
+              <span className="block mt-4">{instrumentalist.bio}</span>
+            )}
+          </p>
           
           {/* Tags */}
           <div className="flex flex-wrap gap-4 mb-4">
@@ -52,7 +54,7 @@ const InstrumentalistBio = () => {
             {instrumentalist.favoriteGenres && (
               <Tag 
                 icon={faMusic} 
-                text={instrumentalist.favoriteGenres}
+                text={instrumentalist.favoriteGenres.join(', ')}
                 darkMode={false}
               />
             )}
