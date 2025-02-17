@@ -63,12 +63,12 @@ const InstrumentalistBio = () => {
         <div className="relative z-10">
           <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden shadow-2xl">
             <OptimizedImage
-              src={instrumentalist.profileImageUrl || DEFAULT_IMAGE}
-              alt={instrumentalist.name}
+              src={instrumentalist.profileImageUrl}
+              alt={`${instrumentalist.name}'s profile`}
               width={800}
               height={800}
-              className="w-full h-full"
-              objectFit="cover"
+              className="w-full h-full object-cover"
+              fallbackSrc={DEFAULT_IMAGE}
               quality={85}
             />
           </div>

@@ -23,33 +23,30 @@ export const OptimizedImage = ({
   });
 
   const [isLoading, setIsLoading] = useState(() => {
-    // Check if we already have this image loaded
-    return !loadingCache.has(optimizedSrc);
+    return !loadingCache.has(src);
   });
   const [error, setError] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
-    // If the image is already loaded in cache, skip loading state
-    if (loadingCache.has(optimizedSrc)) {
+    if (loadingCache.has(src)) {
       setIsLoading(false);
       return;
     }
 
-    // Preload the image
     const img = new Image();
-    img.src = optimizedSrc;
+    img.src = src || fallbackSrc;
 
     img.onload = () => {
       setIsLoading(false);
-      loadingCache.set(optimizedSrc, true);
+      loadingCache.set(src, true);
     };
 
     img.onerror = () => {
       setError(true);
       setIsLoading(false);
     };
-  }, [optimizedSrc]);
+  }, [src, fallbackSrc]);
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -83,39 +80,41 @@ export const OptimizedImage = ({
   }, [src, fallbackSrc]);
 
   const handleError = () => {
-    // Only set error if we have a non-empty src that isn't the fallback
-    if (!error && src && src !== fallbackSrc) {
-      setError(true);
-    }
+    setError(true);
   };
 
-  if (error) {
+  if (error || !src) {
     return (
-      <div
-        className={`bg-gray-200 flex items-center justify-center ${className}`}
-        style={{ width, height }}
-      >
-        <span className="text-gray-400">Image not available</span>
-      </div>
+      <img
+        src={fallbackSrc}
+        alt={alt}
+        width={width}
+        height={height}
+        className={className}
+        style={{
+          objectFit,
+          width: "100%",
+          height: "100%",
+        }}
+      />
     );
   }
 
   return (
     <div className={`relative ${className}`} style={{ width, height }}>
       <img
-        src={src || fallbackSrc}
+        src={src}
         alt={alt}
-        width="100%"
-        height="100%"
+        width={width}
+        height={height}
         loading="lazy"
         style={{
           objectFit,
           width: "100%",
           height: "100%",
-          display: "block",
         }}
         className={`
-          transition-opacity duration-300 w-full h-full
+          transition-opacity duration-300
           ${isLoading ? "opacity-0" : "opacity-100"}
         `}
         onError={handleError}
