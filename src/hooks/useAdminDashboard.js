@@ -46,7 +46,78 @@ export const useAdminDashboard = (user) => {
         throw new Error('No approved profile data found');
       }
 
-      // Check if profile already exists in any of the profile tables
+      // Move photo to public bucket if it exists
+      let publicPhotoUrl = null;
+      if (application.admin_approved_profile.photo_url) {
+        try {
+          // Extract just the filename from the URL
+          const photoUrl = application.admin_approved_profile.photo_url;
+          const fileName = photoUrl.split('/').pop();
+          
+          if (!fileName) {
+            console.warn('Could not extract filename from photo URL');
+            // Continue with null photo URL
+          } else {
+            // First verify the file exists
+            const { data: fileExists } = await supabase.storage
+              .from('application-photos')
+              .list('applications/artist', {
+                search: fileName
+              });
+
+            if (!fileExists || fileExists.length === 0) {
+              console.warn('Photo file not found in storage:', fileName);
+              // Continue with null photo URL
+            } else {
+              // Download the file
+              const { data: fileData, error: downloadError } = await supabase.storage
+                .from('application-photos')
+                .download(`applications/artist/${fileName}`);
+                
+              if (downloadError) {
+                console.error('Download error:', downloadError);
+                // Continue with null photo URL
+              } else {
+                // Determine content type from file data
+                const contentType = fileData.type || 'image/jpeg';
+
+                // Upload to public bucket in artist folder
+                const newPath = `artist/${fileName}`;
+
+                const { error: uploadError } = await supabase.storage
+                  .from('public')
+                  .upload(newPath, fileData, {
+                    upsert: true,
+                    contentType: contentType,
+                    cacheControl: '31536000'
+                  });
+
+                if (uploadError) {
+                  console.error('Upload error:', uploadError);
+                  // Continue with null photo URL
+                } else {
+                  // Get the new public URL - this is a synchronous operation
+                  const { data } = supabase.storage
+                    .from('public')
+                    .getPublicUrl(newPath);
+
+                  publicPhotoUrl = data.publicUrl;
+
+                  // Only delete the original if the move was successful
+                  await supabase.storage
+                    .from('application-photos')
+                    .remove([`applications/artist/${fileName}`]);
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error moving photo:', error);
+          // Continue with null photo URL
+        }
+      }
+
+      // Check if profile already exists
       const tableName = application.application_type === "artist"
         ? "artists"
         : application.application_type === "industry"
@@ -67,25 +138,24 @@ export const useAdminDashboard = (user) => {
         throw new Error(`A ${application.application_type} profile already exists for this user`);
       }
 
-      // Transform the admin_approved_profile data to match the table schema
+      // Transform the admin_approved_profile data
       const transformedProfile = {
         user_id: application.user_id,
         name: application.admin_approved_profile.name || '',
         email: application.admin_approved_profile.email || '',
         bio: application.admin_approved_profile.bio || '',
         location: application.admin_approved_profile.location || '',
-        photo_url: application.admin_approved_profile.photo_url || null,
-        profile_image_url: application.admin_approved_profile.photo_url || null,
-        years_experience: application.admin_approved_profile.years_experience || null,
+        photo_url: publicPhotoUrl,
+        profile_image_url: publicPhotoUrl,
         social_links: Array.isArray(application.admin_approved_profile.social_links) 
           ? application.admin_approved_profile.social_links 
           : [],
       };
 
-      // Add type-specific fields
+      // Add type-specific fields for artists
       if (application.application_type === "artist") {
         Object.assign(transformedProfile, {
-          artist_type: application.admin_approved_profile.type || '',
+          artist_type: application.admin_approved_profile.artist_type || '',
           genres: Array.isArray(application.admin_approved_profile.genres) 
             ? application.admin_approved_profile.genres 
             : [],

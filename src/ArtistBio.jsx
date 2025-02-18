@@ -129,17 +129,10 @@ const ArtistBio = () => {
               {artist.type && (
                 <Tag icon={faUsers} text={artist.type} darkMode={false} />
               )}
-              {artist.yearsActive && (
-                <Tag
-                  icon={faClock}
-                  text={`${artist.yearsActive} years active`}
-                  darkMode={false}
-                />
-              )}
-              {artist.influences && (
+              {Array.isArray(artist.influences) && artist.influences.length > 0 && (
                 <Tag
                   icon={faMusic}
-                  text={`Influences: ${artist.influences}`}
+                  text={`Influences: ${artist.influences.join(", ")}`}
                   darkMode={false}
                 />
               )}

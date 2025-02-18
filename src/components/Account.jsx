@@ -115,6 +115,16 @@ const Account = () => {
           </div>
         )}
 
+        {/* Profile Approved Message */}
+        {application?.status === "approved" && (
+          <div className="mb-8 p-6 bg-green-900/50 rounded-lg border border-green-500">
+            <h2 className="text-2xl font-semibold text-white mb-2">Profile Approved!</h2>
+            <p className="text-gray-300 mb-4">
+              An admin will finalize your profile shortly.
+            </p>
+          </div>
+        )}
+
         {/* Profile Information */}
         <div className="mb-8 p-6 bg-covenLightPurple rounded-lg border border-white/20">
           <h2 className="text-2xl font-semibold text-white mb-4">Profile</h2>

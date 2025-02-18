@@ -21,18 +21,35 @@ export const useOptimizedImage = (url, options = {}) => {
       return imageCache.get(cacheKey);
     }
     
-    // Only transform Supabase storage URLs
-    if (url.includes('storage.googleapis.com') || url.includes('supabase')) {
-      const params = new URLSearchParams({
-        width: width.toString(),
-        quality: quality.toString(),
-        format
-      });
-      const optimizedUrl = `${url}?${params.toString()}`;
-      
-      // Store in cache
-      imageCache.set(cacheKey, optimizedUrl);
-      return optimizedUrl;
+    // Handle Supabase storage URLs
+    if (url.includes('supabase')) {
+      // Check if it's from the public bucket
+      if (url.includes('/public/public/')) {
+        // For public bucket, we need to remove the duplicate 'public'
+        const cleanUrl = url.replace('/public/public/', '/public/');
+        const params = new URLSearchParams({
+          width: width.toString(),
+          quality: quality.toString(),
+          format
+        });
+        const optimizedUrl = `${cleanUrl}?${params.toString()}`;
+        
+        // Store in cache
+        imageCache.set(cacheKey, optimizedUrl);
+        return optimizedUrl;
+      } else {
+        // For other storage URLs
+        const params = new URLSearchParams({
+          width: width.toString(),
+          quality: quality.toString(),
+          format
+        });
+        const optimizedUrl = `${url}?${params.toString()}`;
+        
+        // Store in cache
+        imageCache.set(cacheKey, optimizedUrl);
+        return optimizedUrl;
+      }
     }
     
     // Store original URL in cache

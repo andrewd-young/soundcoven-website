@@ -8,7 +8,7 @@ import supabase from "../utils/supabase";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const Login = ({ title }) => {
+const Login = ({ title, mode: initialMode }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showEmailForm, setShowEmailForm] = useState(false);
@@ -17,7 +17,7 @@ const Login = ({ title }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [mode, setMode] = useState("signup");
+  const [mode, setMode] = useState(initialMode || "signup");
   const [signupConfirmed, setSignupConfirmed] = useState(false);
 
   useEffect(() => {
@@ -43,6 +43,73 @@ const Login = ({ title }) => {
 
     checkExistingApplication();
   }, [user, navigate]);
+
+  useEffect(() => {
+    const handleEmailConfirmation = async () => {
+      if (mode === "confirm") {
+        const hash = window.location.hash;
+        if (!hash) {
+          setError('No confirmation code found. Please use the link from your email.');
+          return;
+        }
+        
+        try {
+          setLoading(true);
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: hash.substring(1),
+            type: 'signup'
+          });
+          
+          if (error) throw error;
+
+          // Wait for the session to be established
+          if (data?.user) {
+            // Wait a brief moment for auth state to update
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            try {
+              // Fetch the user's session to ensure we're authenticated
+              const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+              if (sessionError) throw sessionError;
+              
+              if (session) {
+                // Get the redirect URL from localStorage or default to /apply
+                const redirectTo = localStorage.getItem('intendedPath') || '/apply';
+                localStorage.removeItem('intendedPath');
+                navigate(redirectTo);
+                return;
+              }
+            } catch (sessionErr) {
+              console.error('Error getting session:', sessionErr);
+              throw new Error('Failed to establish session after confirmation');
+            }
+          }
+          
+          throw new Error('No user data received from confirmation');
+        } catch (err) {
+          console.error('Error confirming email:', err);
+          setError(
+            err.message === 'No user data received from confirmation'
+              ? 'Account confirmed but session creation failed. Please try logging in.'
+              : 'Failed to confirm email. Please try the confirmation link again or request a new one below.'
+          );
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    handleEmailConfirmation();
+  }, [mode, navigate]);
+
+  // Add a new effect to handle auth state changes
+  useEffect(() => {
+    if (user && mode === "confirm") {
+      const redirectTo = localStorage.getItem('intendedPath') || '/apply';
+      localStorage.removeItem('intendedPath');
+      navigate(redirectTo);
+    }
+  }, [user, mode, navigate]);
 
   // Commenting out Google sign-in as it's not implemented yet
   /*
@@ -80,7 +147,7 @@ const Login = ({ title }) => {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/apply`,
+            emailRedirectTo: `${window.location.origin}/auth/confirm`,
           },
         });
 
@@ -90,7 +157,7 @@ const Login = ({ title }) => {
               type: "signup",
               email,
               options: {
-                emailRedirectTo: `${window.location.origin}/apply`,
+                emailRedirectTo: `${window.location.origin}/auth/confirm`,
               },
             });
 
@@ -226,6 +293,80 @@ const Login = ({ title }) => {
     );
   }
 
+  if (mode === "confirm") {
+    return (
+      <div className="flex justify-center px-4 md:px-0">
+        <div className="text-left mt-20 w-full max-w-md">
+          <h1 className="text-4xl font-bold text-white mb-6 text-center">
+            {loading ? "Confirming your account..." : 
+             error ? "Confirmation Failed" : "Account Confirmed!"}
+          </h1>
+          {error && (
+            <div className="text-red-500 text-center mb-4">{error}</div>
+          )}
+          {!loading && (
+            <div className="text-center space-y-4">
+              {error ? (
+                <>
+                  <Button
+                    onClick={() => {
+                      // Retry the current confirmation hash
+                      const hash = window.location.hash;
+                      if (hash) {
+                        window.location.reload();
+                      }
+                    }}
+                    className="text-white mb-2 w-full"
+                    text="Retry Confirmation"
+                  />
+                  <Button
+                    onClick={async () => {
+                      try {
+                        setLoading(true);
+                        setError(null);
+                        const { error: resendError } = await supabase.auth.resend({
+                          type: "signup",
+                          email: email || '',
+                          options: {
+                            emailRedirectTo: `${window.location.origin}/auth/confirm`,
+                          },
+                        });
+                        if (resendError) throw resendError;
+                        setError('New confirmation email sent! Please check your inbox.');
+                      } catch (err) {
+                        setError('Failed to send new confirmation email. Please try again.');
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    className="text-white mb-2 w-full"
+                    text="Request New Confirmation Email"
+                  />
+                  <Button
+                    onClick={() => navigate("/login")}
+                    className="text-white w-full"
+                    text="Return to Login"
+                  />
+                </>
+              ) : (
+                <>
+                  <p className="text-white text-center mb-4">
+                    Your email has been confirmed successfully! You can now proceed to your account.
+                  </p>
+                  <Button
+                    onClick={() => navigate("/apply")}
+                    className="text-white w-full"
+                    text="Continue to Application"
+                  />
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-center px-4 md:px-0">
       <div className="text-left mt-20 w-full max-w-md">
@@ -286,6 +427,7 @@ const Login = ({ title }) => {
 
 Login.propTypes = {
   title: PropTypes.string.isRequired,
+  mode: PropTypes.oneOf(["login", "signup", "confirm"]),
 };
 
 export default Login;

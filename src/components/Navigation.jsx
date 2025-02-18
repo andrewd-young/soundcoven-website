@@ -167,7 +167,7 @@ const Navigation = () => {
             )}
             {!user && (
               <>
-                <span className="hidden sm:inline text-sm sm:text-md">
+                <span className="hidden sm:inline text-base sm:text-xl">
                   Interested in joining the coven?
                 </span>
                 <Link

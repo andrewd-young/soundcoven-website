@@ -110,6 +110,10 @@ const App = () => {
                     element={<Login title="Sign Up or Login" />}
                   />
                   <Route
+                    path="/auth/confirm"
+                    element={<Login title="Confirming your account..." mode="confirm" />}
+                  />
+                  <Route
                     path="/artists/:artistId"
                     element={
                       <ProtectedRoute>

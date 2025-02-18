@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import supabase from "../utils/supabase";
 import Button from "./common/Button";
-import { OptimizedImage } from './common/OptimizedImage';
+import { AuthImage } from "./common/AuthImage";
 
 const ApplicationView = () => {
   const { applicationId } = useParams();
@@ -46,37 +46,37 @@ const ApplicationView = () => {
           photo_url: data.photo_url || "",
           email: data.email || "",
           location: data.location || "",
-          age: data.age || "",
-          years_active: data.years_active || "",
           bio: data.bio || "",
-          streaming_link: data.streaming_link || "",
           instagram_link: data.instagram_link || "",
-          genre: data.genre || "",
-          type: data.type || "",
-          influences: Array.isArray(data.influences) ? data.influences : (data.influences ? [data.influences] : []),
+          streaming_link: data.streaming_link || "",
           ...(data.application_type === "artist" && {
             artist_type: data.artist_type || "",
             genres: Array.isArray(data.genres) ? data.genres : (data.genres ? [data.genres] : []),
             streaming_links: Array.isArray(data.streaming_links) ? data.streaming_links : (data.streaming_links ? [data.streaming_links] : []),
+            influences: Array.isArray(data.influences) ? data.influences : (data.influences ? [data.influences] : []),
+            years_active: data.years_active || "",
             current_needs: data.current_needs || "",
             upcoming_show: data.upcoming_show || "",
-            social_links: {},
+            type: data.type || "",
           }),
           ...(data.application_type === "industry" && {
             industry_role: data.industry_role || "",
+            company: data.company || "",
+            years_experience: data.years_experience || "",
+            expertise_areas: Array.isArray(data.expertise_areas) ? data.expertise_areas : (data.expertise_areas ? [data.expertise_areas] : []),
             favorite_artists: Array.isArray(data.favorite_artists) ? data.favorite_artists : (data.favorite_artists ? [data.favorite_artists] : []),
-            bio: "",
-            company: "",
-            years_experience: "",
-            expertise_areas: [],
+            website: data.website || "",
+            linkedin: data.linkedin || "",
           }),
           ...(data.application_type === "instrumentalist" && {
             instrument: data.instrument || "",
+            years_experience: data.years_experience || "",
             favorite_genres: Array.isArray(data.favorite_genres) ? data.favorite_genres : (data.favorite_genres ? [data.favorite_genres] : []),
-            bio: "",
-            years_experience: "",
-            preferred_styles: [],
-            equipment: "",
+            equipment: data.equipment || "",
+            preferred_styles: Array.isArray(data.preferred_styles) ? data.preferred_styles : (data.preferred_styles ? [data.preferred_styles] : []),
+            availability: data.availability || "",
+            rate: data.rate || "",
+            portfolio_links: Array.isArray(data.portfolio_links) ? data.portfolio_links : (data.portfolio_links ? [data.portfolio_links] : []),
           }),
         };
         setProfileData(initialProfileData);
@@ -169,7 +169,7 @@ const ApplicationView = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto bg-covenLightPurple rounded-lg p-6">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-4xl font-bold text-white">Review Application</h1>
           <Button
@@ -184,13 +184,12 @@ const ApplicationView = () => {
           <div className="relative h-24 bg-[#432347]">
             <div className="absolute -bottom-16 left-6 flex items-end">
               {application.photo_url ? (
-                <OptimizedImage
+                <AuthImage
                   src={application.photo_url}
                   alt={`${application.name}'s profile`}
                   width={128}
                   height={128}
                   className="w-32 h-32 rounded-lg border-4 border-[#432347]"
-                  objectFit="cover"
                 />
               ) : (
                 <div className="w-32 h-32 rounded-lg border-4 border-[#432347] bg-gray-700 flex items-center justify-center">
@@ -270,24 +269,6 @@ const ApplicationView = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-300 mb-2">Age</label>
-                  <input
-                    type="number"
-                    value={profileData.age || ""}
-                    onChange={(e) => handleInputChange("age", e.target.value)}
-                    className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-300 mb-2">Years Active</label>
-                  <input
-                    type="number"
-                    value={profileData.years_active || ""}
-                    onChange={(e) => handleInputChange("years_active", e.target.value)}
-                    className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
-                  />
-                </div>
-                <div>
                   <label className="block text-gray-300 mb-2">Bio</label>
                   <textarea
                     value={profileData.bio || ""}
@@ -317,6 +298,15 @@ const ApplicationView = () => {
                       />
                     </div>
                     <div>
+                      <label className="block text-gray-300 mb-2">Years Active</label>
+                      <input
+                        type="text"
+                        value={profileData.years_active || ""}
+                        onChange={(e) => handleInputChange("years_active", e.target.value)}
+                        className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
+                      />
+                    </div>
+                    <div>
                       <label className="block text-gray-300 mb-2">Genres (comma-separated)</label>
                       <input
                         type="text"
@@ -326,12 +316,21 @@ const ApplicationView = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-300 mb-2">Streaming Links (comma-separated)</label>
+                      <label className="block text-gray-300 mb-2">Influences (comma-separated)</label>
                       <input
                         type="text"
-                        value={(profileData.streaming_links || []).join(", ")}
-                        onChange={(e) => handleArrayInputChange("streaming_links", e.target.value)}
+                        value={(profileData.influences || []).join(", ")}
+                        onChange={(e) => handleArrayInputChange("influences", e.target.value)}
                         className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 mb-2">Current Needs</label>
+                      <textarea
+                        value={profileData.current_needs || ""}
+                        onChange={(e) => handleInputChange("current_needs", e.target.value)}
+                        className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
+                        rows={3}
                       />
                     </div>
                   </>
@@ -366,6 +365,24 @@ const ApplicationView = () => {
                         className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
                       />
                     </div>
+                    <div>
+                      <label className="block text-gray-300 mb-2">Expertise Areas (comma-separated)</label>
+                      <input
+                        type="text"
+                        value={(profileData.expertise_areas || []).join(", ")}
+                        onChange={(e) => handleArrayInputChange("expertise_areas", e.target.value)}
+                        className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 mb-2">Website</label>
+                      <input
+                        type="url"
+                        value={profileData.website || ""}
+                        onChange={(e) => handleInputChange("website", e.target.value)}
+                        className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
+                      />
+                    </div>
                   </>
                 )}
 
@@ -381,20 +398,38 @@ const ApplicationView = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-300 mb-2">Favorite Genres (comma-separated)</label>
+                      <label className="block text-gray-300 mb-2">Years of Experience</label>
                       <input
                         type="text"
-                        value={(profileData.favorite_genres || []).join(", ")}
-                        onChange={(e) => handleArrayInputChange("favorite_genres", e.target.value)}
+                        value={profileData.years_experience || ""}
+                        onChange={(e) => handleInputChange("years_experience", e.target.value)}
+                        className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 mb-2">Preferred Styles (comma-separated)</label>
+                      <input
+                        type="text"
+                        value={(profileData.preferred_styles || []).join(", ")}
+                        onChange={(e) => handleArrayInputChange("preferred_styles", e.target.value)}
                         className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
                       />
                     </div>
                     <div>
                       <label className="block text-gray-300 mb-2">Equipment</label>
-                      <input
-                        type="text"
+                      <textarea
                         value={profileData.equipment || ""}
                         onChange={(e) => handleInputChange("equipment", e.target.value)}
+                        className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 mb-2">Rate (optional)</label>
+                      <input
+                        type="text"
+                        value={profileData.rate || ""}
+                        onChange={(e) => handleInputChange("rate", e.target.value)}
                         className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
                       />
                     </div>

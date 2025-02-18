@@ -96,7 +96,6 @@ export const useAccount = () => {
 
       // Refresh profile data
       await fetchProfileAndApplication();
-      setMessage("Profile approved! An admin will finalize your profile shortly.");
     } catch (error) {
       console.error('Error accepting profile:', error);
       setMessage(`error: ${error.message}`);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import supabase from '../utils/supabase';
@@ -8,7 +8,6 @@ const useApplicationForm = (applicationType, initialFormData) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [applicationId, setApplicationId] = useState(null);
   const [formData, setFormData] = useState(initialFormData);
 
   const handleChange = (e) => {
@@ -29,13 +28,14 @@ const useApplicationForm = (applicationType, initialFormData) => {
     setFormData(prev => ({ ...prev, photo: e.target.files[0] }));
   };
 
-  const uploadPhoto = async (file, applicationId) => {
+  const uploadPhoto = async (file) => {
     if (!file) return null;
     
     try {
       const compressedImage = await compressImage(file);
       const fileExt = file.name.split('.').pop().toLowerCase();
-      const fileName = `${applicationId || Date.now()}.${fileExt}`;
+      const fileName = `${user.id}_${Date.now()}.${fileExt}`;
+      // Make sure the path is correct
       const filePath = `applications/${applicationType}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
@@ -43,17 +43,17 @@ const useApplicationForm = (applicationType, initialFormData) => {
         .upload(filePath, compressedImage, { 
           upsert: true,
           contentType: file.type,
-          cacheControl: '31536000' // 1 year cache
+          cacheControl: '31536000'
         });
       
       if (uploadError) throw uploadError;
       
-      // Get the public URL using the correct bucket name
-      const { data: { publicUrl } } = supabase.storage
+      // Get the public URL
+      const { data } = supabase.storage
         .from('application-photos')
         .getPublicUrl(filePath);
-      
-      return publicUrl;
+        
+      return data.publicUrl;
     } catch (error) {
       console.error('Error uploading photo:', error);
       throw error;
@@ -65,19 +65,15 @@ const useApplicationForm = (applicationType, initialFormData) => {
     setLoading(true);
 
     try {
-      // First upload the photo if one exists
       let photoUrl = null;
       if (formData.photo) {
-        // Generate a temporary ID for the photo upload
-        const tempId = `temp_${Date.now()}`;
         try {
-          photoUrl = await uploadPhoto(formData.photo, tempId);
+          photoUrl = await uploadPhoto(formData.photo);
         } catch (error) {
           throw new Error('Photo upload failed. Please try again.');
         }
       }
 
-      // Only proceed with application creation if photo upload succeeded (if photo was provided)
       const applicationData = {
         ...transformData(formData, photoUrl),
         status: 'pending',
@@ -131,36 +127,6 @@ const useApplicationForm = (applicationType, initialFormData) => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const fetchDraftApplication = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('applications')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('status', 'draft')
-          .eq('application_type', applicationType)
-          .maybeSingle();
-        
-        if (error) throw error;
-        
-        if (data) {
-          setApplicationId(data.id);
-          setFormData(prev => ({
-            ...prev,
-            ...data
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching draft application:', error);
-      }
-    };
-
-    if (user) {
-      fetchDraftApplication();
-    }
-  }, [user, applicationType]);
 
   return {
     loading,

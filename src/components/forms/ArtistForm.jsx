@@ -13,8 +13,6 @@ const ArtistForm = () => {
     school: "",
     location: "",
     bio: "",
-    age: "",
-    yearsActive: "",
     phone: "",
     genres: "",
     links: "",
@@ -24,6 +22,7 @@ const ArtistForm = () => {
     upcomingShow: "",
     influences: "",
     note: "",
+    specificConnections: "",
   };
 
   const { loading, formData, handleChange, handleFileChange, handleSubmit } =
@@ -38,17 +37,17 @@ const ArtistForm = () => {
     school: formData.school,
     location: formData.location,
     bio: formData.bio,
-    age: parseInt(formData.age),
-    years_active: parseInt(formData.yearsActive),
-    contact_phone: formData.phone,
-    genres: formData.genres.split(',').map(g => g.trim()),
-    streaming_links: formData.links.split(',').map(l => l.trim()),
-    social_links: formData.socialLinks,
+    artist_type: formData.artistType,
+    genres: formData.genres,
+    streaming_links: formData.links,
+    social_links: formData.socialLinks ? JSON.parse(`{"links": "${formData.socialLinks}"}`) : null,
     photo_url: photoUrl,
-    current_needs: formData.needs.split(',').map(n => n.trim()),
-    upcoming_shows: formData.upcomingShow.split(',').map(s => s.trim()),
+    current_needs: formData.needs,
+    upcoming_show: formData.upcomingShow,
     influences: formData.influences,
+    industry_role: formData.specificConnections,
     note: formData.note,
+    phone_number: formData.phone
   });
 
   const onSubmit = (e) => handleSubmit(e, transformData);
@@ -145,26 +144,6 @@ const ArtistForm = () => {
         ></textarea>
       </div>
       <div className="mb-4">
-        <label className="block mb-2">Age</label>
-        <input
-          name="age"
-          type="number"
-          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block mb-2">Years Active</label>
-        <input
-          name="yearsActive"
-          type="number"
-          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
         <label className="block mb-2">Phone</label>
         <input
           name="phone"
@@ -197,18 +176,6 @@ const ArtistForm = () => {
         />
       </div>
       <div className="mb-4">
-        <label className="block mb-2">
-          Are you currently in need of a manager, producer, publicist, etc.?
-        </label>
-        <input
-          name="needs"
-          type="text"
-          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
-          placeholder="N/A if not applicable"
-        />
-      </div>
-      <div className="mb-4">
         <label className="block mb-2">Upcoming live show</label>
         <input
           name="upcomingShow"
@@ -236,6 +203,16 @@ const ArtistForm = () => {
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleChange}
           placeholder="Instagram, Twitter, TikTok, etc. (separate with commas)"
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Are you looking for any specific connections?</label>
+        <input
+          name="specificConnections"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="e.g., producer, manager, guitar player"
         />
       </div>
       <div className="mb-4">

@@ -6,7 +6,7 @@ import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Button from "./common/Button";
 import { Tab } from '@headlessui/react';
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
-import { OptimizedImage } from "./common/OptimizedImage";
+import { AuthImage } from "./common/AuthImage";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -107,109 +107,119 @@ const AdminDashboard = () => {
           {filteredApplications.map((application) => (
             <div
               key={application.id}
-              className="bg-covenLightPurple rounded-lg p-6 border border-white transition-colors"
+              className="bg-covenLightPurple rounded-lg p-6 border border-white transition-colors flex justify-between"
             >
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex-grow">
+                <div className="flex justify-between items-start mb-4">
+                  <Link 
+                    to={`/admin/applications/${application.id}`}
+                    className="flex-grow cursor-pointer"
+                  >
+                    <div>
+                      <h2 className="text-2xl text-white font-semibold">
+                        {application.name}
+                      </h2>
+                      <p className="text-gray-300">
+                        {application.application_type.charAt(0).toUpperCase() +
+                          application.application_type.slice(1)}{" "}
+                        Application
+                      </p>
+                      <p className={`inline-block px-3 py-1 rounded-full text-sm ${getStatusColorClasses(application.status)}`}>
+                        {getStatusDisplay(application.status)}
+                      </p>
+                    </div>
+                  </Link>
+                </div>
+
                 <Link 
                   to={`/admin/applications/${application.id}`}
-                  className="flex-grow cursor-pointer"
+                  className="block"
                 >
-                  <div>
-                    <h2 className="text-2xl text-white font-semibold">
-                      {application.name}
-                    </h2>
-                    <p className="text-gray-300">
-                      {application.application_type.charAt(0).toUpperCase() +
-                        application.application_type.slice(1)}{" "}
-                      Application
-                    </p>
-                    <p className={`inline-block px-3 py-1 rounded-full text-sm ${getStatusColorClasses(application.status)}`}>
-                      {getStatusDisplay(application.status)}
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
+                    <div>
+                      <p>
+                        <strong>Email:</strong> {application.email}
+                      </p>
+                      <p>
+                        <strong>School:</strong> {application.school}
+                      </p>
+                    </div>
+
+                    <div>
+                      {application.application_type === "artist" && (
+                        <>
+                          <p>
+                            <strong>Artist Type:</strong> {application.artist_type}
+                          </p>
+                          <p>
+                            <strong>Genres:</strong>{" "}
+                            {Array.isArray(application.genres)
+                              ? application.genres.join(", ")
+                              : application.genres}
+                          </p>
+                        </>
+                      )}
+
+                      {application.application_type === "industry" && (
+                        <>
+                          <p>
+                            <strong>Industry Role:</strong>{" "}
+                            {application.industry_role}
+                          </p>
+                          <p>
+                            <strong>Favorite Artists:</strong>{" "}
+                            {Array.isArray(application.favorite_artists)
+                              ? application.favorite_artists.join(", ")
+                              : application.favorite_artists}
+                          </p>
+                        </>
+                      )}
+
+                      {application.application_type === "instrumentalist" && (
+                        <>
+                          <p>
+                            <strong>Instrument:</strong> {application.instrument}
+                          </p>
+                          <p>
+                            <strong>Favorite Genres:</strong>{" "}
+                            {Array.isArray(application.favorite_genres)
+                              ? application.favorite_genres.join(", ")
+                              : application.favorite_genres}
+                          </p>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </Link>
-                <div className="ml-4">
-                  <Button 
-                    text={
-                      <>
-                        View Application <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
-                      </>
-                    }
-                    className="px-6 py-2 rounded transition-color"
-                    link={`/admin/applications/${application.id}`}
-                  />
-                </div>
+
+                {application.status === "approved" && (
+                  <div className="flex space-x-2">
+                    <Button 
+                      onClick={() => handleFinalizeProfile(application)}
+                      text="Create Artist Page"
+                      className="bg-green-600 hover:bg-green-700 text-white mt-4"
+                      disabled={loading}
+                    />
+                    <Button 
+                      text={
+                        <>
+                          View Application <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+                        </>
+                      }
+                      className="px-6 py-2 rounded transition-color mt-4"
+                      link={`/admin/applications/${application.id}`}
+                    />
+                  </div>
+                )}
               </div>
 
-              <Link 
-                to={`/admin/applications/${application.id}`}
-                className="block"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
-                  <div>
-                    <p>
-                      <strong>Email:</strong> {application.email}
-                    </p>
-                    <p>
-                      <strong>School:</strong> {application.school}
-                    </p>
-                  </div>
-
-                  <div>
-                    {application.application_type === "artist" && (
-                      <>
-                        <p>
-                          <strong>Artist Type:</strong> {application.artist_type}
-                        </p>
-                        <p>
-                          <strong>Genres:</strong>{" "}
-                          {Array.isArray(application.genres)
-                            ? application.genres.join(", ")
-                            : application.genres}
-                        </p>
-                      </>
-                    )}
-
-                    {application.application_type === "industry" && (
-                      <>
-                        <p>
-                          <strong>Industry Role:</strong>{" "}
-                          {application.industry_role}
-                        </p>
-                        <p>
-                          <strong>Favorite Artists:</strong>{" "}
-                          {Array.isArray(application.favorite_artists)
-                            ? application.favorite_artists.join(", ")
-                            : application.favorite_artists}
-                        </p>
-                      </>
-                    )}
-
-                    {application.application_type === "instrumentalist" && (
-                      <>
-                        <p>
-                          <strong>Instrument:</strong> {application.instrument}
-                        </p>
-                        <p>
-                          <strong>Favorite Genres:</strong>{" "}
-                          {Array.isArray(application.favorite_genres)
-                            ? application.favorite_genres.join(", ")
-                            : application.favorite_genres}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </Link>
-
-              {application.status === "approved" && (
-                <Button 
-                  onClick={() => handleFinalizeProfile(application)}
-                  text="Create Artist Page"
-                  className="bg-green-600 hover:bg-green-700 text-white mt-4"
-                  disabled={loading}
-                />
-              )}
+              <AuthImage
+                src={application.photo_url}
+                alt={`${application.name}'s photo`}
+                width={200}
+                height={200}
+                className="rounded-lg ml-4"
+              />
             </div>
           ))}
         </div>
