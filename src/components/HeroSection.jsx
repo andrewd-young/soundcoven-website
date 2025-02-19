@@ -33,9 +33,9 @@ const HeroSection = () => {
     <section className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24 relative">
       <div className="grid md:grid-cols-2 items-center gap-8" style={{ minHeight: '600px' }}>
         {/* Artist Image */}
-        <div className="relative z-10 h-[600px]">
+        <div className="relative z-10 w-full" style={{ paddingTop: '100%' }}>
           <div 
-            className="h-full w-full rounded-xl overflow-hidden shadow-2xl transform transition duration-500 hover:scale-105"
+            className="absolute top-0 left-0 h-full w-full rounded-xl overflow-hidden shadow-2xl transform transition duration-500 hover:scale-105"
             style={{ backgroundColor: '#4F1D4D' }}
           >
             <OptimizedImage

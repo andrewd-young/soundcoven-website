@@ -13,6 +13,7 @@ const ApplicationView = () => {
   const [error, setError] = useState(null);
   const [application, setApplication] = useState(null);
   const [profileData, setProfileData] = useState({});
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     const fetchApplication = async () => {
@@ -25,6 +26,7 @@ const ApplicationView = () => {
           .single();
 
         if (profileError) throw profileError;
+        setUserRole(profile?.role);
         if (profile?.role !== "admin") {
           navigate("/");
           return;
@@ -70,13 +72,9 @@ const ApplicationView = () => {
           }),
           ...(data.application_type === "instrumentalist" && {
             instrument: data.instrument || "",
-            years_experience: data.years_experience || "",
-            favorite_genres: Array.isArray(data.favorite_genres) ? data.favorite_genres : (data.favorite_genres ? [data.favorite_genres] : []),
-            equipment: data.equipment || "",
-            preferred_styles: Array.isArray(data.preferred_styles) ? data.preferred_styles : (data.preferred_styles ? [data.preferred_styles] : []),
-            availability: data.availability || "",
-            rate: data.rate || "",
-            portfolio_links: Array.isArray(data.portfolio_links) ? data.portfolio_links : (data.portfolio_links ? [data.portfolio_links] : []),
+            years_experience: (data.admin_approved_profile?.years_experience || data.years_experience || ""),
+            equipment: data.admin_approved_profile?.equipment || data.equipment || "",
+            rate: data.admin_approved_profile?.rate || data.rate || "",
           }),
         };
         setProfileData(initialProfileData);
@@ -93,7 +91,7 @@ const ApplicationView = () => {
   const handleInputChange = (field, value) => {
     setProfileData((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: field === "years_experience" ? parseInt(value) || "" : value,
     }));
   };
 
@@ -129,7 +127,9 @@ const ApplicationView = () => {
         .eq("id", application.id);
 
       if (applicationError) throw applicationError;
-      navigate("/admin");
+      
+      // Use stored role for navigation
+      navigate(userRole === "admin" ? "/admin" : "/account");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -220,12 +220,16 @@ const ApplicationView = () => {
                   ? "bg-yellow-500/20 text-yellow-300"
                   : application.status === "pending_user_approval"
                   ? "bg-blue-500/20 text-blue-300"
-                  : "bg-red-500/20 text-red-300"
+                  : application.status === "approved"
+                  ? "bg-green-500/20 text-green-300"
+                  : "bg-red-500/20 text-red-300A"
               }`}>
                 {application.status === "pending" 
                   ? "Pending Review"
                   : application.status === "pending_user_approval"
                   ? "Waiting for User Approval"
+                  : application.status === "approved"
+                  ? "Approved"
                   : "Rejected"}
               </span>
               <span className="text-gray-300">|</span>
@@ -400,18 +404,9 @@ const ApplicationView = () => {
                     <div>
                       <label className="block text-gray-300 mb-2">Years of Experience</label>
                       <input
-                        type="text"
+                        type="number"
                         value={profileData.years_experience || ""}
                         onChange={(e) => handleInputChange("years_experience", e.target.value)}
-                        className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-gray-300 mb-2">Preferred Styles (comma-separated)</label>
-                      <input
-                        type="text"
-                        value={(profileData.preferred_styles || []).join(", ")}
-                        onChange={(e) => handleArrayInputChange("preferred_styles", e.target.value)}
                         className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
                       />
                     </div>
@@ -425,12 +420,13 @@ const ApplicationView = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-gray-300 mb-2">Rate (optional)</label>
+                      <label className="block text-gray-300 mb-2">Rate</label>
                       <input
                         type="text"
                         value={profileData.rate || ""}
                         onChange={(e) => handleInputChange("rate", e.target.value)}
                         className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
+                        placeholder="Hourly or per-project rate"
                       />
                     </div>
                   </>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useOptimizedImage } from "../../hooks/useOptimizedImage";
-import supabase from '../../utils/supabase';
 import { useAuth } from '../../context/AuthContext';
 
 // Create a loading state cache to prevent multiple loading states for the same image

@@ -121,7 +121,7 @@ export const useAdminDashboard = (user) => {
       const tableName = application.application_type === "artist"
         ? "artists"
         : application.application_type === "industry"
-        ? "industry_pros"
+        ? "industry_professionals"
         : "instrumentalists";
 
       const { data: existingProfile, error: checkError } = await supabase
@@ -149,7 +149,11 @@ export const useAdminDashboard = (user) => {
         profile_image_url: publicPhotoUrl,
         social_links: Array.isArray(application.admin_approved_profile.social_links) 
           ? application.admin_approved_profile.social_links 
-          : [],
+          : typeof application.admin_approved_profile.social_links === 'string'
+            ? application.admin_approved_profile.social_links.split(',').map(link => link.trim())
+            : [],
+        school: application.admin_approved_profile.school || '',
+        years_experience: application.admin_approved_profile.years_experience || null,
       };
 
       // Add type-specific fields for artists
@@ -177,11 +181,18 @@ export const useAdminDashboard = (user) => {
         Object.assign(transformedProfile, {
           industry_role: application.admin_approved_profile.industry_role || '',
           company: application.admin_approved_profile.company || '',
+          phone: application.admin_approved_profile.phone || '',
           favorite_artists: Array.isArray(application.admin_approved_profile.favorite_artists)
             ? application.admin_approved_profile.favorite_artists
             : typeof application.admin_approved_profile.favorite_artists === 'string'
               ? application.admin_approved_profile.favorite_artists.split(',').map(a => a.trim())
-              : []
+              : [],
+          social_links: Array.isArray(application.admin_approved_profile.social_links)
+            ? application.admin_approved_profile.social_links
+            : typeof application.admin_approved_profile.social_links === 'string'
+              ? application.admin_approved_profile.social_links.split(',').map(link => link.trim())
+              : [],
+          years_experience: parseInt(application.admin_approved_profile.years_experience) || null,
         });
       } else if (application.application_type === "instrumentalist") {
         Object.assign(transformedProfile, {
@@ -195,7 +206,8 @@ export const useAdminDashboard = (user) => {
             ? application.admin_approved_profile.equipment
             : typeof application.admin_approved_profile.equipment === 'string'
               ? application.admin_approved_profile.equipment.split(',').map(e => e.trim())
-              : []
+              : [],
+          rate: application.admin_approved_profile.rate || '',
         });
       }
       

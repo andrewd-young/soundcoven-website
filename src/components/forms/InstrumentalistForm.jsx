@@ -15,6 +15,9 @@ const InstrumentalistForm = () => {
     note: "",
     photo: null,
     socialLinks: "",
+    yearsExperience: "",
+    equipment: "",
+    rate: "",
   };
 
   const { loading, formData, handleChange, handleSubmit, handleFileChange } =
@@ -31,9 +34,12 @@ const InstrumentalistForm = () => {
     instrument: formData.instrument,
     favorite_genres: formData.favoriteGenres,
     favorite_artists: formData.favoriteArtists,
-    profile_image_url: photoUrl,
+    photo_url: photoUrl,
     note: formData.note,
     social_links: formData.socialLinks,
+    years_experience: formData.yearsExperience,
+    equipment: formData.equipment,
+    rate: formData.rate,
   });
 
   const onSubmit = (e) => handleSubmit(e, transformData);
@@ -162,6 +168,38 @@ const InstrumentalistForm = () => {
         />
       </div>
       <div className="mb-4">
+        <label className="block mb-2">Years of Experience</label>
+        <input
+          name="yearsExperience"
+          type="number"
+          min="0"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Number of years"
+          required
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Equipment</label>
+        <input
+          name="equipment"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Equipment you use (separate with commas)"
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Rate</label>
+        <input
+          name="rate"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Rate for your services"
+        />
+      </div>
+      <div className="mb-4">
         <label className="block mb-2">Note</label>
         <textarea
           name="note"
@@ -169,7 +207,7 @@ const InstrumentalistForm = () => {
           value={formData.note}
           onChange={handleChange}
           ref={noteRef}
-          placeholder="Anything you would want people to know about you?"
+          placeholder="Anything you would want people to know about you? (styles, equipment, rate, etc.)"
         ></textarea>
         <p className="text-sm text-gray-400">
           {formData.note.trim() ? formData.note.trim().split(/\s+/).length : 0}{" "}

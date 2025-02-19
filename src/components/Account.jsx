@@ -76,8 +76,8 @@ const Account = () => {
                 {application.application_type === "artist" && (
                   <div className="space-y-3">
                     <p><strong className="text-white">Artist Type:</strong> {application.admin_approved_profile.artist_type}</p>
-                    <p className="break-words"><strong className="text-white">Genres:</strong> {application.admin_approved_profile.genres.join(", ")}</p>
-                    <p className="break-words"><strong className="text-white">Streaming Links:</strong> {application.admin_approved_profile.streaming_links.join(", ")}</p>
+                    <p className="break-words"><strong className="text-white">Genres:</strong> {Array.isArray(application.admin_approved_profile.genres) ? application.admin_approved_profile.genres.join(", ") : 'N/A'}</p>
+                    <p className="break-words"><strong className="text-white">Streaming Links:</strong> {Array.isArray(application.admin_approved_profile.streaming_links) ? application.admin_approved_profile.streaming_links.join(", ") : 'N/A'}</p>
                   </div>
                 )}
 
@@ -92,7 +92,7 @@ const Account = () => {
                 {application.application_type === "instrumentalist" && (
                   <div className="space-y-3">
                     <p><strong className="text-white">Instrument:</strong> {application.admin_approved_profile.instrument}</p>
-                    <p className="break-words"><strong className="text-white">Favorite Genres:</strong> {application.admin_approved_profile.favorite_genres.join(", ")}</p>
+                    <p className="break-words"><strong className="text-white">Favorite Genres:</strong> {Array.isArray(application.admin_approved_profile.favorite_genres) ? application.admin_approved_profile.favorite_genres.join(", ") : 'N/A'}</p>
                     <p><strong className="text-white">Equipment:</strong> {application.admin_approved_profile.equipment}</p>
                   </div>
                 )}
@@ -112,16 +112,6 @@ const Account = () => {
                 disabled={loading}
               />
             </div>
-          </div>
-        )}
-
-        {/* Profile Approved Message */}
-        {application?.status === "approved" && (
-          <div className="mb-8 p-6 bg-green-900/50 rounded-lg border border-green-500">
-            <h2 className="text-2xl font-semibold text-white mb-2">Profile Approved!</h2>
-            <p className="text-gray-300 mb-4">
-              An admin will finalize your profile shortly.
-            </p>
           </div>
         )}
 

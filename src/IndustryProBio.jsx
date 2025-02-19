@@ -8,6 +8,10 @@ import {
   faEnvelope,
   faPhone,
   faBriefcase,
+  faGraduationCap,
+  faLink,
+  faBuilding,
+  faClock,
 } from "@fortawesome/free-solid-svg-icons";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Profile+Image";
@@ -35,28 +39,58 @@ const IndustryProBio = () => {
     return <Navigate to="/industry-pros" replace />;
   }
 
-  // Convert favorite_artists string to array if it exists
-  const favoriteArtistsList = pro.favorite_artists 
-    ? pro.favorite_artists.split(',').map(artist => artist.trim()) 
-    : [];
+  // Convert arrays or strings to arrays
+  const favoriteArtistsList = Array.isArray(pro.favorite_artists)
+    ? pro.favorite_artists
+    : pro.favorite_artists
+      ? pro.favorite_artists.split(',').map(artist => artist.trim())
+      : [];
 
-  const someCondition = ((pro.location || pro.email || pro.phone) && pro.school);
+  const expertiseAreas = Array.isArray(pro.expertise_areas)
+    ? pro.expertise_areas
+    : pro.expertise_areas
+      ? pro.expertise_areas.split(',').map(area => area.trim())
+      : [];
+
+  const socialLinks = Array.isArray(pro.social_links)
+    ? pro.social_links
+    : pro.social_links
+      ? pro.social_links.split(',').map(link => link.trim())
+      : [];
 
   return (
     <section id="pro-bio" className="text-white py-8 px-6 md:px-12 lg:px-24">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="flex flex-col">
           <h2 className="text-5xl font-bold mb-6">{pro.name}</h2>
-          <p className="text-xl font-medium mb-2">
-            <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
-            {pro.role || 'Role not specified'}
-            {pro.company && ` at ${pro.company}`}
-          </p>
-          <p className="text-lg mb-4 text-white">
+          
+          {/* Role and Company */}
+          <div className="mb-4">
+            <p className="text-xl font-medium">
+              <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
+              {pro.industry_role || 'Role not specified'}
+            </p>
+            {pro.company && (
+              <p className="text-lg">
+                <FontAwesomeIcon icon={faBuilding} className="mr-2" />
+                {pro.company}
+              </p>
+            )}
+            {pro.years_experience && (
+              <p className="text-lg">
+                <FontAwesomeIcon icon={faClock} className="mr-2" />
+                {pro.years_experience} years of experience
+              </p>
+            )}
+          </div>
+
+          {/* Bio */}
+          <p className="text-lg mb-6 text-white">
             {pro.bio || "No bio available."}
           </p>
-          {someCondition && (
-          <div className="flex flex-wrap gap-4 mb-4">
+
+          {/* Contact Information */}
+          <div className="flex flex-wrap gap-4 mb-6">
             {pro.location && (
               <span className="tag bg-blue-200 text-blue-800 px-3 py-1 rounded">
                 <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2" />
@@ -76,17 +110,38 @@ const IndustryProBio = () => {
               </span>
             )}
           </div>
-          )}
+
+          {/* Education */}
           {pro.school && (
-            <div className="mb-4">
+            <div className="mb-6">
               <h3 className="text-2xl font-semibold mb-2">Education</h3>
               <span className="tag bg-orange-200 text-orange-800 px-3 py-1 rounded">
+                <FontAwesomeIcon icon={faGraduationCap} className="mr-2" />
                 {pro.school}
               </span>
             </div>
           )}
+
+          {/* Expertise Areas */}
+          {expertiseAreas.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-2xl font-semibold mb-2">Areas of Expertise</h3>
+              <div className="flex flex-wrap gap-2">
+                {expertiseAreas.map((area, index) => (
+                  <span
+                    key={index}
+                    className="tag bg-purple-200 text-purple-800 px-3 py-1 rounded"
+                  >
+                    {area}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Favorite Artists */}
           {favoriteArtistsList.length > 0 && (
-            <div className="mb-4">
+            <div className="mb-6">
               <h3 className="text-2xl font-semibold mb-2">Favorite Artists</h3>
               <div className="flex flex-wrap gap-2">
                 {favoriteArtistsList.map((artist, index) => (
@@ -100,7 +155,30 @@ const IndustryProBio = () => {
               </div>
             </div>
           )}
+
+          {/* Social Links */}
+          {socialLinks.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-2xl font-semibold mb-2">Connect</h3>
+              <div className="flex flex-wrap gap-2">
+                {socialLinks.map((link, index) => (
+                  <a
+                    key={index}
+                    href={link.startsWith('http') ? link : `https://${link}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tag bg-pink-200 text-pink-800 px-3 py-1 rounded hover:bg-pink-300 transition-colors"
+                  >
+                    <FontAwesomeIcon icon={faLink} className="mr-2" />
+                    {new URL(link.startsWith('http') ? link : `https://${link}`).hostname}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Profile Image */}
         <div className="relative z-10">
           <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden">
             <img
@@ -120,13 +198,25 @@ IndustryProBio.propTypes = {
     PropTypes.shape({
       id: PropTypes.number.isRequired,
       name: PropTypes.string.isRequired,
-      role: PropTypes.string,
+      industry_role: PropTypes.string,
       company: PropTypes.string,
       location: PropTypes.string,
       email: PropTypes.string,
       phone: PropTypes.string,
       school: PropTypes.string,
-      favorite_artists: PropTypes.string,
+      favorite_artists: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.arrayOf(PropTypes.string)
+      ]),
+      expertise_areas: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.arrayOf(PropTypes.string)
+      ]),
+      social_links: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.arrayOf(PropTypes.string)
+      ]),
+      years_experience: PropTypes.number,
       bio: PropTypes.string,
       profile_image_url: PropTypes.string,
     })

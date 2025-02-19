@@ -124,7 +124,7 @@ const AdminDashboard = () => {
                           application.application_type.slice(1)}{" "}
                         Application
                       </p>
-                      <p className={`inline-block px-3 py-1 rounded-full text-sm ${getStatusColorClasses(application.status)}`}>
+                      <p className={`inline-block px-3 py-2 rounded-full text-sm ${getStatusColorClasses(application.status)} mt-2`}>
                         {getStatusDisplay(application.status)}
                       </p>
                     </div>
@@ -216,9 +216,10 @@ const AdminDashboard = () => {
               <AuthImage
                 src={application.photo_url}
                 alt={`${application.name}'s photo`}
-                width={200}
-                height={200}
-                className="rounded-lg ml-4"
+                width={250}
+                height={250}
+                className="rounded-lg ml-4 object-cover min-w-[100px] min-h-[100px]"
+                fallbackSrc={`https://ui-avatars.com/api/?name=${encodeURIComponent(application.name)}&background=432347&color=fff&size=100`}
               />
             </div>
           ))}

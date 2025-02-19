@@ -17,6 +17,7 @@ const IndustryForm = () => {
     favoriteArtists: "",
     note: "",
     socialLinks: "",
+    yearsExperience: "",
   };
 
   const { loading, formData, handleChange, handleFileChange, handleSubmit } =
@@ -37,6 +38,7 @@ const IndustryForm = () => {
     favorite_artists: formData.favoriteArtists,
     note: formData.note,
     social_links: formData.socialLinks,
+    years_experience: parseInt(formData.yearsExperience) || null,
   });
 
   const validatePhoneNumber = (phone) => {
@@ -221,24 +223,41 @@ const IndustryForm = () => {
       </div>
 
       <div className="mb-4">
-        <label className="block mb-2">Additional Notes (max 200 words)</label>
+        <label className="block mb-2">Years of Experience</label>
+        <input
+          name="yearsExperience"
+          type="number"
+          min="0"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Number of years"
+          required
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block mb-2">Note</label>
         <textarea
           ref={noteRef}
           name="note"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded resize-none"
           onChange={handleChange}
+          value={formData.note}
+          placeholder="Anything you would want people to know about you?"
           rows="4"
         />
+        <p className="text-sm text-gray-400">
+          {formData.note.trim() ? formData.note.trim().split(/\s+/).length : 0}{" "}
+          / 200 words
+        </p>
       </div>
 
       <button
         type="submit"
+        className="w-full bg-white text-gray-800 px-4 py-2 rounded hover:bg-gray-300 disabled:bg-gray-400"
         disabled={loading}
-        className={`w-full bg-white text-purple-900 py-2 rounded font-semibold hover:bg-gray-100 transition-colors ${
-          loading ? "opacity-50 cursor-not-allowed" : ""
-        }`}
       >
-        {loading ? "Submitting..." : "Submit Application"}
+        {loading ? "Submitting..." : "Submit"}
       </button>
     </form>
   );

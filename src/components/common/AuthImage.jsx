@@ -13,7 +13,7 @@ export const AuthImage = ({
   height,
   className,
   objectFit = "cover",
-  fallbackSrc = '/default-profile.jpg'
+  fallbackSrc
 }) => {
   const [isLoading, setIsLoading] = useState(() => !loadingCache.has(src));
   const [error, setError] = useState(false);
@@ -24,7 +24,7 @@ export const AuthImage = ({
     const fetchImage = async () => {
       setError(false);
       
-      if (!src || src === fallbackSrc) {
+      if (!src) {
         return;
       }
 
@@ -63,47 +63,52 @@ export const AuthImage = ({
       setImageSrc(loadingCache.get(src));
       setIsLoading(false);
     }
-  }, [src, fallbackSrc]);
+  }, [src]);
 
   const handleError = () => {
     setError(true);
     setIsLoading(false);
+    setImageSrc(fallbackSrc || `https://ui-avatars.com/api/?name=${encodeURIComponent(alt)}&background=432347&color=fff&size=${width}`);
   };
 
   if (error || !imageSrc) {
     return (
-      <img
-        src={fallbackSrc}
-        alt={alt}
-        width={width}
-        height={height}
-        className={className}
-        style={{
-          objectFit,
-          width: "100%",
-          height: "100%",
-        }}
-      />
+      <div style={{ width: `${width}px`, height: `${height}px` }} className={className}>
+        <img
+          src={fallbackSrc || `https://ui-avatars.com/api/?name=${encodeURIComponent(alt)}&background=432347&color=fff&size=${width}`}
+          alt={alt}
+          width={width}
+          height={height}
+          className="w-full h-full"
+          style={{
+            objectFit,
+            borderRadius: '8px',
+          }}
+        />
+      </div>
     );
   }
 
   return (
-    <div className={`relative ${className}`} style={{ width, height }}>
+    <div 
+      className={`relative ${className}`} 
+      style={{ width: `${width}px`, height: `${height}px` }}
+    >
       <img
         src={imageSrc}
         alt={alt}
         width={width}
         height={height}
         loading="lazy"
-        style={{
-          objectFit,
-          width: "100%",
-          height: "100%",
-        }}
         className={`
+          w-full h-full
           transition-opacity duration-300
           ${isLoading ? "opacity-0" : "opacity-100"}
         `}
+        style={{
+          objectFit,
+          borderRadius: '8px',
+        }}
         onError={handleError}
       />
       {isLoading && (
