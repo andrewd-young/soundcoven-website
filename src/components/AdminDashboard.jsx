@@ -38,6 +38,8 @@ const AdminDashboard = () => {
         return 'Changes Requested';
       case 'approved':
         return 'Approved';
+      case 'finalized':
+        return 'Finalized';
       case 'rejected':
         return 'Rejected';
       default:
@@ -56,6 +58,8 @@ const AdminDashboard = () => {
         return 'bg-orange-500/20 text-orange-300';
       case 'approved':
         return 'bg-green-500/20 text-green-300';
+      case 'finalized':
+        return 'bg-purple-500/20 text-purple-300';
       case 'rejected':
         return 'bg-red-500/20 text-red-300';
       default:

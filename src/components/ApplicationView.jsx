@@ -222,7 +222,9 @@ const ApplicationView = () => {
                   ? "bg-blue-500/20 text-blue-300"
                   : application.status === "approved"
                   ? "bg-green-500/20 text-green-300"
-                  : "bg-red-500/20 text-red-300A"
+                  : application.status === "finalized"
+                  ? "bg-purple-500/20 text-purple-300"
+                  : "bg-red-500/20 text-red-300"
               }`}>
                 {application.status === "pending" 
                   ? "Pending Review"
@@ -230,6 +232,8 @@ const ApplicationView = () => {
                   ? "Waiting for User Approval"
                   : application.status === "approved"
                   ? "Approved"
+                  : application.status === "finalized"
+                  ? "Finalized"
                   : "Rejected"}
               </span>
               <span className="text-gray-300">|</span>

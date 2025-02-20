@@ -10,6 +10,19 @@ export const useAdminDashboard = (user) => {
   const [error, setError] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState('pending');
 
+  const getTableName = (applicationType) => {
+    switch (applicationType) {
+      case 'artist':
+        return 'artists';
+      case 'instrumentalist':
+        return 'instrumentalists';
+      case 'industry':
+        return 'industry_professionals';
+      default:
+        throw new Error(`Unknown application type: ${applicationType}`);
+    }
+  };
+
   const fetchApplications = useCallback(async () => {
     try {
       const { data: profile, error: profileError } = await supabase
@@ -40,219 +53,75 @@ export const useAdminDashboard = (user) => {
 
   const handleFinalizeProfile = async (application) => {
     try {
-      setLoading(true);
-      
-      if (!application?.admin_approved_profile) {
-        throw new Error('No approved profile data found');
+      // First check if we have a valid photo URL
+      if (!application.photo_url) {
+        throw new Error('No photo URL found in application');
       }
 
-      // Move photo to public bucket if it exists
-      let publicPhotoUrl = null;
-      if (application.admin_approved_profile.photo_url) {
-        try {
-          // Extract just the filename from the URL
-          const photoUrl = application.admin_approved_profile.photo_url;
-          const fileName = photoUrl.split('/').pop();
-          
-          if (!fileName) {
-            console.warn('Could not extract filename from photo URL');
-            // Continue with null photo URL
-          } else {
-            // First verify the file exists
-            const { data: fileExists } = await supabase.storage
-              .from('application-photos')
-              .list('applications/artist', {
-                search: fileName
-              });
-
-            if (!fileExists || fileExists.length === 0) {
-              console.warn('Photo file not found in storage:', fileName);
-              // Continue with null photo URL
-            } else {
-              // Download the file
-              const { data: fileData, error: downloadError } = await supabase.storage
-                .from('application-photos')
-                .download(`applications/artist/${fileName}`);
-                
-              if (downloadError) {
-                console.error('Download error:', downloadError);
-                // Continue with null photo URL
-              } else {
-                // Determine content type from file data
-                const contentType = fileData.type || 'image/jpeg';
-
-                // Upload to public bucket in artist folder
-                const newPath = `artist/${fileName}`;
-
-                const { error: uploadError } = await supabase.storage
-                  .from('public')
-                  .upload(newPath, fileData, {
-                    upsert: true,
-                    contentType: contentType,
-                    cacheControl: '31536000'
-                  });
-
-                if (uploadError) {
-                  console.error('Upload error:', uploadError);
-                  // Continue with null photo URL
-                } else {
-                  // Get the new public URL - this is a synchronous operation
-                  const { data } = supabase.storage
-                    .from('public')
-                    .getPublicUrl(newPath);
-
-                  publicPhotoUrl = data.publicUrl;
-
-                  // Only delete the original if the move was successful
-                  await supabase.storage
-                    .from('application-photos')
-                    .remove([`applications/artist/${fileName}`]);
-                }
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Error moving photo:', error);
-          // Continue with null photo URL
-        }
-      }
-
-      // Check if profile already exists
-      const tableName = application.application_type === "artist"
-        ? "artists"
-        : application.application_type === "industry"
-        ? "industry_professionals"
-        : "instrumentalists";
-
-      const { data: existingProfile, error: checkError } = await supabase
-        .from(tableName)
-        .select("*")
-        .eq("user_id", application.user_id)
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found" error
-        throw checkError;
-      }
-
-      if (existingProfile) {
-        throw new Error(`A ${application.application_type} profile already exists for this user`);
-      }
-
-      // Transform the admin_approved_profile data
-      const transformedProfile = {
+      // Extract just the profile data we want to save
+      const profileData = {
+        ...application.admin_approved_profile,
+        profile_image_url: application.photo_url,
         user_id: application.user_id,
-        name: application.admin_approved_profile.name || '',
-        email: application.admin_approved_profile.email || '',
-        bio: application.admin_approved_profile.bio || '',
-        location: application.admin_approved_profile.location || '',
-        photo_url: publicPhotoUrl,
-        profile_image_url: publicPhotoUrl,
-        social_links: Array.isArray(application.admin_approved_profile.social_links) 
-          ? application.admin_approved_profile.social_links 
-          : typeof application.admin_approved_profile.social_links === 'string'
-            ? application.admin_approved_profile.social_links.split(',').map(link => link.trim())
-            : [],
-        school: application.admin_approved_profile.school || '',
-        years_experience: application.admin_approved_profile.years_experience || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
-      // Add type-specific fields for artists
-      if (application.application_type === "artist") {
-        Object.assign(transformedProfile, {
-          artist_type: application.admin_approved_profile.artist_type || '',
-          genres: Array.isArray(application.admin_approved_profile.genres) 
-            ? application.admin_approved_profile.genres 
-            : [],
-          streaming_links: Array.isArray(application.admin_approved_profile.streaming_links)
-            ? application.admin_approved_profile.streaming_links
-            : [],
-          influences: Array.isArray(application.admin_approved_profile.influences)
-            ? application.admin_approved_profile.influences
-            : [],
-          current_needs: Array.isArray(application.admin_approved_profile.current_needs)
-            ? application.admin_approved_profile.current_needs
-            : [],
-          upcoming_shows: Array.isArray(application.admin_approved_profile.upcoming_shows)
-            ? application.admin_approved_profile.upcoming_shows
-            : [],
-          instagram_link: application.admin_approved_profile.instagram_link || ''
-        });
-      } else if (application.application_type === "industry") {
-        Object.assign(transformedProfile, {
-          industry_role: application.admin_approved_profile.industry_role || '',
-          company: application.admin_approved_profile.company || '',
-          phone: application.admin_approved_profile.phone || '',
-          favorite_artists: Array.isArray(application.admin_approved_profile.favorite_artists)
-            ? application.admin_approved_profile.favorite_artists
-            : typeof application.admin_approved_profile.favorite_artists === 'string'
-              ? application.admin_approved_profile.favorite_artists.split(',').map(a => a.trim())
-              : [],
-          social_links: Array.isArray(application.admin_approved_profile.social_links)
-            ? application.admin_approved_profile.social_links
-            : typeof application.admin_approved_profile.social_links === 'string'
-              ? application.admin_approved_profile.social_links.split(',').map(link => link.trim())
-              : [],
-          years_experience: parseInt(application.admin_approved_profile.years_experience) || null,
-        });
-      } else if (application.application_type === "instrumentalist") {
-        Object.assign(transformedProfile, {
-          instrument: application.admin_approved_profile.instrument || '',
-          favorite_genres: Array.isArray(application.admin_approved_profile.favorite_genres)
-            ? application.admin_approved_profile.favorite_genres
-            : typeof application.admin_approved_profile.favorite_genres === 'string'
-              ? application.admin_approved_profile.favorite_genres.split(',').map(g => g.trim())
-              : [],
-          equipment: Array.isArray(application.admin_approved_profile.equipment)
-            ? application.admin_approved_profile.equipment
-            : typeof application.admin_approved_profile.equipment === 'string'
-              ? application.admin_approved_profile.equipment.split(',').map(e => e.trim())
-              : [],
-          rate: application.admin_approved_profile.rate || '',
-        });
+      // Remove any undefined or null values
+      Object.keys(profileData).forEach(key => {
+        if (profileData[key] === undefined || profileData[key] === null) {
+          delete profileData[key];
+        }
+      });
+
+      // Create the profile
+      const { data: newProfile, error: profileError } = await supabase
+        .from(getTableName(application.application_type))
+        .insert([profileData])
+        .select()
+        .single();
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw new Error(`Failed to create profile: ${profileError.message}`);
       }
-      
-      // Insert into appropriate table
-      const { error: insertError } = await supabase
-        .from(tableName)
-        .insert([transformedProfile]);
 
-      if (insertError) throw insertError;
+      if (!newProfile) {
+        throw new Error('Profile was not created');
+      }
 
-      // Update profiles table
-      const { error: profileError } = await supabase
-        .from("profiles")
+      // Update application status to finalized
+      const { error: applicationError } = await supabase
+        .from('applications')
         .update({
-          role: application.application_type,
-        })
-        .eq("id", application.user_id);
-
-      if (profileError) throw profileError;
-
-      // Update application status
-      const { error: statusError } = await supabase
-        .from("applications")
-        .update({
-          status: "finalized",
-          finalized_at: new Date().toISOString(),
-          finalized_by: user.id,
+          status: 'finalized',
           status_history: [...(application.status_history || []), {
-            status: "finalized",
+            status: 'finalized',
             timestamp: new Date().toISOString(),
-            admin_id: user.id
-          }]
+            user_id: user.id
+          }],
+          finalized_at: new Date().toISOString(),
+          finalized_by: user.id
         })
-        .eq("id", application.id);
+        .eq('id', application.id);
 
-      if (statusError) throw statusError;
+      if (applicationError) {
+        console.error('Application update error:', applicationError);
+        throw applicationError;
+      }
 
-      // Refresh applications list
-      fetchApplications();
+      // Update the applications list
+      setFilteredApplications(prev => 
+        prev.map(app => 
+          app.id === application.id 
+            ? { ...app, status: 'finalized' }
+            : app
+        )
+      );
+
     } catch (error) {
       console.error('Error finalizing profile:', error);
-      setError(error.message);
-      throw error; // Re-throw to prevent further execution
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 
