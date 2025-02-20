@@ -53,12 +53,70 @@ export const useAdminDashboard = (user) => {
 
   const handleFinalizeProfile = async (application) => {
     try {
-      // First check if we have a valid photo URL
       if (!application.photo_url) {
         throw new Error('No photo URL found in application');
       }
 
-      // Extract just the profile data we want to save
+      // Define the allowed fields for each profile type
+      const allowedFields = {
+        instrumentalist: [
+          'name',
+          'bio',
+          'email',
+          'profile_image_url',
+          'user_id',
+          'created_at',
+          'updated_at',
+          'instrument',
+          'years_experience',
+          'equipment',
+          'rate',
+          'location',
+          'social_links',
+        ],
+        artist: [
+          'name',
+          'bio',
+          'email',
+          'profile_image_url',
+          'user_id',
+          'created_at',
+          'updated_at',
+          'artist_type',
+          'genres',
+          'influences',
+          'streaming_links',
+          'location',
+          'social_links',
+        ],
+        industry: [
+          'name',
+          'bio',
+          'email',
+          'profile_image_url',
+          'user_id',
+          'created_at',
+          'updated_at',
+          'industry_role',
+          'company',
+          'expertise_areas',
+          'website',
+          'linkedin',
+          'location',
+          'social_links',
+        ],
+      };
+
+      // Define which fields should be arrays
+      const arrayFields = ['equipment', 'social_links', 'genres', 'influences', 'streaming_links'];
+
+      // Get the allowed fields for this application type
+      const allowed = allowedFields[application.application_type];
+      if (!allowed) {
+        throw new Error(`Unknown application type: ${application.application_type}`);
+      }
+
+      // Filter and format the profile data
       const profileData = {
         ...application.admin_approved_profile,
         profile_image_url: application.photo_url,
@@ -67,17 +125,32 @@ export const useAdminDashboard = (user) => {
         updated_at: new Date().toISOString(),
       };
 
-      // Remove any undefined or null values
-      Object.keys(profileData).forEach(key => {
-        if (profileData[key] === undefined || profileData[key] === null) {
-          delete profileData[key];
-        }
-      });
+      // Create a new object with only the allowed fields and proper array formatting
+      const cleanedProfileData = Object.keys(profileData)
+        .filter(key => allowed.includes(key))
+        .reduce((obj, key) => {
+          if (profileData[key] !== undefined && profileData[key] !== null) {
+            // If it's an array field, ensure it's properly formatted
+            if (arrayFields.includes(key)) {
+              // If it's a string, split it by commas and trim each item
+              if (typeof profileData[key] === 'string') {
+                obj[key] = profileData[key].split(',').map(item => item.trim());
+              } else if (Array.isArray(profileData[key])) {
+                obj[key] = profileData[key];
+              } else {
+                obj[key] = [profileData[key].toString()];
+              }
+            } else {
+              obj[key] = profileData[key];
+            }
+          }
+          return obj;
+        }, {});
 
       // Create the profile
       const { data: newProfile, error: profileError } = await supabase
         .from(getTableName(application.application_type))
-        .insert([profileData])
+        .insert([cleanedProfileData])
         .select()
         .single();
 

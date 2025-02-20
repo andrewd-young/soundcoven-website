@@ -20,6 +20,7 @@ const InstrumentalistCard = ({ instrumentalist }) => {
             height={225}
             className="w-full h-full"
             objectFit="cover"
+            fallbackSrc={DEFAULT_IMAGE}
           />
         </div>
         <div className="p-6">
