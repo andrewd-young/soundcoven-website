@@ -68,7 +68,7 @@ const IndustryProBio = () => {
           <div className="mb-4">
             <p className="text-xl font-medium">
               <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
-              {pro.industry_role || 'Role not specified'}
+              {pro.industry_role || pro.role || 'Role not specified'}
             </p>
             {pro.company && (
               <p className="text-lg">

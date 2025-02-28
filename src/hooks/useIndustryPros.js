@@ -17,6 +17,7 @@ export const useIndustryPros = () => {
       userId: pro.user_id,
       name: pro.name,
       role: pro.role,
+      industry_role: pro.industry_role,
       company: pro.company,
       school: pro.school,
       location: pro.location,
