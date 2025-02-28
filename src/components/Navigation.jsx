@@ -150,7 +150,7 @@ const Navigation = () => {
               <>
                 {application?.status === "pending" ? (
                   <span className="text-base sm:text-xl">Application Pending</span>
-                ) : application?.status !== "approved" && (
+                ) : application?.status !== "approved" || application?.status !== "finalized" (
                   <>
                     <span className="hidden sm:inline text-base sm:text-xl">
                       Interested in joining the coven?
