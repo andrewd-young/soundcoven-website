@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "./common/Button";
 import { useArtists } from "../hooks/useArtists";
-import { OptimizedImage } from "./common/OptimizedImage";
+import { AuthImage } from "./common/AuthImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 
@@ -38,15 +38,14 @@ const HeroSection = () => {
             className="absolute top-0 left-0 h-full w-full rounded-xl overflow-hidden shadow-2xl transform transition duration-500 hover:scale-105"
             style={{ backgroundColor: '#4F1D4D' }}
           >
-            <OptimizedImage
+            <AuthImage
               src={featuredArtist.image || DEFAULT_IMAGE}
               alt={featuredArtist.name}
               width="100%"
               height="100%"
               className="w-full h-full"
               objectFit="cover"
-              quality={90}
-              imageWidth={1600}
+              fallbackSrc={DEFAULT_IMAGE}
             />
           </div>
         </div>

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBriefcase, faUniversity } from "@fortawesome/free-solid-svg-icons";
-import { OptimizedImage } from "./common/OptimizedImage";
+import { AuthImage } from "./common/AuthImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Profile+Image";
 
@@ -35,7 +35,7 @@ const IndustryCard = ({ pro, className = "", styles = {} }) => {
       }}
     >
       <div className="h-72 overflow-hidden rounded-t-lg">
-        <OptimizedImage
+        <AuthImage
           src={pro.profile_image_url || DEFAULT_IMAGE}
           alt={pro.name}
           width={320}
@@ -43,6 +43,7 @@ const IndustryCard = ({ pro, className = "", styles = {} }) => {
           className="w-full h-full"
           objectFit="cover"
           objectPosition="top"
+          fallbackSrc={DEFAULT_IMAGE}
         />
       </div>
       <div className={`flex flex-col flex-grow p-4 ${

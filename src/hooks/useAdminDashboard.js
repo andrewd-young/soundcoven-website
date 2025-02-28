@@ -118,18 +118,51 @@ export const useAdminDashboard = (user) => {
       if (!allowed) {
         throw new Error(`Unknown application type: ${application.application_type}`);
       }
-
-      // Only include photo_url if it exists
-      const photoUrl = application.photo_url || null;
       
       // Format social links
       const socialLinks = {
         ...(application.admin_approved_profile.social_links || {}),
-        website: application.admin_approved_profile.website,
-        linkedin: application.admin_approved_profile.linkedin,
       };
+      
+      // Only add website and linkedin if they exist
+      if (application.admin_approved_profile.website) {
+        socialLinks.website = application.admin_approved_profile.website;
+      }
+      if (application.admin_approved_profile.linkedin) {
+        socialLinks.linkedin = application.admin_approved_profile.linkedin;
+      }
 
-      // Filter and format the profile data
+      // Copy the image to a public bucket if it exists
+      let publicImageUrl = null;
+      if (application.photo_url) {
+        const originalPath = application.photo_url.match(/public\/(?:application-photos\/)?(.+)/)[1];
+        const newPath = `profiles/${application.application_type}/${application.user_id}`;
+        
+        // Download from application-photos
+        const { data: fileData, error: downloadError } = await supabase.storage
+          .from('application-photos')
+          .download(originalPath);
+
+        if (downloadError) throw downloadError;
+
+        // Upload to public-profiles bucket
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('public-profiles')
+          .upload(newPath, fileData, {
+            contentType: 'image/jpeg', // Adjust based on actual file type
+            upsert: true
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('public-profiles')
+          .getPublicUrl(newPath);
+
+        publicImageUrl = publicUrl;
+      }
+
+      // Update profile data with public image URL
       const profileData = {
         ...application.admin_approved_profile,
         user_id: application.user_id,
@@ -137,11 +170,20 @@ export const useAdminDashboard = (user) => {
         updated_at: new Date().toISOString(),
         social_links: socialLinks,
         favorite_artists: application.favorite_artists || [],
+        profile_image_url: publicImageUrl || application.photo_url || null,
       };
 
-      // Only add profile_image_url if photoUrl exists
-      if (photoUrl) {
-        profileData.profile_image_url = photoUrl;
+      // Debug log to verify image URL
+      console.log('Image URL being copied:', application.photo_url);
+
+      // Special handling for artist_type
+      if (application.application_type === 'artist') {
+        // Convert to lowercase and validate against allowed types
+        const allowedTypes = ['solo', 'band', 'dj', 'producer'];
+        const rawArtistType = (application.admin_approved_profile.artist_type || '').toLowerCase();
+        
+        // Use the raw type if valid, otherwise default to 'solo'
+        profileData.artist_type = allowedTypes.includes(rawArtistType) ? rawArtistType : 'solo';
       }
 
       // Remove standalone website and linkedin fields as they're now in social_links
@@ -163,6 +205,10 @@ export const useAdminDashboard = (user) => {
           }
           return obj;
         }, {});
+
+      // Debug the final data
+      // console.log('Final profile data:', cleanedProfileData);
+      // console.log('Artist type in final data:', cleanedProfileData.artist_type);
 
       // Create the profile
       const { data: newProfile, error: profileError } = await supabase

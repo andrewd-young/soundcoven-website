@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useExtractColors } from "react-extract-colors";
 import { isLightColor } from "../utils/colorUtils";
-import { OptimizedImage } from "./common/OptimizedImage";
+import { AuthImage } from "./common/AuthImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
@@ -25,23 +25,23 @@ const ArtistCard = ({ artist }) => {
   return (
     <Link to={`/artists/${artist.id}`} className="block">
       <div
-        className="w-64 flex-shrink-0 rounded-lg overflow-hidden shadow-lg"
+        className="w-64 flex-shrink-0 rounded-lg overflow-hidden shadow-lg h-90 flex flex-col"
         style={{ backgroundColor: bgColor }}
       >
-        <div className="aspect-w-1 aspect-h-1">
-          <OptimizedImage
+        <div className="aspect-w-1 aspect-h-1 flex-grow">
+          <AuthImage
             src={artist.image || DEFAULT_IMAGE}
             alt={artist.name}
             width={256}
             height={256}
-            className="w-full h-full"
+            className="w-full h-full object-cover"
             objectFit="cover"
-            quality={75}
+            fallbackSrc={DEFAULT_IMAGE}
           />
         </div>
         <div className={`p-4 ${isLightColor(bgColor) ? 'text-on-light' : 'text-white'}`}>
           <h3 className="text-xl font-bold mb-2">{artist.name}</h3>
-          <p className="text-sm opacity-75">
+          <p className="text-sm opacity-75 h-16">
             {artist.genre || "Genre not specified"}
           </p>
         </div>

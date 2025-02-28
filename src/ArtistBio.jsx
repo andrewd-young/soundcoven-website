@@ -12,7 +12,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faSpotify, faInstagram } from "@fortawesome/free-brands-svg-icons";
 import Tag from "./components/common/Tag";
-import { OptimizedImage } from "./components/common/OptimizedImage";
+import { AuthImage } from "./components/common/AuthImage";
 import MetaTags from "./components/MetaTags";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
@@ -140,14 +140,14 @@ const ArtistBio = () => {
           </div>
           <div className="relative z-10">
             <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden shadow-2xl">
-              <OptimizedImage
+              <AuthImage
                 src={artist.image || DEFAULT_IMAGE}
                 alt={artist.name}
                 width={800}
                 height={800}
                 className="w-full h-full"
                 objectFit="cover"
-                quality={85}
+                fallbackSrc={DEFAULT_IMAGE}
               />
             </div>
           </div>

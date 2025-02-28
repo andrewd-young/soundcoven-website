@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGuitar, faGraduationCap } from '@fortawesome/free-solid-svg-icons';
 import Tag from './common/Tag';
-import { OptimizedImage } from './common/OptimizedImage';
+import { AuthImage } from './common/AuthImage';
 
 const DEFAULT_IMAGE = 'https://placehold.co/600x400?text=Instrumentalist+Image';
 
@@ -13,7 +13,7 @@ const InstrumentalistCard = ({ instrumentalist }) => {
     <Link to={`/instrumentalists/${instrumentalist.id}`}>
       <div className="bg-covenLightPurple rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300">
         <div className="aspect-w-16 aspect-h-9">
-          <OptimizedImage
+          <AuthImage
             src={instrumentalist.profileImageUrl || DEFAULT_IMAGE}
             alt={instrumentalist.name}
             width={400}

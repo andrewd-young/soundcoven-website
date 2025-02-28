@@ -9,7 +9,7 @@ import {
   faCompactDisc,
   faSchool,
 } from "@fortawesome/free-solid-svg-icons";
-import { OptimizedImage } from "./common/OptimizedImage";
+import { AuthImage } from "./common/AuthImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
@@ -43,10 +43,11 @@ const ArtistWideCard = ({ artist }) => {
       >
         {/* Image Container - Full width on mobile, 1/3 width on desktop */}
         <div className="w-full md:w-1/3 flex-shrink-0">
-          <OptimizedImage
+          <AuthImage
             src={artist.image || DEFAULT_IMAGE}
             alt={artist.name}
             className="w-full h-auto md:h-full object-cover"
+            fallbackSrc={DEFAULT_IMAGE}
           />
         </div>
 
