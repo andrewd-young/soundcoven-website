@@ -32,27 +32,40 @@ const useApplicationForm = (applicationType, initialFormData) => {
     if (!file) return null;
     
     try {
-      const compressedImage = await compressImage(file);
-      const fileExt = file.name.split('.').pop().toLowerCase();
-      const fileName = `${user.id}_${Date.now()}.${fileExt}`;
-      // Make sure the path is correct
+      // Compress image and convert to JPEG, strip metadata
+      const compressedImage = await compressImage(file, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.8,
+        type: 'image/jpeg', // Force JPEG format
+        stripMetadata: true // Strip EXIF and other metadata
+      });
+
+      // Always use .jpg extension since we're converting to JPEG
+      const fileName = `${user.id}.jpg`;
       const filePath = `applications/${applicationType}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('application-photos')
         .upload(filePath, compressedImage, { 
           upsert: true,
-          contentType: file.type,
+          contentType: 'image/jpeg',
           cacheControl: '31536000'
         });
       
       if (uploadError) throw uploadError;
       
-      // Get the public URL
-      const { data } = supabase.storage
+      // Properly handle the public URL response
+      const { data, error: publicUrlError } = await supabase.storage
         .from('application-photos')
         .getPublicUrl(filePath);
         
+      if (publicUrlError) throw publicUrlError;
+      
+      if (!data?.publicUrl) {
+        throw new Error('Failed to get public URL for uploaded file');
+      }
+
       return data.publicUrl;
     } catch (error) {
       console.error('Error uploading photo:', error);

@@ -200,7 +200,7 @@ const AdminDashboard = () => {
                   <div className="flex space-x-2">
                     <Button 
                       onClick={() => handleFinalizeProfile(application)}
-                      text="Create Artist Page"
+                      text="Create Page"
                       className="bg-green-600 hover:bg-green-700 text-white mt-4"
                       disabled={loading}
                     />

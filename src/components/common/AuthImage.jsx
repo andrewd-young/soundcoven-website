@@ -31,20 +31,36 @@ export const AuthImage = ({
       try {
         // If it's a Supabase storage URL
         if (src.includes('supabase') || src.includes('storage')) {
-          // Extract the path correctly
-          const pathMatch = src.match(/public\/application-photos\/(.*)/);
+          // Extract the path correctly - update to handle both old and new path formats
+          const pathMatch = src.match(/public\/(?:application-photos\/)?(.+)/);
           if (!pathMatch) {
             throw new Error('Invalid storage path');
           }
           
-          const path = pathMatch[1]; // This will get everything after "application-photos/"
+          const path = pathMatch[1];
           
           // Get signed URL
           const { data: signedURL, error: signError } = await supabase.storage
             .from('application-photos')
             .createSignedUrl(path, 3600); // 1 hour expiry
 
-          if (signError) throw signError;
+          if (signError) {
+            // Properly await the public URL call
+            const { data: publicURL, error: publicUrlError } = await supabase.storage
+              .from('application-photos')
+              .getPublicUrl(path);
+            
+            if (publicUrlError) {
+              throw publicUrlError;
+            }
+
+            if (publicURL?.publicUrl) {
+              setImageSrc(publicURL.publicUrl);
+              return;
+            }
+
+            throw new Error('Failed to get public URL');
+          }
           
           setImageSrc(signedURL.signedUrl);
           loadingCache.set(src, signedURL.signedUrl);

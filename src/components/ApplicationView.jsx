@@ -35,15 +35,19 @@ const ApplicationView = () => {
           return;
         }
 
-        // Fetch application
+        // Fetch application with admin_approved_profile
         const { data, error } = await supabase
           .from("applications")
-          .select("*")
+          .select("*, admin_approved_profile")
           .eq("id", applicationId)
           .single();
 
         if (error) throw error;
-        setApplication(data);
+        setApplication({
+          ...data,
+          // Ensure admin_approved_profile contains the current profileData
+          admin_approved_profile: data.admin_approved_profile || {}
+        });
 
         // Initialize profile data based on application type
         const initialProfileData = {
@@ -114,6 +118,16 @@ const ApplicationView = () => {
 
     fetchApplication();
   }, [applicationId, user.id, navigate]);
+
+  // Add this effect to keep admin_approved_profile updated
+  useEffect(() => {
+    if (application) {
+      setApplication(prev => ({
+        ...prev,
+        admin_approved_profile: profileData
+      }));
+    }
+  }, [profileData]);
 
   const handleInputChange = (field, value) => {
     setProfileData((prev) => ({
@@ -197,6 +211,18 @@ const ApplicationView = () => {
 
       if (error) throw error;
       navigate("/admin");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFinalize = async () => {
+    try {
+      setLoading(true);
+      await handleFinalizeProfile(application);
+      navigate('/admin');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -488,6 +514,22 @@ const ApplicationView = () => {
                         className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
                       />
                     </div>
+                    <div>
+                      <label className="block text-gray-300 mb-2">
+                        Favorite Artists (comma-separated)
+                      </label>
+                      <input
+                        type="text"
+                        value={(profileData.favorite_artists || []).join(", ")}
+                        onChange={(e) =>
+                          handleArrayInputChange(
+                            "favorite_artists",
+                            e.target.value
+                          )
+                        }
+                        className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
+                      />
+                    </div>
                   </>
                 )}
 
@@ -580,8 +622,8 @@ const ApplicationView = () => {
               {application.status === "approved" && (
                 <>
                   <Button
-                    onClick={() => handleFinalizeProfile(application)}
-                    text="Create Artist Page"
+                    onClick={handleFinalize}
+                    text="Create Page"
                     className="bg-green-600 hover:bg-green-700 text-white"
                     disabled={loading}
                   />

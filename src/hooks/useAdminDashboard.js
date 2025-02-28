@@ -53,10 +53,6 @@ export const useAdminDashboard = (user) => {
 
   const handleFinalizeProfile = async (application) => {
     try {
-      if (!application.photo_url) {
-        throw new Error('No photo URL found in application');
-      }
-
       // Define the allowed fields for each profile type
       const allowedFields = {
         instrumentalist: [
@@ -101,14 +97,21 @@ export const useAdminDashboard = (user) => {
           'company',
           'expertise_areas',
           'website',
-          'linkedin',
           'location',
           'social_links',
+          'favorite_artists',
         ],
       };
 
       // Define which fields should be arrays
-      const arrayFields = ['equipment', 'social_links', 'genres', 'influences', 'streaming_links'];
+      const arrayFields = [
+        'equipment',
+        'genres',
+        'influences',
+        'streaming_links',
+        'expertise_areas',
+        'favorite_artists',
+      ];
 
       // Get the allowed fields for this application type
       const allowed = allowedFields[application.application_type];
@@ -116,30 +119,44 @@ export const useAdminDashboard = (user) => {
         throw new Error(`Unknown application type: ${application.application_type}`);
       }
 
+      // Only include photo_url if it exists
+      const photoUrl = application.photo_url || null;
+      
+      // Format social links
+      const socialLinks = {
+        ...(application.admin_approved_profile.social_links || {}),
+        website: application.admin_approved_profile.website,
+        linkedin: application.admin_approved_profile.linkedin,
+      };
+
       // Filter and format the profile data
       const profileData = {
         ...application.admin_approved_profile,
-        profile_image_url: application.photo_url,
         user_id: application.user_id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        social_links: socialLinks,
+        favorite_artists: application.favorite_artists || [],
       };
+
+      // Only add profile_image_url if photoUrl exists
+      if (photoUrl) {
+        profileData.profile_image_url = photoUrl;
+      }
+
+      // Remove standalone website and linkedin fields as they're now in social_links
+      delete profileData.website;
+      delete profileData.linkedin;
 
       // Create a new object with only the allowed fields and proper array formatting
       const cleanedProfileData = Object.keys(profileData)
         .filter(key => allowed.includes(key))
         .reduce((obj, key) => {
           if (profileData[key] !== undefined && profileData[key] !== null) {
-            // If it's an array field, ensure it's properly formatted
             if (arrayFields.includes(key)) {
-              // If it's a string, split it by commas and trim each item
-              if (typeof profileData[key] === 'string') {
-                obj[key] = profileData[key].split(',').map(item => item.trim());
-              } else if (Array.isArray(profileData[key])) {
-                obj[key] = profileData[key];
-              } else {
-                obj[key] = [profileData[key].toString()];
-              }
+              obj[key] = Array.isArray(profileData[key]) 
+                ? profileData[key]
+                : profileData[key].split(',').map(item => item.trim());
             } else {
               obj[key] = profileData[key];
             }
