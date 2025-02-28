@@ -18,7 +18,7 @@ const Filter = ({ filters, onFilterChange }) => {
           <div key={key} className="w-full md:w-auto">
             {config.type === "select" ? (
               <select
-                className="w-full md:w-48 p-2 rounded bg-white bg-opacity-10 text-white"
+                className="w-full md:w-48 p-2 rounded bg-white bg-opacity-10 text-white h-10"
                 onChange={(e) => onFilterChange((prev) => ({ ...prev, [key]: e.target.value }))}
               >
                 <option value="">All {key}s</option>
@@ -32,7 +32,7 @@ const Filter = ({ filters, onFilterChange }) => {
               <input
                 type="text"
                 placeholder={`Search by ${key}...`}
-                className="w-full md:w-48 p-2 rounded bg-white bg-opacity-10 text-white"
+                className="w-full md:w-48 p-2 rounded bg-white bg-opacity-10 text-white h-10"
                 onChange={(e) =>
                   onFilterChange((prev) => ({ ...prev, [key]: e.target.value }))
                 }

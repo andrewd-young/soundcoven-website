@@ -46,7 +46,7 @@ const ApplicationView = () => {
         setApplication({
           ...data,
           // Ensure admin_approved_profile contains the current profileData
-          admin_approved_profile: data.admin_approved_profile || {}
+          admin_approved_profile: data.admin_approved_profile || {},
         });
 
         // Initialize profile data based on application type
@@ -122,9 +122,9 @@ const ApplicationView = () => {
   // Add this effect to keep admin_approved_profile updated
   useEffect(() => {
     if (application) {
-      setApplication(prev => ({
+      setApplication((prev) => ({
         ...prev,
-        admin_approved_profile: profileData
+        admin_approved_profile: profileData,
       }));
     }
   }, [profileData]);
@@ -222,7 +222,7 @@ const ApplicationView = () => {
     try {
       setLoading(true);
       await handleFinalizeProfile(application);
-      navigate('/admin');
+      navigate("/admin");
     } catch (err) {
       setError(err.message);
     } finally {

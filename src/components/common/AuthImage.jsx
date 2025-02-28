@@ -32,7 +32,7 @@ export const AuthImage = ({
         // If it's a Supabase storage URL
         if (src.includes('supabase') || src.includes('storage')) {
           // Extract the path correctly - update to handle both old and new path formats
-          const pathMatch = src.match(/public\/(?:application-photos\/)?(.+)/);
+          const pathMatch = src.match(/application-photos\/(.+)/);
           if (!pathMatch) {
             throw new Error('Invalid storage path');
           }

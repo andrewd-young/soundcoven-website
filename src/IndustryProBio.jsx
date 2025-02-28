@@ -13,6 +13,7 @@ import {
   faBuilding,
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
+import { AuthImage } from "./components/common/AuthImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Profile+Image";
 
@@ -43,32 +44,32 @@ const IndustryProBio = () => {
   const favoriteArtistsList = Array.isArray(pro.favorite_artists)
     ? pro.favorite_artists
     : pro.favorite_artists
-      ? pro.favorite_artists.split(',').map(artist => artist.trim())
-      : [];
+    ? pro.favorite_artists.split(",").map((artist) => artist.trim())
+    : [];
 
   const expertiseAreas = Array.isArray(pro.expertise_areas)
     ? pro.expertise_areas
     : pro.expertise_areas
-      ? pro.expertise_areas.split(',').map(area => area.trim())
-      : [];
+    ? pro.expertise_areas.split(",").map((area) => area.trim())
+    : [];
 
   const socialLinks = Array.isArray(pro.social_links)
     ? pro.social_links
     : pro.social_links
-      ? pro.social_links.split(',').map(link => link.trim())
-      : [];
+    ? pro.social_links.split(",").map((link) => link.trim())
+    : [];
 
   return (
     <section id="pro-bio" className="text-white py-8 px-6 md:px-12 lg:px-24">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="flex flex-col">
           <h2 className="text-5xl font-bold mb-6">{pro.name}</h2>
-          
+
           {/* Role and Company */}
           <div className="mb-4">
             <p className="text-xl font-medium">
               <FontAwesomeIcon icon={faBriefcase} className="mr-2" />
-              {pro.industry_role || pro.role || 'Role not specified'}
+              {pro.industry_role || pro.role || "Role not specified"}
             </p>
             {pro.company && (
               <p className="text-lg">
@@ -125,7 +126,9 @@ const IndustryProBio = () => {
           {/* Expertise Areas */}
           {expertiseAreas.length > 0 && (
             <div className="mb-6">
-              <h3 className="text-2xl font-semibold mb-2">Areas of Expertise</h3>
+              <h3 className="text-2xl font-semibold mb-2">
+                Areas of Expertise
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {expertiseAreas.map((area, index) => (
                   <span
@@ -164,13 +167,17 @@ const IndustryProBio = () => {
                 {socialLinks.map((link, index) => (
                   <a
                     key={index}
-                    href={link.startsWith('http') ? link : `https://${link}`}
+                    href={link.startsWith("http") ? link : `https://${link}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="tag bg-pink-200 text-pink-800 px-3 py-1 rounded hover:bg-pink-300 transition-colors"
                   >
                     <FontAwesomeIcon icon={faLink} className="mr-2" />
-                    {new URL(link.startsWith('http') ? link : `https://${link}`).hostname}
+                    {
+                      new URL(
+                        link.startsWith("http") ? link : `https://${link}`
+                      ).hostname
+                    }
                   </a>
                 ))}
               </div>
@@ -181,10 +188,14 @@ const IndustryProBio = () => {
         {/* Profile Image */}
         <div className="relative z-10">
           <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden">
-            <img
+            <AuthImage
               src={pro.profile_image_url || DEFAULT_IMAGE}
               alt={pro.name}
-              className="w-full h-full object-cover object-center"
+              width={600}
+              height={600}
+              className="w-full h-full"
+              objectFit="cover"
+              fallbackSrc={DEFAULT_IMAGE}
             />
           </div>
         </div>
@@ -206,15 +217,15 @@ IndustryProBio.propTypes = {
       school: PropTypes.string,
       favorite_artists: PropTypes.oneOfType([
         PropTypes.string,
-        PropTypes.arrayOf(PropTypes.string)
+        PropTypes.arrayOf(PropTypes.string),
       ]),
       expertise_areas: PropTypes.oneOfType([
         PropTypes.string,
-        PropTypes.arrayOf(PropTypes.string)
+        PropTypes.arrayOf(PropTypes.string),
       ]),
       social_links: PropTypes.oneOfType([
         PropTypes.string,
-        PropTypes.arrayOf(PropTypes.string)
+        PropTypes.arrayOf(PropTypes.string),
       ]),
       years_experience: PropTypes.number,
       bio: PropTypes.string,

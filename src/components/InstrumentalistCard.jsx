@@ -12,15 +12,17 @@ const InstrumentalistCard = ({ instrumentalist }) => {
   return (
     <Link to={`/instrumentalists/${instrumentalist.id}`}>
       <div className="bg-covenLightPurple rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300">
-        <div className="aspect-w-16 aspect-h-9">
+        <div className="h-72 rounded-t-lg overflow-hidden">
           <AuthImage
             src={instrumentalist.profileImageUrl || DEFAULT_IMAGE}
             alt={instrumentalist.name}
             width={400}
-            height={225}
-            className="w-full h-full"
+            height={300}
+            className="w-full h-full rounded-t-lg"
             objectFit="cover"
+            objectPosition="top"
             fallbackSrc={DEFAULT_IMAGE}
+            style={{ width: '100%', height: '100%' }}
           />
         </div>
         <div className="p-6">

@@ -21,22 +21,26 @@ const HeroSection = () => {
   const featuredArtist =
     artists.find((artist) => artist.isFeatured) || artists[0];
 
-  if (loading) return (
-    <section className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24 relative">
-      <LoadingPlaceholder />
-    </section>
-  );
+  if (loading)
+    return (
+      <section className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24 relative">
+        <LoadingPlaceholder />
+      </section>
+    );
   if (error) return <div className="text-white">Error: {error}</div>;
   if (!featuredArtist) return null;
 
   return (
     <section className="bg-covenPurple text-white py-8 px-6 md:px-12 lg:px-24 relative">
-      <div className="grid md:grid-cols-2 items-center gap-8" style={{ minHeight: '600px' }}>
+      <div
+        className="grid md:grid-cols-2 items-center gap-8"
+        style={{ minHeight: "600px" }}
+      >
         {/* Artist Image */}
-        <div className="relative z-10 w-full" style={{ paddingTop: '100%' }}>
-          <div 
+        <div className="relative z-10 w-full" style={{ paddingTop: "100%" }}>
+          <div
             className="absolute top-0 left-0 h-full w-full rounded-xl overflow-hidden shadow-2xl transform transition duration-500 hover:scale-105"
-            style={{ backgroundColor: '#4F1D4D' }}
+            style={{ backgroundColor: "#4F1D4D" }}
           >
             <AuthImage
               src={featuredArtist.image || DEFAULT_IMAGE}
@@ -52,12 +56,20 @@ const HeroSection = () => {
 
         {/* Artist Information */}
         <div className="space-y-4 z-20">
-          <h3 className="italic text-3xl md:text-4xl lg:text-5xl" style={{ minHeight: '2rem' }}>FEATURED</h3>
-          <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight pb-4" style={{ minHeight: '3rem' }}>
+          <h3
+            className="italic text-3xl md:text-4xl lg:text-5xl"
+            style={{ minHeight: "2rem" }}
+          >
+            FEATURED
+          </h3>
+          <h1
+            className="text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight pb-4"
+            style={{ minHeight: "3rem" }}
+          >
             {featuredArtist.name}
           </h1>
 
-          <div className="space-y-4" style={{ minHeight: '2rem' }}>
+          <div className="space-y-4" style={{ minHeight: "2rem" }}>
             <div className="flex space-x-4">
               <Button
                 text="View Artist Profile"
