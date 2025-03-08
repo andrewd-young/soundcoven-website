@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../utils/supabase";
+import { differenceInDays } from "date-fns";
 
 export const useAdminDashboard = (user) => {
   const navigate = useNavigate();
@@ -261,6 +262,43 @@ export const useAdminDashboard = (user) => {
     }
   };
 
+  const handleManualApprove = async (application) => {
+    try {
+      const now = new Date().toISOString();
+      
+      const { error: applicationError } = await supabase
+        .from("applications")
+        .update({
+          status: "approved",
+          last_modified_at: now,
+          last_modified_by: user.id,
+          status_history: [
+            ...(application.status_history || []),
+            {
+              status: "approved",
+              timestamp: now,
+              user_id: user.id,
+              note: "Manually approved by admin after 7 days"
+            },
+          ],
+        })
+        .eq("id", application.id);
+
+      if (applicationError) throw applicationError;
+      
+      // Update local state
+      setFilteredApplications(prev => 
+        prev.map(app => 
+          app.id === application.id 
+            ? { ...app, status: 'approved' }
+            : app
+        )
+      );
+    } catch (err) {
+      console.error('Error approving application:', err);
+    }
+  };
+
   // Filter applications when selected status changes
   useEffect(() => {
     const filtered = applications.filter(app => app.status === selectedStatus);
@@ -279,6 +317,29 @@ export const useAdminDashboard = (user) => {
     error,
     selectedStatus,
     setSelectedStatus,
-    handleFinalizeProfile
+    handleFinalizeProfile,
+    handleManualApprove,
   };
+};
+
+export const shouldShowManualApprove = (application) => {
+  if (!application || application.status !== 'pending_user_approval') {
+    return false;
+  }
+  
+  // Find the pending_user_approval status entry in history
+  const pendingUserApprovalEntry = application.status_history?.find(
+    entry => entry.status === 'pending_user_approval'
+  );
+  
+  if (!pendingUserApprovalEntry) {
+    return false;
+  }
+
+  const daysSinceApproval = differenceInDays(
+    new Date(),
+    new Date(pendingUserApprovalEntry.timestamp)
+  );
+  
+  return daysSinceApproval >= 7;
 }; 

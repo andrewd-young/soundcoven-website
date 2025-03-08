@@ -5,6 +5,8 @@ import supabase from "../utils/supabase";
 import Button from "./common/Button";
 import { AuthImage } from "./common/AuthImage";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
+import { addDays, isPast, differenceInDays, format } from 'date-fns';
+import { shouldShowManualApprove } from "../hooks/useAdminDashboard";
 
 const ApplicationView = () => {
   const { applicationId } = useParams();
@@ -149,38 +151,38 @@ const ApplicationView = () => {
     try {
       setLoading(true);
 
+      const now = new Date().toISOString();
+      const autoApprovalDate = addDays(new Date(), 7).toISOString();
+
       // Clean up profile data by removing unwanted fields
       const cleanedProfileData = { ...profileData };
-      const unwantedFields = [
-        "availability",
-        "portfolio_links",
-        "preferred_styles",
-      ];
+      const unwantedFields = ["availability", "portfolio_links", "preferred_styles"];
       unwantedFields.forEach((field) => delete cleanedProfileData[field]);
 
       const { error: applicationError } = await supabase
         .from("applications")
         .update({
           status: "pending_user_approval",
-          reviewed_at: new Date().toISOString(),
+          reviewed_at: now,
           reviewed_by: user.id,
           admin_approved_profile: cleanedProfileData,
+          sent_for_approval_at: now,
+          auto_approval_date: autoApprovalDate,
           status_history: [
             ...(application.status_history || []),
             {
               status: "pending_user_approval",
-              timestamp: new Date().toISOString(),
+              timestamp: now,
               user_id: user.id,
             },
           ],
           current_revision: (application.current_revision || 1) + 1,
-          last_modified_at: new Date().toISOString(),
+          last_modified_at: now,
           last_modified_by: user.id,
         })
         .eq("id", application.id);
 
       if (applicationError) throw applicationError;
-
       navigate(userRole === "admin" ? "/admin" : "/account");
     } catch (err) {
       setError(err.message);
@@ -222,6 +224,80 @@ const ApplicationView = () => {
     try {
       setLoading(true);
       await handleFinalizeProfile(application);
+      navigate("/admin");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditProfile = async () => {
+    try {
+      setLoading(true);
+      
+      const now = new Date().toISOString();
+      const autoApprovalDate = addDays(new Date(), 7).toISOString();
+
+      const { error: applicationError } = await supabase
+        .from("applications")
+        .update({
+          admin_approved_profile: profileData,
+          last_modified_at: now,
+          last_modified_by: user.id,
+          sent_for_approval_at: now,
+          auto_approval_date: autoApprovalDate,
+          status: "pending_user_approval",
+          status_history: [
+            ...(application.status_history || []),
+            {
+              status: "pending_user_approval",
+              timestamp: now,
+              user_id: user.id,
+              note: "Profile edited by admin"
+            },
+          ],
+        })
+        .eq("id", application.id);
+
+      if (applicationError) throw applicationError;
+      navigate("/admin");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const daysSinceApplication = application ? 
+    differenceInDays(new Date(), new Date(application.sent_for_approval_at)) : 0;
+  
+  const showApproveButton = application?.status === "pending_user_approval" && daysSinceApplication >= 7;
+
+  const handleManualApprove = async () => {
+    try {
+      setLoading(true);
+      const now = new Date().toISOString();
+
+      const { error: applicationError } = await supabase
+        .from("applications")
+        .update({
+          status: "approved",
+          last_modified_at: now,
+          last_modified_by: user.id,
+          status_history: [
+            ...(application.status_history || []),
+            {
+              status: "approved",
+              timestamp: now,
+              user_id: user.id,
+              note: "Manually approved by admin after 7 days"
+            },
+          ],
+        })
+        .eq("id", application.id);
+
+      if (applicationError) throw applicationError;
       navigate("/admin");
     } catch (err) {
       setError(err.message);
@@ -310,22 +386,41 @@ const ApplicationView = () => {
                   ? "Finalized"
                   : "Rejected"}
               </span>
-              <span className="text-gray-300">|</span>
-              <span className="text-gray-300">
-                Submitted:{" "}
-                {new Date(application.created_at).toLocaleDateString()}
-              </span>
+              {application.sent_for_approval_at && (
+                <>
+                  <span className="text-gray-300">|</span>
+                  <span className="text-gray-300">
+                    Days since sent for approval: {daysSinceApplication}
+                  </span>
+                </>
+              )}
             </div>
           </div>
 
           {/* Form Content */}
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Left Column - Common Fields */}
               <div className="space-y-6">
                 <h3 className="text-xl font-semibold text-white border-b border-white/20 pb-2">
                   Basic Information
                 </h3>
+                <div className="space-y-2 text-gray-300">
+                  <p>
+                    <strong>Date Applied:</strong>{" "}
+                    {format(new Date(application.created_at), 'MMM d, yyyy')}
+                  </p>
+                  {application.sent_for_approval_at && (
+                    <p>
+                      <strong>Sent for Approval:</strong>{" "}
+                      {format(new Date(application.sent_for_approval_at), 'MMM d, yyyy')}
+                      {application.status === 'pending_user_approval' && (
+                        <span className="ml-2 text-gray-400">
+                          ({daysSinceApplication} days ago)
+                        </span>
+                      )}
+                    </p>
+                  )}
+                </div>
                 <div>
                   <label className="block text-gray-300 mb-2">Name</label>
                   <input
@@ -619,15 +714,30 @@ const ApplicationView = () => {
                   />
                 </>
               )}
-              {application.status === "approved" && (
+              {application.status === "pending_user_approval" && (
                 <>
                   <Button
-                    onClick={handleFinalize}
-                    text="Create Page"
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                    disabled={loading}
+                    onClick={handleEditProfile}
+                    text="Save Changes & Resend"
+                    className="bg-blue-600 hover:bg-blue-700 px-6"
                   />
+                  {shouldShowManualApprove(application) && (
+                    <Button
+                      onClick={handleManualApprove}
+                      text="Approve for User"
+                      className="bg-green-600 hover:bg-green-700 px-6"
+                      title="User hasn't responded in 7+ days"
+                    />
+                  )}
                 </>
+              )}
+              {application.status === "approved" && (
+                <Button
+                  onClick={handleFinalize}
+                  text="Create Page"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  disabled={loading}
+                />
               )}
             </div>
           </div>

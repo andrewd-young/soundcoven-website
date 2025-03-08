@@ -7,6 +7,8 @@ import Button from "./common/Button";
 import { Tab } from '@headlessui/react';
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
 import { AuthImage } from "./common/AuthImage";
+import { differenceInDays, format } from 'date-fns';
+import { shouldShowManualApprove } from "../hooks/useAdminDashboard";
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -16,7 +18,8 @@ const AdminDashboard = () => {
     error,
     selectedStatus,
     setSelectedStatus,
-    handleFinalizeProfile
+    handleFinalizeProfile,
+    handleManualApprove,
   } = useAdminDashboard(user);
 
   const statusCategories = [
@@ -76,6 +79,18 @@ const AdminDashboard = () => {
     return url;
   };
 
+  const getDaysAgoText = (application) => {
+    if (!application) return '';
+    
+    // Get the most recent date based on status
+    let date = application.created_at;
+    if (application.finalized_at) date = application.finalized_at;
+    else if (application.sent_for_approval_at) date = application.sent_for_approval_at;
+    
+    const days = differenceInDays(new Date(), new Date(date));
+    return `${days}d ago`;
+  };
+
   if (loading)
     return <div className="text-white text-center mt-8">Loading...</div>;
   if (error)
@@ -128,9 +143,14 @@ const AdminDashboard = () => {
                           application.application_type.slice(1)}{" "}
                         Application
                       </p>
-                      <p className={`inline-block px-3 py-2 rounded-full text-sm ${getStatusColorClasses(application.status)} mt-2`}>
-                        {getStatusDisplay(application.status)}
-                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <p className={`inline-block px-3 py-2 rounded-full text-sm ${getStatusColorClasses(application.status)}`}>
+                          {getStatusDisplay(application.status)}
+                        </p>
+                        <span className="text-sm text-gray-400">
+                          {getDaysAgoText(application)}
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 </div>
@@ -196,25 +216,34 @@ const AdminDashboard = () => {
                   </div>
                 </Link>
 
-                {application.status === "approved" && (
-                  <div className="flex space-x-2">
-                    <Button 
-                      onClick={() => handleFinalizeProfile(application)}
-                      text="Create Page"
-                      className="bg-green-600 hover:bg-green-700 text-white mt-4"
-                      disabled={loading}
+                <div className="flex space-x-2 mt-4">
+                  {shouldShowManualApprove(application) && (
+                    <Button
+                      onClick={() => handleManualApprove(application)}
+                      text="Approve for User"
+                      className="bg-green-600 hover:bg-green-700 text-white"
                     />
-                    <Button 
-                      text={
-                        <>
-                          View Application <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
-                        </>
-                      }
-                      className="px-6 py-2 rounded transition-color mt-4"
-                      link={`/admin/applications/${application.id}`}
-                    />
-                  </div>
-                )}
+                  )}
+                  {application.status === "approved" && (
+                    <>
+                      <Button 
+                        onClick={() => handleFinalizeProfile(application)}
+                        text="Create Page"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        disabled={loading}
+                      />
+                      <Button 
+                        text={
+                          <>
+                            View Application <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+                          </>
+                        }
+                        className="px-6 py-2 rounded transition-color"
+                        link={`/admin/applications/${application.id}`}
+                      />
+                    </>
+                  )}
+                </div>
               </div>
 
               <AuthImage

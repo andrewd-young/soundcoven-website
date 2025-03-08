@@ -13,15 +13,17 @@ export const AuthImage = ({
   height,
   className,
   objectFit = "cover",
-  fallbackSrc
+  fallbackSrc,
+  maxRetries = 2,
 }) => {
   const [isLoading, setIsLoading] = useState(() => !loadingCache.has(src));
   const [error, setError] = useState(false);
   const [imageSrc, setImageSrc] = useState(src);
+  const [retryCount, setRetryCount] = useState(0);
   const { user } = useAuth();
 
   useEffect(() => {
-    const fetchImage = async () => {
+    const fetchImage = async (retryAttempt = 0) => {
       setError(false);
       
       if (!src) {
@@ -31,7 +33,6 @@ export const AuthImage = ({
       try {
         // If it's a Supabase storage URL
         if (src.includes('supabase') || src.includes('storage')) {
-          // Extract the path correctly - update to handle both old and new path formats
           const pathMatch = src.match(/application-photos\/(.+)/);
           if (!pathMatch) {
             throw new Error('Invalid storage path');
@@ -39,13 +40,24 @@ export const AuthImage = ({
           
           const path = pathMatch[1];
           
-          // Get signed URL
-          const { data: signedURL, error: signError } = await supabase.storage
+          // Get signed URL with timeout
+          const signedUrlPromise = supabase.storage
             .from('application-photos')
-            .createSignedUrl(path, 3600); // 1 hour expiry
+            .createSignedUrl(path, 3600);
+          
+          // Create a timeout promise
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
+          });
+
+          // Race between the fetch and timeout
+          const { data: signedURL, error: signError } = await Promise.race([
+            signedUrlPromise,
+            timeoutPromise
+          ]);
 
           if (signError) {
-            // Properly await the public URL call
+            // Try public URL as fallback
             const { data: publicURL, error: publicUrlError } = await supabase.storage
               .from('application-photos')
               .getPublicUrl(path);
@@ -67,9 +79,21 @@ export const AuthImage = ({
         }
       } catch (error) {
         console.error('Error loading image:', error);
+        
+        // Retry logic
+        if (retryAttempt < maxRetries) {
+          console.log(`Retrying image load, attempt ${retryAttempt + 1} of ${maxRetries}`);
+          setRetryCount(retryAttempt + 1);
+          // Exponential backoff: 1s, 2s, 4s, etc.
+          setTimeout(() => fetchImage(retryAttempt + 1), Math.pow(2, retryAttempt) * 1000);
+          return;
+        }
+        
         setError(true);
       } finally {
-        setIsLoading(false);
+        if (retryAttempt === maxRetries || !error) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -79,12 +103,15 @@ export const AuthImage = ({
       setImageSrc(loadingCache.get(src));
       setIsLoading(false);
     }
-  }, [src]);
+  }, [src, maxRetries]);
 
   const handleError = () => {
-    setError(true);
-    setIsLoading(false);
-    setImageSrc(fallbackSrc || `https://ui-avatars.com/api/?name=${encodeURIComponent(alt)}&background=432347&color=fff&size=${width}`);
+    // Only set error if we've exhausted all retries
+    if (retryCount >= maxRetries) {
+      setError(true);
+      setIsLoading(false);
+      setImageSrc(fallbackSrc || `https://ui-avatars.com/api/?name=${encodeURIComponent(alt)}&background=432347&color=fff&size=${width}`);
+    }
   };
 
   if (error || !imageSrc) {
