@@ -31,8 +31,18 @@ const InstrumentalistsPage = () => {
     return instrumentalists.filter((instrumentalist) => {
       return Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
-        if (key === "name")
+        
+        // Handle special location filter object
+        if (key === 'location' && typeof value === 'object') {
+          return value.matches(instrumentalist.location);
+        }
+        
+        // Handle name search
+        if (key === "name") {
           return instrumentalist.name.toLowerCase().includes(value.toLowerCase());
+        }
+        
+        // Handle other filters
         return instrumentalist[key] === value;
       });
     });

@@ -127,7 +127,7 @@ const ArtistBio = () => {
                 />
               )}
               {artist.type && (
-                <Tag icon={faUsers} text={artist.type} darkMode={false} />
+                <Tag icon={faUsers} text={artist.type.charAt(0).toUpperCase() + artist.type.slice(1)} darkMode={false} />
               )}
               {Array.isArray(artist.influences) && artist.influences.length > 0 && (
                 <Tag

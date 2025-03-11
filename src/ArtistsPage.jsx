@@ -35,8 +35,18 @@ const ArtistsPage = () => {
     return artists.filter((artist) => {
       return Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
-        if (key === "name")
+        
+        // Handle special location filter object
+        if (key === 'location' && typeof value === 'object') {
+          return value.matches(artist.location);
+        }
+        
+        // Handle name search
+        if (key === "name") {
           return artist.name.toLowerCase().includes(value.toLowerCase());
+        }
+        
+        // Handle other filters
         return artist[key] === value;
       });
     });
