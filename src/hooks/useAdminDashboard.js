@@ -70,6 +70,8 @@ export const useAdminDashboard = (user) => {
           'rate',
           'location',
           'social_links',
+          'school',
+          'favorite_genres',
         ],
         artist: [
           'name',
@@ -85,6 +87,7 @@ export const useAdminDashboard = (user) => {
           'streaming_links',
           'location',
           'social_links',
+          'school',
         ],
         industry: [
           'name',
@@ -97,10 +100,13 @@ export const useAdminDashboard = (user) => {
           'industry_role',
           'company',
           'expertise_areas',
-          'website',
           'location',
           'social_links',
           'favorite_artists',
+          'school',
+          'phone',
+          'role',
+          'years_experience',
         ],
       };
 
@@ -112,6 +118,9 @@ export const useAdminDashboard = (user) => {
         'streaming_links',
         'expertise_areas',
         'favorite_artists',
+        'favorite_genres',
+        'current_needs',
+        'upcoming_shows',
       ];
 
       // Get the allowed fields for this application type
@@ -120,9 +129,21 @@ export const useAdminDashboard = (user) => {
         throw new Error(`Unknown application type: ${application.application_type}`);
       }
       
+      // First, check and delete any existing profiles for this user
+      const { error: deleteError } = await supabase
+        .from(getTableName(application.application_type))
+        .delete()
+        .eq('user_id', application.user_id);
+
+      if (deleteError) {
+        console.error('Error deleting existing profile:', deleteError);
+        throw deleteError;
+      }
+
       // Format social links
       const socialLinks = {
         ...(application.admin_approved_profile.social_links || {}),
+        ...(application.social_links || {}),
       };
       
       // Only add website and linkedin if they exist
@@ -140,8 +161,32 @@ export const useAdminDashboard = (user) => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         social_links: socialLinks,
+        streaming_links: application.streaming_links || 
+                        application.admin_approved_profile.streaming_links || [],
+        school: application.school || 
+                application.admin_approved_profile.school || null,
+        // Handle genres from either source, ensuring they're arrays
+        genres: Array.isArray(application.genres) 
+          ? application.genres 
+          : typeof application.genres === 'string'
+          ? application.genres.split(',').map(g => g.trim())
+          : Array.isArray(application.admin_approved_profile.genres)
+          ? application.admin_approved_profile.genres
+          : typeof application.admin_approved_profile.genres === 'string'
+          ? application.admin_approved_profile.genres.split(',').map(g => g.trim())
+          : [],
+        // Handle influences similarly
+        influences: Array.isArray(application.influences)
+          ? application.influences
+          : typeof application.influences === 'string'
+          ? application.influences.split(',').map(i => i.trim())
+          : Array.isArray(application.admin_approved_profile.influences)
+          ? application.admin_approved_profile.influences
+          : typeof application.admin_approved_profile.influences === 'string'
+          ? application.admin_approved_profile.influences.split(',').map(i => i.trim())
+          : [],
         favorite_artists: application.favorite_artists || [],
-        profile_image_url: application.photo_url || null, // Use the original photo_url directly
+        profile_image_url: application.photo_url || null,
       };
 
       // Special handling for artist_type
@@ -270,6 +315,52 @@ export const useAdminDashboard = (user) => {
     }
   };
 
+  const handleUnpublishProfile = async (application) => {
+    try {
+      // Delete the profile from the appropriate table
+      const { error: deleteError } = await supabase
+        .from(getTableName(application.application_type))
+        .delete()
+        .eq('user_id', application.user_id);
+
+      if (deleteError) throw deleteError;
+
+      // Update application status back to approved
+      const { error: applicationError } = await supabase
+        .from('applications')
+        .update({
+          status: 'approved',
+          status_history: [
+            ...(application.status_history || []),
+            {
+              status: 'approved',
+              timestamp: new Date().toISOString(),
+              user_id: user.id,
+              note: 'Unpublished by admin'
+            }
+          ],
+          last_modified_at: new Date().toISOString(),
+          last_modified_by: user.id
+        })
+        .eq('id', application.id);
+
+      if (applicationError) throw applicationError;
+
+      // Update local state
+      setFilteredApplications(prev => 
+        prev.map(app => 
+          app.id === application.id 
+            ? { ...app, status: 'approved' }
+            : app
+        )
+      );
+
+    } catch (error) {
+      console.error('Error unpublishing profile:', error);
+      throw error;
+    }
+  };
+
   // Filter applications when selected status changes
   useEffect(() => {
     const filtered = applications.filter(app => app.status === selectedStatus);
@@ -290,6 +381,7 @@ export const useAdminDashboard = (user) => {
     setSelectedStatus,
     handleFinalizeProfile,
     handleManualApprove,
+    handleUnpublishProfile,
   };
 };
 

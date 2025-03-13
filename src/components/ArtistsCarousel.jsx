@@ -39,10 +39,16 @@ const ArtistCard = ({ artist }) => {
             fallbackSrc={DEFAULT_IMAGE}
           />
         </div>
-        <div className={`p-4 ${isLightColor(bgColor) ? 'text-on-light' : 'text-white'}`}>
+        <div
+          className={`p-4 ${
+            isLightColor(bgColor) ? "text-on-light" : "text-white"
+          }`}
+        >
           <h3 className="text-xl font-bold mb-2">{artist.name}</h3>
           <p className="text-sm opacity-75 h-16">
-            {artist.genre || "Genre not specified"}
+            {artist.genres && artist.genres.length > 0 
+              ? artist.genres.join(", ")
+              : "Genre not specified"}
           </p>
         </div>
       </div>

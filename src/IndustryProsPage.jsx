@@ -89,7 +89,7 @@ const IndustryProsPage = () => {
               ...pro,
               // Ensure all required fields have fallback values
               role: pro.role || "Role not specified",
-              company: pro.company || "Company not specified",
+              company: pro.company || "",
               location: pro.location || "Location not specified",
               email: pro.email || "Email not specified",
               phone: pro.phone || "Phone not specified",

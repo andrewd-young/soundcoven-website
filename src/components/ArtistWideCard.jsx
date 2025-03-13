@@ -15,7 +15,7 @@ const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
 
 const ArtistWideCard = ({ artist }) => {
-  const { id, name, genre, location, school } = artist;
+  const { id, name, genres, location, school } = artist;
 
   const isUsingDefaultImage = !artist.image;
   const { colors } = useExtractColors(artist.image || DEFAULT_IMAGE, {
@@ -61,10 +61,10 @@ const ArtistWideCard = ({ artist }) => {
             {name}
           </h2>
           <div className="flex flex-wrap gap-2 py-1">
-            {genre && (
+            {genres && genres.length > 0 && (
               <Tag
                 icon={faCompactDisc}
-                text={genre}
+                text={genres.join(", ")}
                 darkMode={!isLightColor(bgColor)}
               />
             )}
@@ -93,7 +93,7 @@ ArtistWideCard.propTypes = {
   artist: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
-    genre: PropTypes.string,
+    genres: PropTypes.arrayOf(PropTypes.string),
     location: PropTypes.string,
     school: PropTypes.string,
     image: PropTypes.string,

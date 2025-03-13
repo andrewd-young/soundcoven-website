@@ -18,7 +18,7 @@ const ApplicationView = () => {
   const [profileData, setProfileData] = useState({});
   const [userRole, setUserRole] = useState(null);
 
-  const { handleFinalizeProfile } = useAdminDashboard(user);
+  const { handleFinalizeProfile, handleUnpublishProfile } = useAdminDashboard(user);
 
   useEffect(() => {
     const fetchApplication = async () => {
@@ -298,6 +298,18 @@ const ApplicationView = () => {
         .eq("id", application.id);
 
       if (applicationError) throw applicationError;
+      navigate("/admin");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    try {
+      setLoading(true);
+      await handleUnpublishProfile(application);
       navigate("/admin");
     } catch (err) {
       setError(err.message);
@@ -736,6 +748,14 @@ const ApplicationView = () => {
                   onClick={handleFinalize}
                   text="Create Page"
                   className="bg-green-600 hover:bg-green-700 text-white"
+                  disabled={loading}
+                />
+              )}
+              {application.status === "finalized" && (
+                <Button
+                  onClick={handleUnpublish}
+                  text="Unpublish Page"
+                  className="bg-red-600 hover:bg-red-700 px-6"
                   disabled={loading}
                 />
               )}

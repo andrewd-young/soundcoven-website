@@ -9,6 +9,7 @@ import {
   faClock,
   faMusic,
   faUsers,
+  faGraduationCap,
 } from "@fortawesome/free-solid-svg-icons";
 import { faSpotify, faInstagram } from "@fortawesome/free-brands-svg-icons";
 import Tag from "./components/common/Tag";
@@ -85,14 +86,15 @@ const ArtistBio = () => {
 
             {/* Social Links */}
             <div className="flex flex-wrap gap-3 mb-6">
-              {artist.streamingLink && (
+              {artist.streamingLinks.map((link, index) => (
                 <SocialButton
+                  key={index}
                   icon={faSpotify}
-                  text="Listen on Spotify"
-                  link={artist.streamingLink}
+                  text={`Listen`}
+                  link={link}
                   primary
                 />
-              )}
+              ))}
               {artist.instagramLink && (
                 <SocialButton
                   icon={faInstagram}
@@ -112,10 +114,10 @@ const ArtistBio = () => {
                   darkMode={false}
                 />
               )}
-              {artist.genre && (
+              {artist.genres && artist.genres.length > 0 && (
                 <Tag
                   icon={faCompactDisc}
-                  text={artist.genre}
+                  text={artist.genres.join(", ")}
                   darkMode={false}
                 />
               )}
@@ -128,6 +130,13 @@ const ArtistBio = () => {
               )}
               {artist.type && (
                 <Tag icon={faUsers} text={artist.type.charAt(0).toUpperCase() + artist.type.slice(1)} darkMode={false} />
+              )}
+              {artist.school && (
+                <Tag
+                  icon={faGraduationCap}
+                  text={artist.school}
+                  darkMode={false}
+                />
               )}
               {Array.isArray(artist.influences) && artist.influences.length > 0 && (
                 <Tag

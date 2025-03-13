@@ -12,24 +12,35 @@ export const useArtists = () => {
       throw error;
     }
 
-    return data.map(artist => ({
-      id: artist.id,
-      userId: artist.user_id,
-      name: artist.name,
-      age: artist.age,
-      location: artist.location,
-      school: artist.school,
-      genre: artist.genre,
-      type: artist.artist_type,
-      yearsActive: artist.years_active,
-      influences: artist.influences,
-      bio: artist.bio,
-      streamingLink: artist.streaming_link,
-      image: artist.profile_image_url,
-      contactPhone: artist.contact_phone,
-      isFeatured: artist.is_featured,
-      instagramLink: artist.instagram_link,
-    }));
+    return data.map(artist => {
+      // Parse social links
+      const socialLinks = artist.social_links || {};
+      const instagramLink = socialLinks.instagram || 
+                           (socialLinks.links ? socialLinks.links.split(',')
+                             .find(link => link.trim().includes('instagram.com')) : null);
+      return {
+        id: artist.id,
+        userId: artist.user_id,
+        name: artist.name,
+        age: artist.age,
+        location: artist.location,
+        school: artist.school,
+        genres: Array.isArray(artist.genres) ? artist.genres :
+                (artist.genres ? artist.genres.split(',').map(g => g.trim()) : []),
+        type: artist.artist_type,
+        yearsActive: artist.years_active,
+        influences: Array.isArray(artist.influences) ? artist.influences : 
+                   (artist.influences ? artist.influences.split(',').map(i => i.trim()) : []),
+        bio: artist.bio,
+        streamingLinks: Array.isArray(artist.streaming_links) ? artist.streaming_links : 
+                       (artist.streaming_links ? artist.streaming_links.split(',') : []),
+        image: artist.profile_image_url,
+        contactPhone: artist.contact_phone,
+        isFeatured: artist.is_featured,
+        instagramLink: instagramLink,
+        socialLinks: artist.social_links || {},  // Keep the full social_links object just in case
+      };
+    });
   };
 
   const { data: artists = [], isLoading, error } = useQuery({
