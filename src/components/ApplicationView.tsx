@@ -8,14 +8,120 @@ import { useAdminDashboard } from "../hooks/useAdminDashboard";
 import { addDays, differenceInDays, format } from 'date-fns';
 import { User } from "@supabase/supabase-js";
 
-const ApplicationView = () => {
-  const { applicationId } = useParams();
+// Define common fields for all application types
+interface BaseApplication {
+  id: string;
+  user_id: string;
+  application_type: "artist" | "industry" | "instrumentalist";
+  name: string;
+  email: string;
+  school: string;
+  note?: string;
+  photo_url?: string;
+  location?: string;
+  bio?: string;
+  social_links?: Record<string, any>;
+  created_at: string;
+  updated_at?: string;
+  reviewed_at?: string;
+  reviewed_by?: string;
+  status_history: Array<{ status: string; timestamp: string; user_id?: string; note?: string }>;
+  modification_requests: string[];
+  current_revision?: number;
+  last_modified_at?: string;
+  last_modified_by?: string;
+  status: "pending" | "pending_user_approval" | "changes_requested" | "approved" | "rejected" | "finalized";
+  admin_approved_profile?: ArtistProfileData | IndustryProfileData | InstrumentalistProfileData | null;
+  finalized_at?: string;
+  finalized_by?: string;
+  user_accepted_at?: string;
+  phone_number?: string;
+}
+
+// Define specific fields for Artist applications
+interface ArtistApplication extends BaseApplication {
+  artist_type?: string;
+  genres?: string | string[];
+  streaming_links?: string | string[];
+  upcoming_show?: string;
+  influences?: string | string[];
+  current_needs?: string;
+  type?: string; // This seems to be a duplicate of artist_type or a different field, clarify if needed
+  years_active?: string;
+}
+
+// Define specific fields for Industry applications
+interface IndustryApplication extends BaseApplication {
+  industry_role?: string;
+  company?: string;
+  years_experience?: number;
+  expertise_areas?: string | string[];
+  favorite_artists?: string | string[];
+  website?: string;
+  linkedin?: string;
+  phone?: string;
+}
+
+// Define specific fields for Instrumentalist applications
+interface InstrumentalistApplication extends BaseApplication {
+  instrument?: string;
+  years_experience?: number;
+  equipment?: string | string[];
+  rate?: string;
+}
+
+// Union type for all possible application structures
+type ApplicationData = ArtistApplication | IndustryApplication | InstrumentalistApplication;
+
+// Define profile data interfaces for admin_approved_profile
+interface BaseProfileData {
+  name: string;
+  photo_url?: string;
+  email: string;
+  location?: string;
+  bio?: string;
+  instagram_link?: string;
+  streaming_link?: string;
+}
+
+interface ArtistProfileData extends BaseProfileData {
+  artist_type?: string;
+  genres?: string[];
+  streaming_links?: string[];
+  influences?: string[];
+  years_active?: string;
+  current_needs?: string;
+  type?: string;
+}
+
+interface IndustryProfileData extends BaseProfileData {
+  industry_role?: string;
+  company?: string;
+  years_experience?: number;
+  expertise_areas?: string[];
+  favorite_artists?: string[];
+  website?: string;
+  linkedin?: string;
+}
+
+interface InstrumentalistProfileData extends BaseProfileData {
+  instrument?: string;
+  years_experience?: number;
+  equipment?: string[];
+  rate?: string;
+}
+
+// Union type for all possible profile data structures
+type ProfileData = ArtistProfileData | IndustryProfileData | InstrumentalistProfileData;
+
+const ApplicationView: React.FC = () => {
+  const { applicationId } = useParams<{ applicationId: string }>();
   const { user } = useAuth() as { user: User | null };
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [application, setApplication] = useState<any>(null);
-  const [profileData, setProfileData] = useState<any>({});
+  const [application, setApplication] = useState<ApplicationData | null>(null);
+  const [profileData, setProfileData] = useState<ProfileData | Record<string, any>>({});
   const [userRole, setUserRole] = useState<string | null>(null);
 
   const { handleFinalizeProfile, handleUnpublishProfile } = useAdminDashboard(user);
@@ -23,7 +129,6 @@ const ApplicationView = () => {
   useEffect(() => {
     const fetchApplication = async () => {
       try {
-        // Check if user is admin
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
@@ -37,7 +142,6 @@ const ApplicationView = () => {
           return;
         }
 
-        // Fetch application with admin_approved_profile
         const { data, error } = await supabase
           .from("applications")
           .select("*, admin_approved_profile")
@@ -45,69 +149,69 @@ const ApplicationView = () => {
           .single();
 
         if (error) throw error;
+
+        const appData = data as ApplicationData;
+
         setApplication({
-          ...data,
-          // Ensure admin_approved_profile contains the current profileData
-          admin_approved_profile: data.admin_approved_profile || {},
+          ...appData,
+          admin_approved_profile: appData.admin_approved_profile || {},
         });
 
-        // Initialize profile data based on application type
-        const initialProfileData = {
-          name: data.name || "",
-          photo_url: data.photo_url || "",
-          email: data.email || "",
-          location: data.location || "",
-          bio: data.bio || "",
-          instagram_link: data.instagram_link || "",
-          streaming_link: data.streaming_link || "",
-          ...(data.application_type === "artist" && {
-            artist_type: data.artist_type || "",
-            genres: Array.isArray(data.genres)
-              ? data.genres
-              : data.genres
-              ? [data.genres]
+        const initialProfileData: ProfileData = {
+          name: appData.name || "",
+          photo_url: appData.photo_url || "",
+          email: appData.email || "",
+          location: appData.location || "",
+          bio: appData.bio || "",
+          instagram_link: (appData as ArtistApplication).instagram_link || "",
+          streaming_link: (appData as ArtistApplication).streaming_links ? (Array.isArray((appData as ArtistApplication).streaming_links) ? (appData as ArtistApplication).streaming_links[0] : (appData as ArtistApplication).streaming_links) : "",
+          ...(appData.application_type === "artist" && {
+            artist_type: (appData as ArtistApplication).artist_type || "",
+            genres: Array.isArray((appData as ArtistApplication).genres)
+              ? (appData as ArtistApplication).genres
+              : (appData as ArtistApplication).genres
+              ? [(appData as ArtistApplication).genres as string]
               : [],
-            streaming_links: Array.isArray(data.streaming_links)
-              ? data.streaming_links
-              : data.streaming_links
-              ? [data.streaming_links]
+            streaming_links: Array.isArray((appData as ArtistApplication).streaming_links)
+              ? (appData as ArtistApplication).streaming_links
+              : (appData as ArtistApplication).streaming_links
+              ? [(appData as ArtistApplication).streaming_links as string]
               : [],
-            influences: Array.isArray(data.influences)
-              ? data.influences
-              : data.influences
-              ? [data.influences]
+            influences: Array.isArray((appData as ArtistApplication).influences)
+              ? (appData as ArtistApplication).influences
+              : (appData as ArtistApplication).influences
+              ? [(appData as ArtistApplication).influences as string]
               : [],
-            years_active: data.years_active || "",
-            current_needs: data.current_needs || "",
-            upcoming_show: data.upcoming_show || "",
-            type: data.type || "",
+            years_active: (appData as ArtistApplication).years_active || "",
+            current_needs: (appData as ArtistApplication).current_needs || "",
+            type: (appData as ArtistApplication).type || "",
           }),
-          ...(data.application_type === "industry" && {
-            industry_role: data.industry_role || "",
-            company: data.company || "",
-            years_experience: data.years_experience || "",
-            expertise_areas: Array.isArray(data.expertise_areas)
-              ? data.expertise_areas
-              : data.expertise_areas
-              ? [data.expertise_areas]
+          ...(appData.application_type === "industry" && {
+            industry_role: (appData as IndustryApplication).industry_role || "",
+            company: (appData as IndustryApplication).company || "",
+            years_experience: (appData as IndustryApplication).years_experience || "",
+            expertise_areas: Array.isArray((appData as IndustryApplication).expertise_areas)
+              ? (appData as IndustryApplication).expertise_areas
+              : (appData as IndustryApplication).expertise_areas
+              ? [(appData as IndustryApplication).expertise_areas as string]
               : [],
-            favorite_artists: Array.isArray(data.favorite_artists)
-              ? data.favorite_artists
-              : data.favorite_artists
-              ? [data.favorite_artists]
+            favorite_artists: Array.isArray((appData as IndustryApplication).favorite_artists)
+              ? (appData as IndustryApplication).favorite_artists
+              : (appData as IndustryApplication).favorite_artists
+              ? [(appData as IndustryApplication).favorite_artists as string]
               : [],
-            website: data.website || "",
-            linkedin: data.linkedin || "",
+            website: (appData as IndustryApplication).website || "",
+            linkedin: (appData as IndustryApplication).linkedin || "",
           }),
-          ...(data.application_type === "instrumentalist" && {
-            instrument: data.instrument || "",
+          ...(appData.application_type === "instrumentalist" && {
+            instrument: (appData as InstrumentalistApplication).instrument || "",
             years_experience:
-              data.admin_approved_profile?.years_experience ||
-              data.years_experience ||
+              (appData as InstrumentalistApplication).years_experience ||
+              (appData as InstrumentalistApplication).years_experience ||
               "",
             equipment:
-              data.admin_approved_profile?.equipment || data.equipment || "",
-            rate: data.admin_approved_profile?.rate || data.rate || "",
+              (appData as InstrumentalistApplication).equipment || (appData as InstrumentalistApplication).equipment || "",
+            rate: (appData as InstrumentalistApplication).rate || (appData as InstrumentalistApplication).rate || "",
           }),
         };
         setProfileData(initialProfileData);
@@ -121,27 +225,25 @@ const ApplicationView = () => {
     fetchApplication();
   }, [applicationId, user?.id, navigate]);
 
-  // Add this effect to keep admin_approved_profile updated
   useEffect(() => {
     if (application) {
-      setApplication((prev: any) => ({
+      setApplication((prev) => ({
         ...prev,
         admin_approved_profile: profileData,
       }));
     }
-  }, [profileData]);
+  }, [application, profileData]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setProfileData((prev: any) => ({
+  const handleInputChange = (field: keyof ProfileData, value: string | number) => {
+    setProfileData((prev: ProfileData) => ({
       ...prev,
-      [field]: field === "years_experience" ? parseInt(value) || "" : value,
+      [field]: field === "years_experience" ? parseInt(value as string) || "" : value,
     }));
   };
 
-  const handleArrayInputChange = (field: string, value: string) => {
-    // Convert comma-separated string to array
+  const handleArrayInputChange = (field: keyof ProfileData, value: string) => {
     const arrayValue = value.split(",").map((item) => item.trim());
-    setProfileData((prev: any) => ({
+    setProfileData((prev: ProfileData) => ({
       ...prev,
       [field]: arrayValue,
     }));
@@ -154,10 +256,11 @@ const ApplicationView = () => {
       const now = new Date().toISOString();
       const autoApprovalDate = addDays(new Date(), 7).toISOString();
 
-      // Clean up profile data by removing unwanted fields
       const cleanedProfileData = { ...profileData };
       const unwantedFields = ["availability", "portfolio_links", "preferred_styles"];
-      unwantedFields.forEach((field) => delete cleanedProfileData[field]);
+      unwantedFields.forEach((field) => delete cleanedProfileData[field as keyof typeof cleanedProfileData]);
+
+      if (!application) return;
 
       const { error: applicationError } = await supabase
         .from("applications")
@@ -194,6 +297,7 @@ const ApplicationView = () => {
   const handleReject = async () => {
     try {
       setLoading(true);
+      if (!application) return;
       const { error } = await supabase
         .from("applications")
         .update({
@@ -223,6 +327,7 @@ const ApplicationView = () => {
   const handleFinalize = async () => {
     try {
       setLoading(true);
+      if (!application) return;
       await handleFinalizeProfile(application);
       navigate("/admin");
     } catch (err) {
@@ -238,6 +343,8 @@ const ApplicationView = () => {
       
       const now = new Date().toISOString();
       const autoApprovalDate = addDays(new Date(), 7).toISOString();
+
+      if (!application) return;
 
       const { error: applicationError } = await supabase
         .from("applications")
@@ -269,7 +376,7 @@ const ApplicationView = () => {
     }
   };
 
-  const daysSinceApplication = application ? 
+  const daysSinceApplication = application?.sent_for_approval_at ? 
     differenceInDays(new Date(), new Date(application.sent_for_approval_at)) : 0;
   
   const showApproveButton = application?.status === "pending_user_approval" && daysSinceApplication >= 7;
@@ -278,6 +385,8 @@ const ApplicationView = () => {
     try {
       setLoading(true);
       const now = new Date().toISOString();
+
+      if (!application) return;
 
       const { error: applicationError } = await supabase
         .from("applications")
@@ -309,6 +418,7 @@ const ApplicationView = () => {
   const handleUnpublish = async () => {
     try {
       setLoading(true);
+      if (!application) return;
       await handleUnpublishProfile(application);
       navigate("/admin");
     } catch (err) {
@@ -490,7 +600,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="text"
-                        value={profileData.artist_type || ""}
+                        value={(profileData as ArtistProfileData).artist_type || ""}
                         onChange={(e) =>
                           handleInputChange("artist_type", e.target.value)
                         }
@@ -503,7 +613,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="text"
-                        value={profileData.years_active || ""}
+                        value={(profileData as ArtistProfileData).years_active || ""}
                         onChange={(e) =>
                           handleInputChange("years_active", e.target.value)
                         }
@@ -516,7 +626,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="text"
-                        value={(profileData.genres || []).join(", ")}
+                        value={((profileData as ArtistProfileData).genres || []).join(", ")}
                         onChange={(e) =>
                           handleArrayInputChange("genres", e.target.value)
                         }
@@ -529,7 +639,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="text"
-                        value={(profileData.influences || []).join(", ")}
+                        value={((profileData as ArtistProfileData).influences || []).join(", ")}
                         onChange={(e) =>
                           handleArrayInputChange("influences", e.target.value)
                         }
@@ -541,7 +651,7 @@ const ApplicationView = () => {
                         Current Needs
                       </label>
                       <textarea
-                        value={profileData.current_needs || ""}
+                        value={(profileData as ArtistProfileData).current_needs || ""}
                         onChange={(e) =>
                           handleInputChange("current_needs", e.target.value)
                         }
@@ -560,7 +670,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="text"
-                        value={profileData.industry_role || ""}
+                        value={(profileData as IndustryProfileData).industry_role || ""}
                         onChange={(e) =>
                           handleInputChange("industry_role", e.target.value)
                         }
@@ -573,7 +683,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="text"
-                        value={profileData.company || ""}
+                        value={(profileData as IndustryProfileData).company || ""}
                         onChange={(e) =>
                           handleInputChange("company", e.target.value)
                         }
@@ -586,7 +696,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="text"
-                        value={profileData.years_experience || ""}
+                        value={(profileData as IndustryProfileData).years_experience || ""}
                         onChange={(e) =>
                           handleInputChange("years_experience", e.target.value)
                         }
@@ -599,7 +709,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="text"
-                        value={(profileData.expertise_areas || []).join(", ")}
+                        value={((profileData as IndustryProfileData).expertise_areas || []).join(", ")}
                         onChange={(e) =>
                           handleArrayInputChange(
                             "expertise_areas",
@@ -615,7 +725,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="url"
-                        value={profileData.website || ""}
+                        value={(profileData as IndustryProfileData).website || ""}
                         onChange={(e) =>
                           handleInputChange("website", e.target.value)
                         }
@@ -628,7 +738,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="text"
-                        value={(profileData.favorite_artists || []).join(", ")}
+                        value={((profileData as IndustryProfileData).favorite_artists || []).join(", ")}
                         onChange={(e) =>
                           handleArrayInputChange(
                             "favorite_artists",
@@ -649,7 +759,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="text"
-                        value={profileData.instrument || ""}
+                        value={(profileData as InstrumentalistProfileData).instrument || ""}
                         onChange={(e) =>
                           handleInputChange("instrument", e.target.value)
                         }
@@ -662,7 +772,7 @@ const ApplicationView = () => {
                       </label>
                       <input
                         type="number"
-                        value={profileData.years_experience || ""}
+                        value={(profileData as InstrumentalistProfileData).years_experience || ""}
                         onChange={(e) =>
                           handleInputChange("years_experience", e.target.value)
                         }
@@ -674,9 +784,9 @@ const ApplicationView = () => {
                         Equipment
                       </label>
                       <textarea
-                        value={profileData.equipment || ""}
+                        value={((profileData as InstrumentalistProfileData).equipment || []).join(", ")}
                         onChange={(e) =>
-                          handleInputChange("equipment", e.target.value)
+                          handleArrayInputChange("equipment", e.target.value)
                         }
                         className="w-full px-3 py-2 bg-covenPurple border border-white/20 rounded text-white focus:border-white focus:outline-none"
                         rows={3}
@@ -686,7 +796,7 @@ const ApplicationView = () => {
                       <label className="block text-gray-300 mb-2">Rate</label>
                       <input
                         type="text"
-                        value={profileData.rate || ""}
+                        value={(profileData as InstrumentalistProfileData).rate || ""}
                         onChange={(e) =>
                           handleInputChange("rate", e.target.value)
                         }
@@ -713,7 +823,7 @@ const ApplicationView = () => {
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-white/20">
-              {application.status === "pending" && (
+              {application?.status === "pending" && (
                 <>
                   <Button
                     onClick={handleReject}
@@ -727,23 +837,16 @@ const ApplicationView = () => {
                   />
                 </>
               )}
-              {application.status === "pending_user_approval" && (
+              {application?.status === "pending_user_approval" && (
                 <>
                   <Button
                     onClick={handleEditProfile}
                     text="Save Changes & Resend"
                     className="bg-blue-600 hover:bg-blue-700 px-6"
                   />
-                  {/* {shouldShowManualApprove(application) && (
-                    <Button
-                      onClick={handleManualApprove}
-                      text="Approve for User"
-                      className="bg-green-600 hover:bg-green-700 px-6"
-                    />
-                  )} */}
                 </>
               )}
-              {application.status === "approved" && (
+              {application?.status === "approved" && (
                 <Button
                   onClick={handleFinalize}
                   text="Create Page"
@@ -751,7 +854,7 @@ const ApplicationView = () => {
                   disabled={loading}
                 />
               )}
-              {application.status === "finalized" && (
+              {application?.status === "finalized" && (
                 <Button
                   onClick={handleUnpublish}
                   text="Unpublish Page"

@@ -1,9 +1,44 @@
 import React, { useRef, useEffect } from "react";
 import useApplicationForm from "../../hooks/useApplicationForm";
 import ImageUpload from "../ImageUpload";
+import { FormProps } from "../../ApplyForm";
 
-const InstrumentalistForm = () => {
-  const initialFormData = {
+interface InstrumentalistFormData {
+  name: string;
+  email: string;
+  instrument: string;
+  school: string;
+  location: string;
+  bio: string;
+  favoriteGenres: string;
+  favoriteArtists: string;
+  note: string;
+  photo: File | null;
+  socialLinks: string;
+  yearsExperience: string;
+  equipment: string;
+  rate: string;
+}
+
+interface TransformedInstrumentalistData {
+  name: string;
+  email: string;
+  instrument: string;
+  school: string;
+  location: string;
+  bio: string;
+  favorite_genres: string;
+  favorite_artists: string;
+  note: string;
+  photo_url: string | null;
+  social_links: { links: string } | null;
+  years_experience: number | null;
+  equipment: string;
+  rate: string;
+}
+
+const InstrumentalistForm: React.FC<FormProps> = () => {
+  const initialFormData: InstrumentalistFormData = {
     name: "",
     email: "",
     instrument: "",
@@ -21,11 +56,11 @@ const InstrumentalistForm = () => {
   };
 
   const { loading, formData, handleChange, handleSubmit, handleFileChange } =
-    useApplicationForm("instrumentalist", initialFormData);
+    useApplicationForm<InstrumentalistFormData>("instrumentalist", initialFormData);
 
-  const noteRef = useRef(null);
+  const noteRef = useRef<HTMLTextAreaElement>(null);
 
-  const transformData = (formData: any, photoUrl: any) => ({
+  const transformData = (formData: InstrumentalistFormData, photoUrl: string | null): TransformedInstrumentalistData => ({
     name: formData.name,
     email: formData.email,
     school: formData.school,
@@ -36,15 +71,15 @@ const InstrumentalistForm = () => {
     favorite_artists: formData.favoriteArtists,
     photo_url: photoUrl,
     note: formData.note,
-    social_links: formData.socialLinks,
-    years_experience: formData.yearsExperience,
+    social_links: formData.socialLinks ? { links: formData.socialLinks } : null,
+    years_experience: parseInt(formData.yearsExperience) || null,
     equipment: formData.equipment,
     rate: formData.rate,
   });
 
-  const onSubmit = (e: any) => handleSubmit(e, transformData);
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, transformData as any);
 
-  const adjustHeight = (ref: any) => {
+  const adjustHeight = (ref: React.RefObject<HTMLTextAreaElement | null>) => {
     if (ref.current) {
       ref.current.style.height = "auto";
       ref.current.style.height = ref.current.scrollHeight + "px";
@@ -71,7 +106,14 @@ const InstrumentalistForm = () => {
         </strong>
       </p>
       <ImageUpload
-        onImageChange={handleFileChange}
+        onImageChange={(file: File | null) => {
+          const mockEvent = {
+            target: {
+              files: file ? [file] : null
+            }
+          } as unknown as React.ChangeEvent<HTMLInputElement>;
+          handleFileChange(mockEvent);
+        }}
         label="Professional Photo of you with your instrument(s) (PDF, Document or Image)"
       />
       <div className="mb-4">

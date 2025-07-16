@@ -8,23 +8,29 @@ import IndustryForm from "./components/forms/IndustryForm";
 import InstrumentalistForm from "./components/forms/InstrumentalistForm";
 import { User } from '@supabase/supabase-js';
 
-interface Application {
+// Define a common interface for form props
+export interface FormProps {
+  onBack: () => void;
+  className?: string;
+}
+
+interface ApplicationData {
   status: string;
   application_type: string;
 }
 
-interface Profile {
+interface ProfileData {
   has_applied: boolean;
   application_id: string | null;
   role: string | null;
-  applications: Application[] | null;
+  applications: ApplicationData[] | null;
 }
 
-const ApplyForm = () => {
+const ApplyForm: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth() as { user: User | null };
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const checkApplicationStatus = async () => {
@@ -35,7 +41,6 @@ const ApplyForm = () => {
       }
 
       try {
-        // Extract role from URL if present
         const urlRole = window.location.pathname.split('/apply/')[1];
         
         const { data: profile, error } = await supabase
@@ -54,18 +59,16 @@ const ApplyForm = () => {
 
         if (error) throw error;
         
-        // Only redirect if application is fully submitted
-        if ((profile as Profile)?.has_applied && (profile as Profile)?.application_id && 
-            (profile as Profile)?.applications?.[0]?.status === 'submitted') {
+        if ((profile as ProfileData)?.has_applied && (profile as ProfileData)?.application_id && 
+            (profile as ProfileData)?.applications?.[0]?.status === 'submitted') {
           navigate('/account');
           return;
         }
 
-        // If URL contains a valid role, use that, otherwise use profile role
         if (urlRole && ['artist', 'industry', 'instrumentalist'].includes(urlRole)) {
           setSelectedRole(urlRole);
-        } else if ((profile as Profile)?.role && (profile as Profile)?.role !== 'other') {
-          setSelectedRole((profile as Profile).role);
+        } else if ((profile as ProfileData)?.role && (profile as ProfileData)?.role !== 'other') {
+          setSelectedRole((profile as ProfileData).role);
         }
       } catch (error) {
         console.error('Error checking application status:', error);
@@ -85,18 +88,16 @@ const ApplyForm = () => {
     }
 
     try {
-      // Check if profile exists
       const { data: existingProfile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', user.id)
         .single();
 
-      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 is "not found" error
+      if (profileError && profileError.code !== 'PGRST116') {
         throw profileError;
       }
 
-      // If profile doesn't exist, create it
       if (!existingProfile) {
         const { error: createError } = await supabase
           .from('profiles')
@@ -108,7 +109,6 @@ const ApplyForm = () => {
 
         if (createError) throw createError;
       } else {
-        // Update existing profile
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
@@ -128,18 +128,18 @@ const ApplyForm = () => {
 
   const renderForm = () => {
     if (selectedRole) {
-      const formProps = {
+      const formProps: FormProps = {
         onBack: () => setSelectedRole(null),
         className: "w-full max-w-xl"
       };
 
       switch (selectedRole) {
         case 'artist':
-          return <ArtistForm {...formProps as any} />;
+          return <ArtistForm {...formProps} />;
         case 'industry':
-          return <IndustryForm {...formProps as any} />;
+          return <IndustryForm {...formProps} />;
         case 'instrumentalist':
-          return <InstrumentalistForm {...formProps as any} />;
+          return <InstrumentalistForm {...formProps} />;
         case 'other':
           return (
             <div className="text-center text-white">
@@ -167,7 +167,6 @@ const ApplyForm = () => {
       }
     }
 
-    // Initial options view
     return (
       <>
         <h1 className="text-4xl text-white mb-8">I am a</h1>

@@ -2,9 +2,42 @@ import React, { useRef, useEffect } from "react";
 import useApplicationForm from "../../hooks/useApplicationForm";
 import { DEFAULT_PROFILE_IMAGE } from "../../constants/images";
 import ImageUpload from "../ImageUpload";
+import { FormProps } from "../../ApplyForm";
 
-const IndustryForm = () => {
-  const initialFormData = {
+interface IndustryFormData {
+  role: string;
+  name: string;
+  email: string;
+  school: string;
+  location: string;
+  company: string;
+  phone: string;
+  bio: string;
+  photo: File | null;
+  favoriteArtists: string;
+  note: string;
+  socialLinks: string;
+  yearsExperience: string;
+}
+
+interface TransformedIndustryData {
+  name: string;
+  email: string;
+  school: string;
+  location: string;
+  company: string;
+  phone: string;
+  bio: string;
+  industry_role: string;
+  photo_url: string | null;
+  favorite_artists: string;
+  note: string;
+  social_links: { links: string } | null;
+  years_experience: number | null;
+}
+
+const IndustryForm: React.FC<FormProps> = () => {
+  const initialFormData: IndustryFormData = {
     role: "",
     name: "",
     email: "",
@@ -21,11 +54,11 @@ const IndustryForm = () => {
   };
 
   const { loading, formData, handleChange, handleFileChange, handleSubmit } =
-    useApplicationForm("industry", initialFormData);
+    useApplicationForm<IndustryFormData>("industry", initialFormData);
 
-  const noteRef = useRef(null);
+  const noteRef = useRef<HTMLTextAreaElement>(null);
 
-  const transformData = (formData: any, photoUrl: any) => ({
+  const transformData = (formData: IndustryFormData, photoUrl: string | null): TransformedIndustryData => ({
     name: formData.name,
     email: formData.email,
     school: formData.school,
@@ -37,16 +70,16 @@ const IndustryForm = () => {
     photo_url: photoUrl,
     favorite_artists: formData.favoriteArtists,
     note: formData.note,
-    social_links: formData.socialLinks,
+    social_links: formData.socialLinks ? { links: formData.socialLinks } : null,
     years_experience: parseInt(formData.yearsExperience) || null,
   });
 
-  const validatePhoneNumber = (phone: any) => {
+  const validatePhoneNumber = (phone: string): boolean => {
     const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
     return phoneRegex.test(phone);
   };
 
-  const formatPhoneNumber = (value: any) => {
+  const formatPhoneNumber = (value: string): string => {
     const phoneNumber = value.replace(/\D/g, '');
     
     if (phoneNumber.length >= 10) {
@@ -55,7 +88,7 @@ const IndustryForm = () => {
     return value;
   };
 
-  const handlePhoneChange = (e: any) => {
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formattedNumber = formatPhoneNumber(e.target.value);
     handleChange({
       ...e,
@@ -67,9 +100,9 @@ const IndustryForm = () => {
     });
   };
 
-  const onSubmit = (e: any) => handleSubmit(e, transformData);
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, transformData as any);
 
-  const adjustHeight = (ref: any) => {
+  const adjustHeight = (ref: React.RefObject<HTMLTextAreaElement | null>) => {
     if (ref.current) {
       ref.current.style.height = "auto";
       ref.current.style.height = ref.current.scrollHeight + "px";
@@ -88,7 +121,14 @@ const IndustryForm = () => {
       <h1 className="font-bold text-3xl mb-4">Apply as an Industry Pro</h1>
 
       <ImageUpload
-        onImageChange={handleFileChange}
+        onImageChange={(file: File | null) => {
+          const mockEvent = {
+            target: {
+              files: file ? [file] : null
+            }
+          } as unknown as React.ChangeEvent<HTMLInputElement>;
+          handleFileChange(mockEvent);
+        }}
         label="Professional Headshot or Photo (PDF, Document or Image)"
       />
 

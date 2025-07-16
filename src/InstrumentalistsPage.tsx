@@ -1,26 +1,42 @@
 import React, { useState, useMemo } from "react";
-import PropTypes from "prop-types";
 import InstrumentalistCard from "./components/InstrumentalistCard";
 import Filter, { FilterConfig } from "./components/Filter";
 import { useInstrumentalists } from "./hooks/useInstrumentalists";
 
-const InstrumentalistsPage = () => {
+interface Instrumentalist {
+  id: number;
+  userId: string;
+  name: string;
+  email?: string;
+  instrument?: string;
+  school?: string;
+  favoriteGenres?: string[];
+  note?: string;
+  profileImageUrl?: string;
+  bio?: string;
+  years_experience?: number;
+  location?: string;
+  photo_url?: string;
+  equipment?: string[];
+  social_links?: Record<string, any>;
+  rate?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+const InstrumentalistsPage: React.FC = () => {
   const [filters, setFilters] = useState<Record<string, unknown>>({});
   const { instrumentalists, loading, error } = useInstrumentalists();
 
-  const filterConfig = useMemo<FilterConfig>(
+  const filterConfig: FilterConfig = useMemo(
     () => ({
       instrument: {
         type: "select",
-        options: [
-          ...new Set(instrumentalists.map((pro) => pro.instrument).filter(Boolean)),
-        ],
+        options: Array.from(new Set(instrumentalists.map((pro) => pro.instrument).filter(Boolean))),
       },
       school: {
         type: "select",
-        options: [
-          ...new Set(instrumentalists.map((pro) => pro.school).filter(Boolean)),
-        ],
+        options: Array.from(new Set(instrumentalists.map((pro) => pro.school).filter(Boolean))),
       },
       name: { type: "search" },
     }),
@@ -28,30 +44,33 @@ const InstrumentalistsPage = () => {
   );
 
   const filteredInstrumentalists = useMemo(() => {
-    return instrumentalists.filter((instrumentalist) => {
+    return instrumentalists.filter((instrumentalist: Instrumentalist) => {
       return Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
         
-        // Handle special location filter object
         if (
           key === 'location' &&
           typeof value === 'object' &&
           value !== null &&
-          'matches' in value &&
           typeof (value as { matches: (loc: string) => boolean }).matches === 'function'
         ) {
             return (value as { matches: (loc: string) => boolean }).matches(
-              (instrumentalist as any).location ?? ""
+              instrumentalist.location ?? ""
             );
         }
         
-        // Handle name search
         if (key === "name") {
           return instrumentalist.name.toLowerCase().includes((value as string).toLowerCase());
         }
         
-        // Handle other filters
-        return instrumentalist[key as keyof typeof instrumentalist] === value;
+        // Handle array fields (favoriteGenres, equipment)
+        if (Array.isArray((instrumentalist as any)[key])) {
+          return ((instrumentalist as any)[key] as string[]).some(item => 
+            (value as string).toLowerCase().includes(item.toLowerCase())
+          );
+        }
+
+        return (instrumentalist as any)[key] === value;
       });
     });
   }, [instrumentalists, filters]);

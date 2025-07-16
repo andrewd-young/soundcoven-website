@@ -3,12 +3,50 @@ import { useAuth } from "../../context/AuthContext";
 import useApplicationForm from "../../hooks/useApplicationForm";
 import ImageUpload from "../ImageUpload";
 import { User } from '@supabase/supabase-js';
+import { FormProps } from "../../ApplyForm";
 
+interface ArtistFormData {
+  name: string;
+  email: string;
+  artistType: string;
+  school: string;
+  location: string;
+  bio: string;
+  phone: string;
+  genres: string;
+  links: string;
+  socialLinks: string;
+  photo: File | null;
+  needs: string;
+  upcomingShow: string;
+  influences: string;
+  note: string;
+  specificConnections: string;
+}
 
-const ArtistForm = () => {
+interface TransformedArtistData {
+  name: string;
+  email: string;
+  school: string;
+  location: string;
+  bio: string;
+  artist_type: string;
+  genres: string;
+  streaming_links: string;
+  social_links: { links: string } | null;
+  photo_url: string | null;
+  current_needs: string;
+  upcoming_show: string;
+  influences: string;
+  industry_role: string;
+  note: string;
+  phone_number: string;
+}
+
+const ArtistForm: React.FC<FormProps> = () => {
   const { user } = useAuth() as { user: User | null };
 
-  const initialFormData = { 
+  const initialFormData: ArtistFormData = {
     name: "",
     email: "",
     artistType: "",
@@ -28,12 +66,12 @@ const ArtistForm = () => {
   };
 
   const { loading, formData, handleChange, handleFileChange, handleSubmit } =
-    useApplicationForm("artist", initialFormData);
+    useApplicationForm<ArtistFormData>("artist", initialFormData);
 
-  const influencesRef = useRef(null);
-  const noteRef = useRef(null);
+  const influencesRef = useRef<HTMLTextAreaElement>(null);
+  const noteRef = useRef<HTMLTextAreaElement>(null);
 
-  const transformData = (formData: any, photoUrl: any) => ({
+  const transformData = (formData: ArtistFormData, photoUrl: string | null): TransformedArtistData => ({
     name: formData.name,
     email: formData.email,
     school: formData.school,
@@ -42,7 +80,7 @@ const ArtistForm = () => {
     artist_type: formData.artistType,
     genres: formData.genres,
     streaming_links: formData.links,
-    social_links: formData.socialLinks ? JSON.parse(`{"links": "${formData.socialLinks}"}`) : null,
+    social_links: formData.socialLinks ? { links: formData.socialLinks } : null,
     photo_url: photoUrl,
     current_needs: formData.needs,
     upcoming_show: formData.upcomingShow,
@@ -52,9 +90,19 @@ const ArtistForm = () => {
     phone_number: formData.phone
   });
 
-  const onSubmit = (e: any) => handleSubmit(e, transformData);
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, transformData as any);
 
-  const adjustHeight = (ref: any) => {
+  const handleImageChange = (file: File | null) => {
+    // Create a mock event that the handleFileChange expects
+    const mockEvent = {
+      target: {
+        files: file ? [file] : null
+      }
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
+    handleFileChange(mockEvent);
+  };
+
+  const adjustHeight = (ref: React.RefObject<HTMLTextAreaElement | null>) => {
     if (ref.current) {
       ref.current.style.height = "auto";
       ref.current.style.height = ref.current.scrollHeight + "px";
@@ -73,7 +121,7 @@ const ArtistForm = () => {
     >
       <h1 className="font-bold text-3xl mb-4">Apply as an Artist</h1>
       <ImageUpload
-        onImageChange={handleFileChange}
+        onImageChange={handleImageChange}
         label="Professional Photo (best photo) of you/your band (PDF, Document or Image)"
       />
       <div className="mb-4">

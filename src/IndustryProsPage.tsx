@@ -1,32 +1,46 @@
 import React, { useState, useMemo } from "react";
-import PropTypes from "prop-types";
 import IndustryCard from "./components/IndustryCard";
 import Filter, { FilterConfig } from "./components/Filter";
 import { useIndustryPros } from "./hooks/useIndustryPros";
 
-const IndustryProsPage = () => {
-  const [filters, setFilters] = useState<any>({});
+interface IndustryProfessional {
+  id: number;
+  userId: string;
+  name: string;
+  role?: string;
+  company?: string;
+  school?: string;
+  location?: string;
+  email?: string;
+  phone?: string;
+  profile_image_url?: string;
+  bio?: string;
+  industry_role?: string;
+  years_experience?: number;
+  social_links?: Record<string, any>;
+  created_at?: string;
+  updated_at?: string;
+  expertise_areas?: string[];
+  favorite_artists?: string[];
+}
+
+const IndustryProsPage: React.FC = () => {
+  const [filters, setFilters] = useState<Record<string, unknown>>({});
   const { industryPros, loading, error } = useIndustryPros();
 
   const filterConfig: FilterConfig = useMemo(
     () => ({
       role: {
         type: "select",
-        options: [
-          ...new Set(industryPros.map((pro) => pro.role).filter(Boolean)),
-        ],
+        options: Array.from(new Set(industryPros.map((pro) => pro.role).filter(Boolean))),
       },
       location: {
         type: "select",
-        options: [
-          ...new Set(industryPros.map((pro) => pro.location).filter(Boolean)),
-        ],
+        options: Array.from(new Set(industryPros.map((pro) => pro.location).filter(Boolean))),
       },
       school: {
         type: "select",
-        options: [
-          ...new Set(industryPros.map((pro) => pro.school).filter(Boolean)),
-        ],
+        options: Array.from(new Set(industryPros.map((pro) => pro.school).filter(Boolean))),
       },
       name: { type: "search" },
     }),
@@ -34,30 +48,33 @@ const IndustryProsPage = () => {
   );
 
   const filteredPros = useMemo(() => {
-    return industryPros.filter((pro) => {
+    return industryPros.filter((pro: IndustryProfessional) => {
       return Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
         
-        // Handle special location filter object
         if (
           key === 'location' &&
           typeof value === 'object' &&
           value !== null &&
-          'matches' in value &&
           typeof (value as { matches: (loc: string) => boolean }).matches === 'function'
         ) {
           return (value as { matches: (loc: string) => boolean }).matches(
-            (pro as any).location ?? ""
+            pro.location ?? ""
           );
         }
         
-        // Handle name search
         if (key === "name") {
           return pro.name.toLowerCase().includes((value as string).toLowerCase());
         }
         
-        // Handle other filters
-        return pro[key as keyof typeof pro] === value;
+        // Handle array fields (expertise_areas, favorite_artists)
+        if (Array.isArray((pro as any)[key])) {
+          return ((pro as any)[key] as string[]).some(item => 
+            (value as string).toLowerCase().includes(item.toLowerCase())
+          );
+        }
+
+        return (pro as any)[key] === value;
       });
     });
   }, [industryPros, filters]);
@@ -107,26 +124,6 @@ const IndustryProsPage = () => {
       </div>
     </section>
   );
-};
-
-IndustryProsPage.propTypes = {
-  industryPros: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-      role: PropTypes.string,
-      company: PropTypes.string,
-      school: PropTypes.string,
-      location: PropTypes.string,
-      email: PropTypes.string,
-      phone: PropTypes.string,
-      profile_image_url: PropTypes.string,
-      bio: PropTypes.string,
-      // These will be added later
-      // expertise: PropTypes.arrayOf(PropTypes.string),
-      // notableClients: PropTypes.arrayOf(PropTypes.string),
-    })
-  ),
 };
 
 export default IndustryProsPage;

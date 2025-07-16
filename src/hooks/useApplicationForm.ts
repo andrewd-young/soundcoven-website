@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import supabase from '../utils/supabase';
 import { compressImage } from '../utils/imageUtils';
+import { User } from '@supabase/supabase-js';
 
-const useApplicationForm = (applicationType, initialFormData) => {
-  const { user } = useAuth();
+const useApplicationForm = <T extends Record<string, any>>(applicationType: string, initialFormData: T) => {
+  const { user } = useAuth() as { user: User | null };
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState<T>(initialFormData);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name === "note") {
       const words = value.trim().split(/\s+/);
@@ -24,11 +25,11 @@ const useApplicationForm = (applicationType, initialFormData) => {
     }
   };
 
-  const handleFileChange = (e) => {
-    setFormData(prev => ({ ...prev, photo: e.target.files[0] }));
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, photo: e.target.files?.[0] || null }));
   };
 
-  const uploadPhoto = async (file) => {
+  const uploadPhoto = async (file: File) => {
     if (!file) return null;
     
     try {
@@ -42,7 +43,7 @@ const useApplicationForm = (applicationType, initialFormData) => {
       });
 
       // Always use .jpg extension since we're converting to JPEG
-      const fileName = `${user.id}.jpg`;
+      const fileName = `${user?.id}.jpg`;
       const filePath = `applications/${applicationType}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
@@ -73,7 +74,7 @@ const useApplicationForm = (applicationType, initialFormData) => {
     }
   };
 
-  const handleSubmit = async (e, transformData) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, transformData: (formData: T, photoUrl: string | null) => Record<string, unknown>) => {
     e.preventDefault();
     setLoading(true);
 
@@ -94,12 +95,12 @@ const useApplicationForm = (applicationType, initialFormData) => {
           {
             status: 'pending',
             timestamp: new Date().toISOString(),
-            user_id: user.id
+            user_id: user?.id
           }
         ],
         updated_at: new Date().toISOString(),
         application_type: applicationType,
-        user_id: user.id,
+        user_id: user?.id,
         current_revision: 1
       };
 
@@ -128,14 +129,15 @@ const useApplicationForm = (applicationType, initialFormData) => {
           application_id: newApplication.id,
           updated_at: new Date().toISOString()
         })
-        .eq('id', user.id);
+        .eq('id', user?.id);
 
       if (profileError) throw profileError;
       
       navigate('/account');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting application:', error);
-      alert(error.message || 'Error submitting application. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Error submitting application. Please try again.';
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
