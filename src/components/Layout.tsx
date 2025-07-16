@@ -2,14 +2,19 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import supabase from "../utils/supabase";
-import Navbar from "./NavBar";
+import Navigation from "./Navigation";
 import Footer from "./Footer";
+import { User } from "@supabase/supabase-js";
 
-const Layout = ({ children }) => {
-  const { user } = useAuth();
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { user } = useAuth() as { user: User | null };
   const navigate = useNavigate();
   const location = useLocation();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -22,7 +27,7 @@ const Layout = ({ children }) => {
         const { data: profile, error } = await supabase
           .from("profiles")
           .select("role")
-          .eq("id", user.id)
+          .eq("id", user?.id)
           .single();
 
         if (error && error.code !== "PGRST116") {
@@ -49,12 +54,12 @@ const Layout = ({ children }) => {
     };
 
     checkProfile();
-  }, [user, navigate, location.pathname]);
+  }, [user?.id, navigate, location.pathname]);
 
   if (loading) {
     return (
       <div className="bg-covenPurple min-h-screen flex flex-col overflow-x-hidden">
-        <Navbar />
+        <Navigation />
         <div className="flex justify-center items-center flex-grow">
           <div className="animate-pulse space-y-4 w-full max-w-2xl mx-auto p-4">
             <div className="h-4 bg-gray-700 rounded w-3/4"></div>
@@ -69,7 +74,7 @@ const Layout = ({ children }) => {
 
   return (
     <div className="bg-covenPurple min-h-screen flex flex-col overflow-x-hidden">
-      <Navbar />
+      <Navigation />
       <main className="flex-grow">{children}</main>
       <Footer />
     </div>

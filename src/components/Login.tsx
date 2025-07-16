@@ -1,23 +1,27 @@
 import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
-// import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import Button from "./common/Button";
 import supabase from "../utils/supabase";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { User } from '@supabase/supabase-js';
 
-const Login = ({ title, mode: initialMode }) => {
+interface LoginProps {
+  title: string;
+  mode?: "login" | "signup" | "confirm";
+}
+
+const Login: React.FC<LoginProps> = ({ title, mode: initialMode }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | null };
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [mode, setMode] = useState(initialMode || "signup");
+  const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<"login" | "signup" | "confirm">(initialMode || "signup");
   const [signupConfirmed, setSignupConfirmed] = useState(false);
 
   useEffect(() => {
@@ -425,9 +429,6 @@ const Login = ({ title, mode: initialMode }) => {
   );
 };
 
-Login.propTypes = {
-  title: PropTypes.string.isRequired,
-  mode: PropTypes.oneOf(["login", "signup", "confirm"]),
-};
+
 
 export default Login;

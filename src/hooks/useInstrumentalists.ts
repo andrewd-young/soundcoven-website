@@ -30,7 +30,6 @@ export const useInstrumentalists = () => {
     queryKey: ['instrumentalists'],
     queryFn: fetchInstrumentalists,
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
-    cacheTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
   });
 
   return {

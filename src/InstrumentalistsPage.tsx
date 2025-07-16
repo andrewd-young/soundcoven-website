@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import InstrumentalistCard from "./components/InstrumentalistCard";
-import Filter from "./components/Filter";
+import Filter, { FilterConfig } from "./components/Filter";
 import { useInstrumentalists } from "./hooks/useInstrumentalists";
 
 const InstrumentalistsPage = () => {
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<Record<string, unknown>>({});
   const { instrumentalists, loading, error } = useInstrumentalists();
 
-  const filterConfig = useMemo(
+  const filterConfig = useMemo<FilterConfig>(
     () => ({
       instrument: {
         type: "select",
@@ -33,17 +33,25 @@ const InstrumentalistsPage = () => {
         if (!value) return true;
         
         // Handle special location filter object
-        if (key === 'location' && typeof value === 'object') {
-          return value.matches(instrumentalist.location);
+        if (
+          key === 'location' &&
+          typeof value === 'object' &&
+          value !== null &&
+          'matches' in value &&
+          typeof (value as { matches: (loc: string) => boolean }).matches === 'function'
+        ) {
+            return (value as { matches: (loc: string) => boolean }).matches(
+              (instrumentalist as any).location ?? ""
+            );
         }
         
         // Handle name search
         if (key === "name") {
-          return instrumentalist.name.toLowerCase().includes(value.toLowerCase());
+          return instrumentalist.name.toLowerCase().includes((value as string).toLowerCase());
         }
         
         // Handle other filters
-        return instrumentalist[key] === value;
+        return instrumentalist[key as keyof typeof instrumentalist] === value;
       });
     });
   }, [instrumentalists, filters]);

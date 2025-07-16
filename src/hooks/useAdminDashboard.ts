@@ -3,15 +3,15 @@ import { useNavigate } from "react-router-dom";
 import supabase from "../utils/supabase";
 import { differenceInDays } from "date-fns";
 
-export const useAdminDashboard = (user) => {
+export const useAdminDashboard = (user: any) => {
   const navigate = useNavigate();
-  const [applications, setApplications] = useState([]);
-  const [filteredApplications, setFilteredApplications] = useState([]);
+  const [applications, setApplications] = useState<any[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState('pending');
 
-  const getTableName = (applicationType) => {
+  const getTableName = (applicationType: string) => {
     switch (applicationType) {
       case 'artist':
         return 'artists';
@@ -46,13 +46,13 @@ export const useAdminDashboard = (user) => {
       if (error) throw error;
       setApplications(data || []);
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
   }, [user, navigate]);
 
-  const handleFinalizeProfile = async (application) => {
+  const handleFinalizeProfile = async (application: any) => {
     try {
       // Define the allowed fields for each profile type
       const allowedFields = {
@@ -124,7 +124,7 @@ export const useAdminDashboard = (user) => {
       ];
 
       // Get the allowed fields for this application type
-      const allowed = allowedFields[application.application_type];
+      const allowed = allowedFields[application.application_type as keyof typeof allowedFields];
       if (!allowed) {
         throw new Error(`Unknown application type: ${application.application_type}`);
       }
@@ -169,21 +169,21 @@ export const useAdminDashboard = (user) => {
         genres: Array.isArray(application.genres) 
           ? application.genres 
           : typeof application.genres === 'string'
-          ? application.genres.split(',').map(g => g.trim())
+          ? application.genres.split(',').map((g: string) => g.trim())
           : Array.isArray(application.admin_approved_profile.genres)
           ? application.admin_approved_profile.genres
-          : typeof application.admin_approved_profile.genres === 'string'
-          ? application.admin_approved_profile.genres.split(',').map(g => g.trim())
+          : typeof application.admin_approved_profile.genres === 'string' 
+          ? application.admin_approved_profile.genres.split(',').map((g: string) => g.trim())
           : [],
         // Handle influences similarly
         influences: Array.isArray(application.influences)
           ? application.influences
           : typeof application.influences === 'string'
-          ? application.influences.split(',').map(i => i.trim())
+          ? application.influences.split(',').map((i: string) => i.trim())
           : Array.isArray(application.admin_approved_profile.influences)
           ? application.admin_approved_profile.influences
-          : typeof application.admin_approved_profile.influences === 'string'
-          ? application.admin_approved_profile.influences.split(',').map(i => i.trim())
+          : typeof application.admin_approved_profile.influences === 'string' 
+          ? application.admin_approved_profile.influences.split(',').map((i: string) => i.trim())
           : [],
         favorite_artists: application.favorite_artists || [],
         profile_image_url: application.photo_url || null,
@@ -200,7 +200,7 @@ export const useAdminDashboard = (user) => {
         };
 
         const rawArtistType = (application.admin_approved_profile.artist_type || '').toLowerCase();
-        profileData.artist_type = artistTypeMap[rawArtistType] || 'solo';
+        profileData.artist_type = artistTypeMap[rawArtistType as keyof typeof artistTypeMap] || 'solo';
       }
 
       // Remove standalone website and linkedin fields as they're now in social_links
@@ -210,12 +210,12 @@ export const useAdminDashboard = (user) => {
       // Create a new object with only the allowed fields and proper array formatting
       const cleanedProfileData = Object.keys(profileData)
         .filter(key => allowed.includes(key))
-        .reduce((obj, key) => {
+        .reduce((obj: any, key: string) => {
           if (profileData[key] !== undefined && profileData[key] !== null) {
             if (arrayFields.includes(key)) {
               obj[key] = Array.isArray(profileData[key]) 
                 ? profileData[key]
-                : profileData[key].split(',').map(item => item.trim());
+                : profileData[key].split(',').map((item: string) => item.trim());
             } else {
               obj[key] = profileData[key];
             }
@@ -278,7 +278,7 @@ export const useAdminDashboard = (user) => {
     }
   };
 
-  const handleManualApprove = async (application) => {
+  const handleManualApprove = async (application: any) => {
     try {
       const now = new Date().toISOString();
       
@@ -315,7 +315,7 @@ export const useAdminDashboard = (user) => {
     }
   };
 
-  const handleUnpublishProfile = async (application) => {
+  const handleUnpublishProfile = async (application: any) => {
     try {
       // Delete the profile from the appropriate table
       const { error: deleteError } = await supabase
@@ -385,14 +385,14 @@ export const useAdminDashboard = (user) => {
   };
 };
 
-export const shouldShowManualApprove = (application) => {
+export const shouldShowManualApprove = (application: any) => {
   if (!application || application.status !== 'pending_user_approval') {
     return false;
   }
   
   // Find the pending_user_approval status entry in history
   const pendingUserApprovalEntry = application.status_history?.find(
-    entry => entry.status === 'pending_user_approval'
+    (entry: any) => entry.status === 'pending_user_approval'
   );
   
   if (!pendingUserApprovalEntry) {

@@ -32,6 +32,8 @@ import { HelmetProvider } from "react-helmet-async";
 import Terms from "./components/Terms";
 import MetaTags from "./components/MetaTags";
 
+
+
 const ScrollToHashElement = () => {
   const { hash } = useLocation();
 

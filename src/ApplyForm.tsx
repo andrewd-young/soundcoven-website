@@ -6,11 +6,24 @@ import Button from "./components/common/Button";
 import ArtistForm from "./components/forms/ArtistForm";
 import IndustryForm from "./components/forms/IndustryForm";
 import InstrumentalistForm from "./components/forms/InstrumentalistForm";
+import { User } from '@supabase/supabase-js';
+
+interface Application {
+  status: string;
+  application_type: string;
+}
+
+interface Profile {
+  has_applied: boolean;
+  application_id: string | null;
+  role: string | null;
+  applications: Application[] | null;
+}
 
 const ApplyForm = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [selectedRole, setSelectedRole] = useState(null);
+  const { user } = useAuth() as { user: User | null };
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,8 +55,8 @@ const ApplyForm = () => {
         if (error) throw error;
         
         // Only redirect if application is fully submitted
-        if (profile?.has_applied && profile?.application_id && 
-            profile?.applications?.status === 'submitted') {
+        if ((profile as Profile)?.has_applied && (profile as Profile)?.application_id && 
+            (profile as Profile)?.applications?.[0]?.status === 'submitted') {
           navigate('/account');
           return;
         }
@@ -51,8 +64,8 @@ const ApplyForm = () => {
         // If URL contains a valid role, use that, otherwise use profile role
         if (urlRole && ['artist', 'industry', 'instrumentalist'].includes(urlRole)) {
           setSelectedRole(urlRole);
-        } else if (profile?.role && profile.role !== 'other') {
-          setSelectedRole(profile.role);
+        } else if ((profile as Profile)?.role && (profile as Profile)?.role !== 'other') {
+          setSelectedRole((profile as Profile).role);
         }
       } catch (error) {
         console.error('Error checking application status:', error);
@@ -64,7 +77,7 @@ const ApplyForm = () => {
     checkApplicationStatus();
   }, [user, navigate]);
 
-  const handleOptionClick = async (option) => {
+  const handleOptionClick = async (option: string) => {
     if (!user) {
       sessionStorage.setItem('intendedPath', `/apply/${option}`);
       navigate('/login');
@@ -122,11 +135,11 @@ const ApplyForm = () => {
 
       switch (selectedRole) {
         case 'artist':
-          return <ArtistForm {...formProps} />;
+          return <ArtistForm {...formProps as any} />;
         case 'industry':
-          return <IndustryForm {...formProps} />;
+          return <IndustryForm {...formProps as any} />;
         case 'instrumentalist':
-          return <InstrumentalistForm {...formProps} />;
+          return <InstrumentalistForm {...formProps as any} />;
         case 'other':
           return (
             <div className="text-center text-white">

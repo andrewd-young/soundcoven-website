@@ -1,29 +1,42 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 
-const Filter = ({ filters, onFilterChange }) => {
+// Define the types for filter config
+export type FilterOption = string;
+export type FilterType = 'select' | 'search';
+
+export interface SelectFilterConfig {
+  type: 'select';
+  options: FilterOption[];
+}
+export interface SearchFilterConfig {
+  type: 'search';
+}
+export type FilterConfig = Record<string, SelectFilterConfig | SearchFilterConfig>;
+
+interface FilterProps {
+  filters: FilterConfig;
+  onFilterChange: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+}
+
+const Filter = ({ filters, onFilterChange }: FilterProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleFilterChange = (key, value, config) => {
+  const handleFilterChange = (key: string, value: string, config: SelectFilterConfig | SearchFilterConfig) => {
     onFilterChange((prev) => {
       if (key === 'location') {
-        // For location, we'll pass both the selected value and a comparison function
         return {
           ...prev,
           [key]: {
             value: value,
-            matches: (itemLocation) => {
-              if (!value) return true; // If no filter value, match everything
-              if (!itemLocation) return false; // If no item location, don't match
-              
-              // Split the item's location string and check if any part matches the filter value
+            matches: (itemLocation: string) => {
+              if (!value) return true;
+              if (!itemLocation) return false;
               const locationParts = itemLocation.split('/').map(loc => loc.trim());
               return locationParts.some(loc => loc === value);
             }
           }
         };
       }
-      // For other filters, keep the original behavior
       return { ...prev, [key]: value };
     });
   };
@@ -46,18 +59,16 @@ const Filter = ({ filters, onFilterChange }) => {
                 onChange={(e) => handleFilterChange(key, e.target.value, config)}
               >
                 <option value="">All {key}s</option>
-                {Array.isArray(config.options) ? 
-                  config.options.flatMap(option => {
-                    // If the option contains multiple locations, split them
+                {Array.isArray((config as SelectFilterConfig).options) ? 
+                  (config as SelectFilterConfig).options.flatMap(option => {
                     if (typeof option === 'string' && option.includes('/')) {
                       return option.split('/').map(loc => loc.trim());
                     }
                     return option;
                   })
-                  // Remove duplicates and sort
                   .filter((value, index, self) => self.indexOf(value) === index)
                   .sort()
-                  .map((option) => (
+                  .map(option => (
                     <option key={option} value={option}>
                       {option}
                     </option>
@@ -77,11 +88,6 @@ const Filter = ({ filters, onFilterChange }) => {
       </div>
     </div>
   );
-};
-
-Filter.propTypes = {
-  filters: PropTypes.object.isRequired,
-  onFilterChange: PropTypes.func.isRequired,
 };
 
 export default Filter;

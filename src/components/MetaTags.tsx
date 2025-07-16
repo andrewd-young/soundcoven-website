@@ -1,7 +1,14 @@
+import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 
-const MetaTags = ({ title, description, image, type = "website" }) => {
+interface MetaTagsProps {
+  title: string;
+  description: string;
+  image: string;
+}
+
+const MetaTags = ({ title, description, image }: MetaTagsProps) => {
   const location = useLocation();
   const currentUrl = `${window.location.origin}${location.pathname}`;
 
@@ -22,7 +29,7 @@ const MetaTags = ({ title, description, image, type = "website" }) => {
       <meta name="description" content={finalDescription} />
 
       {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
+      <meta property="og:type" content="website" />
       <meta property="og:site_name" content="Coven" />
       <meta property="og:url" content={currentUrl} />
       <meta property="og:title" content={finalTitle} />

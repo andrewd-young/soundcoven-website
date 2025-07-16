@@ -1,14 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGuitar, faGraduationCap } from '@fortawesome/free-solid-svg-icons';
 import Tag from './common/Tag';
-import { AuthImage } from './common/AuthImage';
+import AuthImage from './common/AuthImage';
 
 const DEFAULT_IMAGE = 'https://placehold.co/600x400?text=Instrumentalist+Image';
 
-const InstrumentalistCard = ({ instrumentalist }) => {
+interface InstrumentalistCardProps {
+  instrumentalist: {
+    id: number;
+    name: string;
+    instrument?: string;
+    school?: string;
+    profileImageUrl?: string;
+  };
+}
+
+const InstrumentalistCard: React.FC<InstrumentalistCardProps> = ({ instrumentalist }) => {
   return (
     <Link to={`/instrumentalists/${instrumentalist.id}`}>
       <div className="bg-covenLightPurple rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300">
@@ -20,9 +29,7 @@ const InstrumentalistCard = ({ instrumentalist }) => {
             height={300}
             className="w-full h-full rounded-t-lg"
             objectFit="cover"
-            objectPosition="top"
             fallbackSrc={DEFAULT_IMAGE}
-            style={{ width: '100%', height: '100%' }}
           />
         </div>
         <div className="p-6">

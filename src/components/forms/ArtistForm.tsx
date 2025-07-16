@@ -1,50 +1,60 @@
 import React, { useRef, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
 import useApplicationForm from "../../hooks/useApplicationForm";
 import ImageUpload from "../ImageUpload";
+import { User } from '@supabase/supabase-js';
 
-const InstrumentalistForm = () => {
-  const initialFormData = {
+
+const ArtistForm = () => {
+  const { user } = useAuth() as { user: User | null };
+
+  const initialFormData = { 
     name: "",
     email: "",
-    instrument: "",
+    artistType: "",
     school: "",
     location: "",
     bio: "",
-    favoriteGenres: "",
-    favoriteArtists: "",
-    note: "",
-    photo: null,
+    phone: "",
+    genres: "",
+    links: "",
     socialLinks: "",
-    yearsExperience: "",
-    equipment: "",
-    rate: "",
+    photo: null,
+    needs: "",
+    upcomingShow: "",
+    influences: "",
+    note: "",
+    specificConnections: "",
   };
 
-  const { loading, formData, handleChange, handleSubmit, handleFileChange } =
-    useApplicationForm("instrumentalist", initialFormData);
+  const { loading, formData, handleChange, handleFileChange, handleSubmit } =
+    useApplicationForm("artist", initialFormData);
 
+  const influencesRef = useRef(null);
   const noteRef = useRef(null);
 
-  const transformData = (formData, photoUrl) => ({
+  const transformData = (formData: any, photoUrl: any) => ({
     name: formData.name,
     email: formData.email,
     school: formData.school,
     location: formData.location,
     bio: formData.bio,
-    instrument: formData.instrument,
-    favorite_genres: formData.favoriteGenres,
-    favorite_artists: formData.favoriteArtists,
+    artist_type: formData.artistType,
+    genres: formData.genres,
+    streaming_links: formData.links,
+    social_links: formData.socialLinks ? JSON.parse(`{"links": "${formData.socialLinks}"}`) : null,
     photo_url: photoUrl,
+    current_needs: formData.needs,
+    upcoming_show: formData.upcomingShow,
+    influences: formData.influences,
+    industry_role: formData.specificConnections,
     note: formData.note,
-    social_links: formData.socialLinks,
-    years_experience: formData.yearsExperience,
-    equipment: formData.equipment,
-    rate: formData.rate,
+    phone_number: formData.phone
   });
 
-  const onSubmit = (e) => handleSubmit(e, transformData);
+  const onSubmit = (e: any) => handleSubmit(e, transformData);
 
-  const adjustHeight = (ref) => {
+  const adjustHeight = (ref: any) => {
     if (ref.current) {
       ref.current.style.height = "auto";
       ref.current.style.height = ref.current.scrollHeight + "px";
@@ -52,30 +62,39 @@ const InstrumentalistForm = () => {
   };
 
   useEffect(() => {
+    adjustHeight(influencesRef);
     adjustHeight(noteRef);
-  }, [formData.note]);
+  }, [formData.influences, formData.note]);
 
   return (
     <form
       onSubmit={onSubmit}
       className="text-white p-8 rounded-lg mx-auto md:mt-2 lg:mt-5"
     >
-      <h1 className="font-bold text-3xl mb-4">Apply as an Instrumentalist</h1>
-      <p className="mb-4">
-        Do you play one, two, or even three instruments (vocals included) and
-        want to make your skills available to artists or producers who might
-        need them in their music? &nbsp;
-        <strong>
-          You can fill out this form even if you&apos;ve already completed the
-          Talent or Industry form!
-        </strong>
-      </p>
+      <h1 className="font-bold text-3xl mb-4">Apply as an Artist</h1>
       <ImageUpload
         onImageChange={handleFileChange}
-        label="Professional Photo of you with your instrument(s) (PDF, Document or Image)"
+        label="Professional Photo (best photo) of you/your band (PDF, Document or Image)"
       />
       <div className="mb-4">
-        <label className="block mb-2">Name</label>
+        <label className="block mb-2">
+          Are you a Solo Artist, Band, DJ or Producer?
+        </label>
+        <select
+          name="artistType"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          required
+        >
+          <option value="">Choose one</option>
+          <option value="Solo Artist">Solo Artist</option>
+          <option value="Band">Band</option>
+          <option value="DJ">DJ</option>
+          <option value="Producer">Producer</option>
+        </select>
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Name(s)</label>
         <input
           name="name"
           type="text"
@@ -85,20 +104,10 @@ const InstrumentalistForm = () => {
         />
       </div>
       <div className="mb-4">
-        <label className="block mb-2">Email</label>
+        <label className="block mb-2">Email(s)</label>
         <input
           name="email"
           type="email"
-          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block mb-2">Instrument</label>
-        <input
-          name="instrument"
-          type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleChange}
           required
@@ -131,31 +140,62 @@ const InstrumentalistForm = () => {
           name="bio"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleChange}
-          placeholder="Tell us about your musical background and experience"
-          rows="4"
+          placeholder="Tell us about yourself and your music"
+          rows={4}
           required
         ></textarea>
       </div>
       <div className="mb-4">
-        <label className="block mb-2">Favorite Artists</label>
+        <label className="block mb-2">Phone</label>
         <input
-          name="favoriteArtists"
-          type="text"
+          name="phone"
+          type="tel"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleChange}
-          placeholder="Separate artists with commas"
+          placeholder="(123) 456-7890"
           required
         />
       </div>
       <div className="mb-4">
-        <label className="block mb-2">Favorite genres to play</label>
+        <label className="block mb-2">Genre(s)</label>
         <input
-          name="favoriteGenres"
+          name="genres"
           type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleChange}
           required
         />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Links to streaming platforms</label>
+        <input
+          name="links"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="Must provide at least one link to streamable music"
+          required
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Upcoming live show</label>
+        <input
+          name="upcomingShow"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          placeholder="N/A if not applicable"
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block mb-2">Influences on your music</label>
+        <textarea
+          name="influences"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={handleChange}
+          ref={influencesRef}
+          placeholder="Artists, producers, creatives, etc."
+        ></textarea>
       </div>
       <div className="mb-4">
         <label className="block mb-2">Social Media Links</label>
@@ -168,35 +208,13 @@ const InstrumentalistForm = () => {
         />
       </div>
       <div className="mb-4">
-        <label className="block mb-2">Years of Experience</label>
+        <label className="block mb-2">Are you looking for any specific connections?</label>
         <input
-          name="yearsExperience"
-          type="number"
-          min="0"
-          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
-          placeholder="Number of years"
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block mb-2">Equipment</label>
-        <input
-          name="equipment"
+          name="specificConnections"
           type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleChange}
-          placeholder="Equipment you use (separate with commas)"
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block mb-2">Rate</label>
-        <input
-          name="rate"
-          type="text"
-          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
-          placeholder="Rate for your services"
+          placeholder="e.g., producer, manager, guitar player"
         />
       </div>
       <div className="mb-4">
@@ -207,7 +225,7 @@ const InstrumentalistForm = () => {
           value={formData.note}
           onChange={handleChange}
           ref={noteRef}
-          placeholder="Anything you would want people to know about you? (styles, equipment, rate, etc.)"
+          placeholder="Anything you would want people to know about you?"
         ></textarea>
         <p className="text-sm text-gray-400">
           {formData.note.trim() ? formData.note.trim().split(/\s+/).length : 0}{" "}
@@ -225,4 +243,4 @@ const InstrumentalistForm = () => {
   );
 };
 
-export default InstrumentalistForm;
+export default ArtistForm;

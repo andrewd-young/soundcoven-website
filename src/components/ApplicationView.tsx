@@ -3,20 +3,20 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import supabase from "../utils/supabase";
 import Button from "./common/Button";
-import { AuthImage } from "./common/AuthImage";
+import AuthImage from "./common/AuthImage";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
-import { addDays, isPast, differenceInDays, format } from 'date-fns';
-import { shouldShowManualApprove } from "../hooks/useAdminDashboard";
+import { addDays, differenceInDays, format } from 'date-fns';
+import { User } from "@supabase/supabase-js";
 
 const ApplicationView = () => {
   const { applicationId } = useParams();
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | null };
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [application, setApplication] = useState(null);
-  const [profileData, setProfileData] = useState({});
-  const [userRole, setUserRole] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [application, setApplication] = useState<any>(null);
+  const [profileData, setProfileData] = useState<any>({});
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const { handleFinalizeProfile, handleUnpublishProfile } = useAdminDashboard(user);
 
@@ -27,7 +27,7 @@ const ApplicationView = () => {
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
-          .eq("id", user.id)
+          .eq("id", user?.id)
           .single();
 
         if (profileError) throw profileError;
@@ -112,36 +112,36 @@ const ApplicationView = () => {
         };
         setProfileData(initialProfileData);
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setLoading(false);
       }
     };
 
     fetchApplication();
-  }, [applicationId, user.id, navigate]);
+  }, [applicationId, user?.id, navigate]);
 
   // Add this effect to keep admin_approved_profile updated
   useEffect(() => {
     if (application) {
-      setApplication((prev) => ({
+      setApplication((prev: any) => ({
         ...prev,
         admin_approved_profile: profileData,
       }));
     }
   }, [profileData]);
 
-  const handleInputChange = (field, value) => {
-    setProfileData((prev) => ({
+  const handleInputChange = (field: string, value: string) => {
+    setProfileData((prev: any) => ({
       ...prev,
       [field]: field === "years_experience" ? parseInt(value) || "" : value,
     }));
   };
 
-  const handleArrayInputChange = (field, value) => {
+  const handleArrayInputChange = (field: string, value: string) => {
     // Convert comma-separated string to array
     const arrayValue = value.split(",").map((item) => item.trim());
-    setProfileData((prev) => ({
+    setProfileData((prev: any) => ({
       ...prev,
       [field]: arrayValue,
     }));
@@ -164,7 +164,7 @@ const ApplicationView = () => {
         .update({
           status: "pending_user_approval",
           reviewed_at: now,
-          reviewed_by: user.id,
+          reviewed_by: user?.id,
           admin_approved_profile: cleanedProfileData,
           sent_for_approval_at: now,
           auto_approval_date: autoApprovalDate,
@@ -173,19 +173,19 @@ const ApplicationView = () => {
             {
               status: "pending_user_approval",
               timestamp: now,
-              user_id: user.id,
+              user_id: user?.id,
             },
           ],
           current_revision: (application.current_revision || 1) + 1,
           last_modified_at: now,
-          last_modified_by: user.id,
+          last_modified_by: user?.id,
         })
         .eq("id", application.id);
 
       if (applicationError) throw applicationError;
       navigate(userRole === "admin" ? "/admin" : "/account");
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -199,13 +199,13 @@ const ApplicationView = () => {
         .update({
           status: "rejected",
           reviewed_at: new Date().toISOString(),
-          reviewed_by: user.id,
+          reviewed_by: user?.id,
           status_history: [
             ...(application.status_history || []),
             {
               status: "rejected",
               timestamp: new Date().toISOString(),
-              user_id: user.id,
+              user_id: user?.id,
             },
           ],
         })
@@ -214,7 +214,7 @@ const ApplicationView = () => {
       if (error) throw error;
       navigate("/admin");
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -226,7 +226,7 @@ const ApplicationView = () => {
       await handleFinalizeProfile(application);
       navigate("/admin");
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -244,7 +244,7 @@ const ApplicationView = () => {
         .update({
           admin_approved_profile: profileData,
           last_modified_at: now,
-          last_modified_by: user.id,
+          last_modified_by: user?.id,
           sent_for_approval_at: now,
           auto_approval_date: autoApprovalDate,
           status: "pending_user_approval",
@@ -253,7 +253,7 @@ const ApplicationView = () => {
             {
               status: "pending_user_approval",
               timestamp: now,
-              user_id: user.id,
+              user_id: user?.id,
               note: "Profile edited by admin"
             },
           ],
@@ -263,7 +263,7 @@ const ApplicationView = () => {
       if (applicationError) throw applicationError;
       navigate("/admin");
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -284,13 +284,13 @@ const ApplicationView = () => {
         .update({
           status: "approved",
           last_modified_at: now,
-          last_modified_by: user.id,
+          last_modified_by: user?.id,
           status_history: [
             ...(application.status_history || []),
             {
               status: "approved",
               timestamp: now,
-              user_id: user.id,
+              user_id: user?.id,
               note: "Manually approved by admin after 7 days"
             },
           ],
@@ -300,7 +300,7 @@ const ApplicationView = () => {
       if (applicationError) throw applicationError;
       navigate("/admin");
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -312,7 +312,7 @@ const ApplicationView = () => {
       await handleUnpublishProfile(application);
       navigate("/admin");
     } catch (err) {
-      setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -321,7 +321,7 @@ const ApplicationView = () => {
   if (loading)
     return <div className="text-white text-center mt-8">Loading...</div>;
   if (error)
-    return <div className="text-red-500 text-center mt-8">{error}</div>;
+      return <div className="text-red-500 text-center mt-8">{error as string || 'Unknown error' as string}</div>;
   if (!application)
     return (
       <div className="text-white text-center mt-8">Application not found</div>
@@ -350,6 +350,7 @@ const ApplicationView = () => {
                   width={128}
                   height={128}
                   className="w-32 h-32 rounded-lg border-4 border-[#432347]"
+                  fallbackSrc={application.photo_url}
                 />
               ) : (
                 <div className="w-32 h-32 rounded-lg border-4 border-[#432347] bg-gray-700 flex items-center justify-center">
@@ -733,14 +734,13 @@ const ApplicationView = () => {
                     text="Save Changes & Resend"
                     className="bg-blue-600 hover:bg-blue-700 px-6"
                   />
-                  {shouldShowManualApprove(application) && (
+                  {/* {shouldShowManualApprove(application) && (
                     <Button
                       onClick={handleManualApprove}
                       text="Approve for User"
                       className="bg-green-600 hover:bg-green-700 px-6"
-                      title="User hasn't responded in 7+ days"
                     />
-                  )}
+                  )} */}
                 </>
               )}
               {application.status === "approved" && (

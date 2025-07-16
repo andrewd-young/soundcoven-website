@@ -1,18 +1,18 @@
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import ArtistWideCard from "./components/ArtistWideCard";
-import Filter from "./components/Filter";
+import Filter, { FilterConfig } from "./components/Filter";
 import { useArtists } from "./hooks/useArtists";
 
 const ArtistsPage = () => {
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<any>({});
   const { artists, loading, error } = useArtists();
 
-  const filterConfig = useMemo(
+  const filterConfig = useMemo<FilterConfig>(
     () => ({
       genre: {
         type: "select",
-        options: [...new Set(artists.map((artist) => artist.genre))],
+        options: [...new Set(artists.map((artist) => artist.genres))],
       },
       type: {
         type: "select",
@@ -37,17 +37,25 @@ const ArtistsPage = () => {
         if (!value) return true;
         
         // Handle special location filter object
-        if (key === 'location' && typeof value === 'object') {
-          return value.matches(artist.location);
+        if (
+          key === 'location' &&
+          typeof value === 'object' &&
+          value !== null &&
+          'matches' in value &&
+          typeof (value as { matches: (loc: string) => boolean }).matches === 'function'
+        ) {
+          return (value as { matches: (loc: string) => boolean }).matches(
+            (artist as any).location ?? ""
+          );
         }
         
         // Handle name search
         if (key === "name") {
-          return artist.name.toLowerCase().includes(value.toLowerCase());
+          return artist.name.toLowerCase().includes((value as string).toLowerCase());
         }
         
         // Handle other filters
-        return artist[key] === value;
+        return artist[key as keyof typeof artist] === value;
       });
     });
   }, [artists, filters]);

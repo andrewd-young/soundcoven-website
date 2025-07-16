@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import IndustryCard from "./components/IndustryCard";
-import Filter from "./components/Filter";
+import Filter, { FilterConfig } from "./components/Filter";
 import { useIndustryPros } from "./hooks/useIndustryPros";
 
 const IndustryProsPage = () => {
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState<any>({});
   const { industryPros, loading, error } = useIndustryPros();
 
-  const filterConfig = useMemo(
+  const filterConfig: FilterConfig = useMemo(
     () => ({
       role: {
         type: "select",
@@ -39,17 +39,25 @@ const IndustryProsPage = () => {
         if (!value) return true;
         
         // Handle special location filter object
-        if (key === 'location' && typeof value === 'object') {
-          return value.matches(pro.location);
+        if (
+          key === 'location' &&
+          typeof value === 'object' &&
+          value !== null &&
+          'matches' in value &&
+          typeof (value as { matches: (loc: string) => boolean }).matches === 'function'
+        ) {
+          return (value as { matches: (loc: string) => boolean }).matches(
+            (pro as any).location ?? ""
+          );
         }
         
         // Handle name search
         if (key === "name") {
-          return pro.name.toLowerCase().includes(value.toLowerCase());
+          return pro.name.toLowerCase().includes((value as string).toLowerCase());
         }
         
         // Handle other filters
-        return pro[key] === value;
+        return pro[key as keyof typeof pro] === value;
       });
     });
   }, [industryPros, filters]);
