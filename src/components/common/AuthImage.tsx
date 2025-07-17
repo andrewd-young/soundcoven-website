@@ -6,8 +6,8 @@ import { User } from "@supabase/supabase-js";
 interface AuthImageProps {
   src: string;
   alt: string;
-  width: number;
-  height: number;
+  width?: number | string;
+  height?: number | string;
   className?: string;
   objectFit?: "fill" | "contain" | "cover" | "none" | "scale-down";
   fallbackSrc?: string;
@@ -108,7 +108,10 @@ const AuthImage: React.FC<AuthImageProps> = ({
     return (
       <div
         className={`animate-pulse bg-gray-300 ${className}`}
-        style={{ width, height }}
+        style={{ 
+          width: width || 'auto', 
+          height: height || 'auto' 
+        }}
       />
     );
   }

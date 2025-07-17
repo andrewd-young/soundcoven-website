@@ -2,27 +2,7 @@ import React, { useState, useMemo } from "react";
 import InstrumentalistCard from "./components/InstrumentalistCard";
 import Filter, { FilterConfig } from "./components/Filter";
 import { useInstrumentalists } from "./hooks/useInstrumentalists";
-
-interface Instrumentalist {
-  id: number;
-  userId: string;
-  name: string;
-  email?: string;
-  instrument?: string;
-  school?: string;
-  favoriteGenres?: string[];
-  note?: string;
-  profileImageUrl?: string;
-  bio?: string;
-  years_experience?: number;
-  location?: string;
-  photo_url?: string;
-  equipment?: string[];
-  social_links?: Record<string, any>;
-  rate?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+import { Instrumentalist } from "./types/Instrumentalist";
 
 const InstrumentalistsPage: React.FC = () => {
   const [filters, setFilters] = useState<Record<string, unknown>>({});

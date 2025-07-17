@@ -3,26 +3,7 @@ import IndustryCard from "./components/IndustryCard";
 import Filter, { FilterConfig } from "./components/Filter";
 import { useIndustryPros } from "./hooks/useIndustryPros";
 
-interface IndustryProfessional {
-  id: number;
-  userId: string;
-  name: string;
-  role?: string;
-  company?: string;
-  school?: string;
-  location?: string;
-  email?: string;
-  phone?: string;
-  profile_image_url?: string;
-  bio?: string;
-  industry_role?: string;
-  years_experience?: number;
-  social_links?: Record<string, any>;
-  created_at?: string;
-  updated_at?: string;
-  expertise_areas?: string[];
-  favorite_artists?: string[];
-}
+import { IndustryProfessional } from "./types/IndustryProfessional";
 
 const IndustryProsPage: React.FC = () => {
   const [filters, setFilters] = useState<Record<string, unknown>>({});
@@ -32,15 +13,15 @@ const IndustryProsPage: React.FC = () => {
     () => ({
       role: {
         type: "select",
-        options: Array.from(new Set(industryPros.map((pro) => pro.role).filter(Boolean))),
+        options: Array.from(new Set(industryPros.map((pro) => pro.role).filter(Boolean))) as string[],
       },
       location: {
         type: "select",
-        options: Array.from(new Set(industryPros.map((pro) => pro.location).filter(Boolean))),
+        options: Array.from(new Set(industryPros.map((pro) => pro.location).filter(Boolean))) as string[],
       },
       school: {
         type: "select",
-        options: Array.from(new Set(industryPros.map((pro) => pro.school).filter(Boolean))),
+        options: Array.from(new Set(industryPros.map((pro) => pro.school).filter(Boolean))) as string[],
       },
       name: { type: "search" },
     }),
@@ -48,33 +29,55 @@ const IndustryProsPage: React.FC = () => {
   );
 
   const filteredPros = useMemo(() => {
-    return industryPros.filter((pro: IndustryProfessional) => {
+    // Filter out entries missing required properties
+    const validPros = industryPros.filter(
+      (pro): pro is IndustryProfessional =>
+        pro &&
+        Array.isArray(pro.expertise_areas) &&
+        typeof pro.name === "string" &&
+        typeof pro.role === "string"
+    );
+    return validPros.filter((pro) => {
       return Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
-        
-        if (
-          key === 'location' &&
-          typeof value === 'object' &&
-          value !== null &&
-          typeof (value as { matches: (loc: string) => boolean }).matches === 'function'
-        ) {
-          return (value as { matches: (loc: string) => boolean }).matches(
-            pro.location ?? ""
-          );
-        }
-        
-        if (key === "name") {
-          return pro.name.toLowerCase().includes((value as string).toLowerCase());
-        }
-        
-        // Handle array fields (expertise_areas, favorite_artists)
-        if (Array.isArray((pro as any)[key])) {
-          return ((pro as any)[key] as string[]).some(item => 
-            (value as string).toLowerCase().includes(item.toLowerCase())
-          );
+
+        // Location filter (string or custom matcher)
+        if (key === "location") {
+          if (typeof value === "string") {
+            return (pro.location ?? '').toLowerCase() === value.toLowerCase();
+          }
+            if (
+            typeof value === "object" &&
+            value !== null &&
+            typeof (value as { matches: () => boolean }).matches === "function"
+            ) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            return (value as { matches: (loc: string) => boolean }).matches(pro.location ?? '');
+            }
         }
 
-        return (pro as any)[key] === value;
+        // Name filter
+        if (key === "name" && typeof value === "string") {
+          return pro.name.toLowerCase().includes(value.toLowerCase());
+        }
+
+        // Array fields
+        if (
+          (key === "expertise_areas" || key === "favorite_artists") &&
+          (key === "expertise_areas" && Array.isArray(pro.expertise_areas) && typeof value === "string") ||
+          (key === "favorite_artists" && Array.isArray(pro.favorite_artists) && typeof value === "string")
+        ) {
+          const arr =
+            key === "expertise_areas"
+              ? pro.expertise_areas
+              : key === "favorite_artists"
+              ? pro.favorite_artists
+              : [];
+          return arr.some((item) => item.toLowerCase().includes(value.toLowerCase()));
+        }
+
+        // Default equality
+        return (pro as IndustryProfessional)[key as keyof IndustryProfessional] === value;
       });
     });
   }, [industryPros, filters]);

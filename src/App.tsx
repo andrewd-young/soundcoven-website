@@ -23,7 +23,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Account from "./components/Account";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import AdminDashboard from "./components/AdminDashboard";
+import { AdminDashboard } from "./components/AdminDashboard";
 import ApplicationView from "./components/ApplicationView";
 import InstrumentalistsPage from "./InstrumentalistsPage";
 import InstrumentalistBio from "./InstrumentalistBio";

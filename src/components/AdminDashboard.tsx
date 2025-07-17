@@ -1,22 +1,23 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { User } from "../types/User";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Button from "./common/Button";
 import { Tab } from '@headlessui/react';
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
-import { AuthImage } from "./common/AuthImage";
-import { differenceInDays, format } from 'date-fns';
+import { ApplicationData, ArtistApplication, IndustryApplication, InstrumentalistApplication } from "../types/Application";
+import AuthImage from "./common/AuthImage";
+import { differenceInDays } from 'date-fns';
 import { shouldShowManualApprove } from "../hooks/useAdminDashboard";
 
-const AdminDashboard = () => {
-  const { user } = useAuth();
+export const AdminDashboard = () => {
+  const { user } = useAuth() as { user: User | null };
   const {
     filteredApplications,
     loading,
     error,
-    selectedStatus,
     setSelectedStatus,
     handleFinalizeProfile,
     handleManualApprove,
@@ -31,7 +32,7 @@ const AdminDashboard = () => {
   ];
 
   // Helper function to get status display text
-  const getStatusDisplay = (status) => {
+  const getStatusDisplay = (status: string) => {
     switch (status) {
       case 'pending':
         return 'Pending Review';
@@ -51,7 +52,7 @@ const AdminDashboard = () => {
   };
 
   // Helper function to get status color classes
-  const getStatusColorClasses = (status) => {
+  const getStatusColorClasses = (status: string) => {
     switch (status) {
       case 'pending':
         return 'bg-yellow-500/20 text-yellow-300';
@@ -70,16 +71,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const getOptimizedImageUrl = (url) => {
-    if (!url) return url;
-    // Only add transformation parameters if it's a Supabase storage URL
-    if (url.includes('storage.googleapis.com') || url.includes('supabase')) {
-      return `${url}?width=1200&quality=75&format=jpeg`;
-    }
-    return url;
-  };
-
-  const getDaysAgoText = (application) => {
+  const getDaysAgoText = (application: ApplicationData) => {
     if (!application) return '';
     
     // Get the most recent date based on status
@@ -87,6 +79,7 @@ const AdminDashboard = () => {
     if (application.finalized_at) date = application.finalized_at;
     else if (application.sent_for_approval_at) date = application.sent_for_approval_at;
     
+    if (!date) return ''; // Handle case where date is undefined
     const days = differenceInDays(new Date(), new Date(date));
     return `${days}d ago`;
   };
@@ -123,32 +116,34 @@ const AdminDashboard = () => {
         <p className="text-white text-center">No applications found</p>
       ) : (
         <div className="grid gap-6">
-          {filteredApplications.map((application) => (
+          {filteredApplications.map((application: ApplicationData) => {
+            const typedApplication = application as ArtistApplication | IndustryApplication | InstrumentalistApplication;
+            return (
             <div
-              key={application.id}
+              key={typedApplication.id}
               className="bg-covenLightPurple rounded-lg p-6 border border-white transition-colors flex justify-between"
             >
               <div className="flex-grow">
                 <div className="flex justify-between items-start mb-4">
                   <Link 
-                    to={`/admin/applications/${application.id}`}
+                    to={`/admin/applications/${typedApplication.id}`}
                     className="flex-grow cursor-pointer"
                   >
                     <div>
                       <h2 className="text-2xl text-white font-semibold">
-                        {application.name}
+                        {typedApplication.name}
                       </h2>
                       <p className="text-gray-300">
-                        {application.application_type.charAt(0).toUpperCase() +
-                          application.application_type.slice(1)}{" "}
+                        {typedApplication.application_type.charAt(0).toUpperCase() +
+                          typedApplication.application_type.slice(1)}{" "}
                         Application
                       </p>
                       <div className="flex items-center gap-2 mt-2">
-                        <p className={`inline-block px-3 py-2 rounded-full text-sm ${getStatusColorClasses(application.status)}`}>
-                          {getStatusDisplay(application.status)}
+                        <p className={`inline-block px-3 py-2 rounded-full text-sm ${getStatusColorClasses(typedApplication.status)}`}>
+                          {getStatusDisplay(typedApplication.status)}
                         </p>
                         <span className="text-sm text-gray-400">
-                          {getDaysAgoText(application)}
+                          {getDaysAgoText(typedApplication)}
                         </span>
                       </div>
                     </div>
@@ -156,59 +151,59 @@ const AdminDashboard = () => {
                 </div>
 
                 <Link 
-                  to={`/admin/applications/${application.id}`}
+                  to={`/admin/applications/${typedApplication.id}`}
                   className="block"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
                     <div>
                       <p>
-                        <strong>Email:</strong> {application.email}
+                        <strong>Email:</strong> {typedApplication.email}
                       </p>
                       <p>
-                        <strong>School:</strong> {application.school}
+                        <strong>School:</strong> {typedApplication.school}
                       </p>
                     </div>
 
                     <div>
-                      {application.application_type === "artist" && (
+                      {typedApplication.application_type === "artist" && (
                         <>
                           <p>
-                            <strong>Artist Type:</strong> {application.artist_type}
+                            <strong>Artist Type:</strong> {(typedApplication as ArtistApplication).artist_type}
                           </p>
                           <p>
                             <strong>Genres:</strong>{" "}
-                            {Array.isArray(application.genres)
-                              ? application.genres.join(", ")
-                              : application.genres}
+                            {Array.isArray((typedApplication as ArtistApplication).genres)
+                              ? (typedApplication as ArtistApplication).genres?.join(", ")
+                              : (typedApplication as ArtistApplication).genres}
                           </p>
                         </>
                       )}
 
-                      {application.application_type === "industry" && (
+                      {typedApplication.application_type === "industry" && (
                         <>
                           <p>
                             <strong>Industry Role:</strong>{" "}
-                            {application.industry_role}
+                            {(typedApplication as IndustryApplication).industry_role}
                           </p>
                           <p>
                             <strong>Favorite Artists:</strong>{" "}
-                            {Array.isArray(application.favorite_artists)
-                              ? application.favorite_artists.join(", ")
-                              : application.favorite_artists}
+                            {Array.isArray((typedApplication as IndustryApplication).favorite_artists)
+                              ? (typedApplication as IndustryApplication).favorite_artists?.join(", ")
+                              : 'N/A'}
                           </p>
                         </>
                       )}
 
-                      {application.application_type === "instrumentalist" && (
+                      {typedApplication.application_type === "instrumentalist" && (
                         <>
                           <p>
-                            <strong>Instrument:</strong> {application.instrument}
+                            <strong>Instrument:</strong> {(typedApplication as InstrumentalistApplication).instrument}
                           </p>
                           <p>
                             <strong>Favorite Genres:</strong>{" "}
-                            {Array.isArray(application.favorite_genres)
-                              ? application.favorite_genres.join(", ")
-                              : application.favorite_genres}
+                            {Array.isArray((typedApplication as InstrumentalistApplication).favorite_genres)
+                              ? (typedApplication as InstrumentalistApplication).favorite_genres?.join(", ")
+                              : (typedApplication as InstrumentalistApplication).favorite_genres}
                           </p>
                         </>
                       )}
@@ -217,17 +212,17 @@ const AdminDashboard = () => {
                 </Link>
 
                 <div className="flex space-x-2 mt-4">
-                  {shouldShowManualApprove(application) && (
+                  {shouldShowManualApprove(typedApplication) && (
                     <Button
-                      onClick={() => handleManualApprove(application)}
+                      onClick={() => handleManualApprove(typedApplication)}
                       text="Approve for User"
                       className="bg-green-600 hover:bg-green-700 text-white"
                     />
                   )}
-                  {application.status === "approved" && (
+                  {typedApplication.status === "approved" && (
                     <>
                       <Button 
-                        onClick={() => handleFinalizeProfile(application)}
+                        onClick={() => handleFinalizeProfile(typedApplication)}
                         text="Create Page"
                         className="bg-green-600 hover:bg-green-700 text-white"
                         disabled={loading}
@@ -239,7 +234,7 @@ const AdminDashboard = () => {
                           </>
                         }
                         className="px-6 py-2 rounded transition-color"
-                        link={`/admin/applications/${application.id}`}
+                        link={`/admin/applications/${typedApplication.id}`}
                       />
                     </>
                   )}
@@ -247,19 +242,17 @@ const AdminDashboard = () => {
               </div>
 
               <AuthImage
-                src={application.photo_url}
-                alt={`${application.name}'s photo`}
+                src={typedApplication.photo_url || ''}
+                alt={`${typedApplication.name}'s photo`}
                 width={250}
                 height={250}
                 className="rounded-lg ml-4 object-cover min-w-[100px] min-h-[100px]"
-                fallbackSrc={`https://ui-avatars.com/api/?name=${encodeURIComponent(application.name)}&background=432347&color=fff&size=100`}
+                fallbackSrc={`https://ui-avatars.com/api/?name=${encodeURIComponent(typedApplication.name)}&background=432347&color=fff&size=100`}
               />
             </div>
-          ))}
+          );})}
         </div>
       )}
     </div>
   );
 };
-
-export default AdminDashboard;

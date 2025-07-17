@@ -1,4 +1,4 @@
-export const isLightColor = (color) => {
+export const isLightColor = (color: string) => {
   if (!color) return false;
   try {
     // Handle rgba colors
@@ -18,7 +18,7 @@ export const isLightColor = (color) => {
     const b = parseInt(hex.substr(4, 2), 16);
     const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
     return brightness > 155;
-  } catch (error) {
+  } catch {
     return false;
   }
 }; 

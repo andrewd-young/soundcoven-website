@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Profile } from "../types/Profile";
+import { ApplicationData } from "../types/Application";
 import Logo from "../assets/soundcoven-logo-white.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
@@ -10,8 +12,8 @@ const Navigation = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
-  const [profile, setProfile] = useState(null);
-  const [application, setApplication] = useState(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [application, setApplication] = useState<ApplicationData | null>(null);
 
   const fetchProfileAndApplication = useCallback(async () => {
     if (!user) return;
@@ -38,7 +40,7 @@ const Navigation = () => {
     fetchProfileAndApplication();
   }, [fetchProfileAndApplication]);
 
-  const handleAboutClick = (e) => {
+  const handleAboutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     // Check if we're not on the home page
     if (window.location.pathname !== "/") {
@@ -150,7 +152,7 @@ const Navigation = () => {
               <>
                 {application?.status === "pending" ? (
                   <span className="text-base sm:text-xl">Application Pending</span>
-                ) : application?.status !== "approved" || application?.status !== "finalized" (
+                ) : (application?.status !== "approved" && application?.status !== "finalized") ? (
                   <>
                     <span className="hidden sm:inline text-base sm:text-xl">
                       Interested in joining the coven?
@@ -162,7 +164,7 @@ const Navigation = () => {
                       Apply
                     </Link>
                   </>
-                )}
+                ) : null}
               </>
             )}
             {!user && (

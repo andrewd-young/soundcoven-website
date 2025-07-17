@@ -5,18 +5,26 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useExtractColors } from "react-extract-colors";
 import { isLightColor } from "../utils/colorUtils";
-import { AuthImage } from "./common/AuthImage";
+import AuthImage from "./common/AuthImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
 
-const ArtistCard = ({ artist }) => {
-  const isUsingDefaultImage = !artist.image;
-  const { colors } = useExtractColors(artist.image || DEFAULT_IMAGE, {
-    crossOrigin: "anonymous",
-    defaultColor: DEFAULT_COLOR,
-    skip: isUsingDefaultImage,
-  });
+interface Artist {
+  id: string;
+  name: string;
+  profile_image_url?: string;
+  genres: string[];
+  artist_type?: string;
+}
+
+interface ArtistCardProps {
+  artist: Artist;
+}
+
+const ArtistCard: React.FC<ArtistCardProps> = ({ artist }) => {
+  const isUsingDefaultImage = !artist.profile_image_url;
+  const { colors } = useExtractColors(artist.profile_image_url || DEFAULT_IMAGE);
 
   const bgColor = isUsingDefaultImage
     ? DEFAULT_COLOR
@@ -30,7 +38,7 @@ const ArtistCard = ({ artist }) => {
       >
         <div className="aspect-w-1 aspect-h-1 flex-grow">
           <AuthImage
-            src={artist.image || DEFAULT_IMAGE}
+            src={artist.profile_image_url || DEFAULT_IMAGE}
             alt={artist.name}
             width={256}
             height={256}
@@ -58,32 +66,32 @@ const ArtistCard = ({ artist }) => {
 
 const ArtistsCarousel = () => {
   const { artists, loading, error } = useArtists();
-  const carouselRef = useRef(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const [isScrolledToEnd, setIsScrolledToEnd] = useState(false);
   const [isScrolledToStart, setIsScrolledToStart] = useState(true);
 
   const scrollRight = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: 300, behavior: "smooth" });
+      (carouselRef.current as HTMLDivElement).scrollBy({ left: 300, behavior: "smooth" });
     }
   };
 
   const scrollLeft = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: -300, behavior: "smooth" });
+      (carouselRef.current as HTMLDivElement).scrollBy({ left: -300, behavior: "smooth" });
     }
   };
 
   const handleScroll = () => {
     if (carouselRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current as HTMLDivElement;
       setIsScrolledToEnd(scrollLeft + clientWidth >= scrollWidth);
       setIsScrolledToStart(scrollLeft === 0);
     }
   };
 
   useEffect(() => {
-    const currentRef = carouselRef.current;
+    const currentRef = carouselRef.current as HTMLDivElement;
     if (currentRef) {
       currentRef.addEventListener("scroll", handleScroll);
       handleScroll(); // Initial check

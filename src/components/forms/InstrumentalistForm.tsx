@@ -1,23 +1,26 @@
 import React, { useRef, useEffect } from "react";
 import useApplicationForm from "../../hooks/useApplicationForm";
 import ImageUpload from "../ImageUpload";
-import { FormProps } from "../../ApplyForm";
+import type { FormProps } from "../../types/Application";
 
-interface InstrumentalistFormData {
+interface InstrumentalistFormData extends Record<string, unknown> {
   name: string;
   email: string;
-  instrument: string;
   school: string;
-  location: string;
-  bio: string;
-  favoriteGenres: string;
-  favoriteArtists: string;
-  note: string;
-  photo: File | null;
-  socialLinks: string;
-  yearsExperience: string;
-  equipment: string;
-  rate: string;
+  instrument?: string;
+  years_experience?: number;
+  equipment: string[];
+  rate?: string;
+  favorite_genres: string[];
+  bio?: string;
+  location?: string;
+  phone_number?: string;
+  photo_url?: string;
+}
+
+interface InstrumentalistFormProps extends FormProps {
+  initialData?: InstrumentalistFormData;
+  onSubmit: (data: InstrumentalistFormData) => void;
 }
 
 interface TransformedInstrumentalistData {
@@ -77,7 +80,7 @@ const InstrumentalistForm: React.FC<FormProps> = () => {
     rate: formData.rate,
   });
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, transformData as any);
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, transformData as unknown as (formData: InstrumentalistFormData, photoUrl: string | null) => Record<string, unknown>);
 
   const adjustHeight = (ref: React.RefObject<HTMLTextAreaElement | null>) => {
     if (ref.current) {

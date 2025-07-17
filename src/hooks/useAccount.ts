@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import supabase from "../utils/supabase";
+import { Profile, ApplicationData } from "../types";
 
 export const useAccount = () => {
   const { user } = useAuth();
@@ -11,15 +12,15 @@ export const useAccount = () => {
   const [userDetails, setUserDetails] = useState({
     email: user?.email || "",
   });
-  const [profile, setProfile] = useState(null);
-  const [application, setApplication] = useState(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [application, setApplication] = useState<ApplicationData | null>(null);
 
   const fetchProfileAndApplication = useCallback(async () => {
     try {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*, applications(*)")
-        .eq("id", user.id)
+        .eq("id", user?.id)
         .single();
 
       if (profileError) throw profileError;
@@ -36,7 +37,7 @@ export const useAccount = () => {
   useEffect(() => {
     if (user) {
       setUserDetails({
-        email: user.email,
+        email: user.email || "",
       });
       fetchProfileAndApplication();
     }
@@ -109,7 +110,7 @@ export const useAccount = () => {
     return role.charAt(0).toUpperCase() + role.slice(1);
   };
 
-  const formatApplicationStatus = (status) => {
+  const formatApplicationStatus = (status: string) => {
     if (!status) return "Not Started";
     return status
       .split("_")

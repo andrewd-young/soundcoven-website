@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "./common/Button";
 import { useArtists } from "../hooks/useArtists";
-import { AuthImage } from "./common/AuthImage";
+import AuthImage from "./common/AuthImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 
@@ -19,7 +19,7 @@ const LoadingPlaceholder = () => (
 const HeroSection = () => {
   const { artists, loading, error } = useArtists();
   const featuredArtist =
-    artists.find((artist) => artist.isFeatured) || artists[0];
+    artists.find((artist) => artist.is_featured) || artists[0];
 
   if (loading)
     return (
@@ -43,7 +43,7 @@ const HeroSection = () => {
             style={{ backgroundColor: "#4F1D4D" }}
           >
             <AuthImage
-              src={featuredArtist.image || DEFAULT_IMAGE}
+              src={featuredArtist.profile_image_url || DEFAULT_IMAGE}
               alt={featuredArtist.name}
               width="100%"
               height="100%"

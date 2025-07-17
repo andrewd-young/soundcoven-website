@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 
 interface ImageUploadProps {
-  onImageChange: (file: File | null) => void;
+  // eslint-disable-next-line no-unused-vars
+    onImageChange: (file: File | null) => void;
   label?: string;
 }
 

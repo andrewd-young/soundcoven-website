@@ -1,6 +1,7 @@
 import React from "react";
 import Button from "./common/Button";
 import { useAccount } from "../hooks/useAccount";
+import { ArtistApplication, IndustryApplication, InstrumentalistApplication } from "../types/Application";
 
 const Account = () => {
   const {
@@ -68,32 +69,32 @@ const Account = () => {
               <h3 className="text-xl font-semibold text-white mb-4">Your Profile Details</h3>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-gray-300">
                 <div className="space-y-3">
-                  <p><strong className="text-white">Name:</strong> {application.admin_approved_profile.name}</p>
-                  <p><strong className="text-white">Email:</strong> {application.admin_approved_profile.email}</p>
-                  <p className="break-words"><strong className="text-white">Bio:</strong> {application.admin_approved_profile.bio}</p>
+                  <p><strong className="text-white">Name:</strong> {application.admin_approved_profile?.name}</p>
+                  <p><strong className="text-white">Email:</strong> {application.admin_approved_profile?.email}</p>
+                  <p className="break-words"><strong className="text-white">Bio:</strong> {application.admin_approved_profile?.bio}</p>
                 </div>
                 
-                {application.application_type === "artist" && (
+                {application.application_type === "artist" && application.admin_approved_profile && (
                   <div className="space-y-3">
-                    <p><strong className="text-white">Artist Type:</strong> {application.admin_approved_profile.artist_type}</p>
-                    <p className="break-words"><strong className="text-white">Genres:</strong> {Array.isArray(application.admin_approved_profile.genres) ? application.admin_approved_profile.genres.join(", ") : 'N/A'}</p>
-                    <p className="break-words"><strong className="text-white">Streaming Links:</strong> {Array.isArray(application.admin_approved_profile.streaming_links) ? application.admin_approved_profile.streaming_links.join(", ") : 'N/A'}</p>
+                    <p><strong className="text-white">Artist Type:</strong> {(application.admin_approved_profile as ArtistApplication)?.artist_type ?? 'N/A'}</p>
+                    <p className="break-words"><strong className="text-white">Genres:</strong> {Array.isArray((application.admin_approved_profile as ArtistApplication)?.genres) ? (application.admin_approved_profile as ArtistApplication)?.genres?.join(", ") : 'N/A'}</p>
+                    <p className="break-words"><strong className="text-white">Streaming Links:</strong> {Array.isArray((application.admin_approved_profile as ArtistApplication)?.streaming_links) ? (application.admin_approved_profile as ArtistApplication)?.streaming_links?.join(", ") : 'N/A'}</p>
                   </div>
                 )}
 
-                {application.application_type === "industry" && (
+                {application.application_type === "industry" && application.admin_approved_profile && (
                   <div className="space-y-3">
-                    <p><strong className="text-white">Industry Role:</strong> {application.admin_approved_profile.industry_role}</p>
-                    <p><strong className="text-white">Company:</strong> {application.admin_approved_profile.company}</p>
-                    <p><strong className="text-white">Years of Experience:</strong> {application.admin_approved_profile.years_experience}</p>
+                    <p><strong className="text-white">Industry Role:</strong> {(application.admin_approved_profile as IndustryApplication)?.industry_role ?? 'N/A'}</p>
+                    <p><strong className="text-white">Company:</strong> {(application.admin_approved_profile as IndustryApplication)?.company ?? 'N/A'}</p>
+                    <p><strong className="text-white">Years of Experience:</strong> {(application.admin_approved_profile as IndustryApplication)?.years_experience ?? 'N/A'}</p>
                   </div>
                 )}
 
-                {application.application_type === "instrumentalist" && (
+                {application.application_type === "instrumentalist" && application.admin_approved_profile && (
                   <div className="space-y-3">
-                    <p><strong className="text-white">Instrument:</strong> {application.admin_approved_profile.instrument}</p>
-                    <p className="break-words"><strong className="text-white">Favorite Genres:</strong> {Array.isArray(application.admin_approved_profile.favorite_genres) ? application.admin_approved_profile.favorite_genres.join(", ") : 'N/A'}</p>
-                    <p><strong className="text-white">Equipment:</strong> {application.admin_approved_profile.equipment}</p>
+                    <p><strong className="text-white">Instrument:</strong> {(application.admin_approved_profile as InstrumentalistApplication)?.instrument}</p>
+                    <p className="break-words"><strong className="text-white">Favorite Genres:</strong> {Array.isArray((application.admin_approved_profile as InstrumentalistApplication)?.favorite_genres) && (application.admin_approved_profile as InstrumentalistApplication)?.favorite_genres?.length > 0 ? (application.admin_approved_profile as InstrumentalistApplication)?.favorite_genres.join(", ") : 'N/A'}</p>
+                    <p><strong className="text-white">Equipment:</strong> {Array.isArray((application.admin_approved_profile as InstrumentalistApplication)?.equipment) ? (application.admin_approved_profile as InstrumentalistApplication)?.equipment.join(", ") : 'N/A'}</p>
                   </div>
                 )}
               </div>
@@ -138,7 +139,7 @@ const Account = () => {
           {profile?.role === "other" ? (
             <div className="space-y-3">
               <p className="text-gray-300 mb-4">
-                You're currently registered as "Other". Would you like to apply
+                You&apos;re currently registered as &quot;Other&quot;. Would you like to apply
                 as an artist, industry professional, or instrumentalist?
               </p>
               <Button
@@ -159,13 +160,10 @@ const Account = () => {
                   {formatRole(application.application_type)}
                 </p>
               )}
-              {(!application ||
-                !application.status ||
-                application.status === "not_started" ||
-                application.status === "draft") && (
+              {(!application || !application.status) && (
                 <Button
-                  onClick={() => navigate(`/apply/${profile.role}`)}
-                  text={application?.status === "draft" ? "Continue Application" : "Start Application"}
+                  onClick={() => navigate(`/apply/${profile!.role}`)}
+                  text="Start Application"
                   className="bg-covenRed hover:bg-red-700 mt-2 text-white"
                 />
               )}

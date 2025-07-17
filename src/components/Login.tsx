@@ -93,7 +93,8 @@ const Login: React.FC<LoginProps> = ({ title, mode: initialMode }) => {
         } catch (err) {
           console.error('Error confirming email:', err);
           setError(
-            err.message === 'No user data received from confirmation'
+            typeof err === 'object' && err !== null && 'message' in err && typeof (err as Error).message === 'string' &&
+            (err as Error).message === 'No user data received from confirmation'
               ? 'Account confirmed but session creation failed. Please try logging in.'
               : 'Failed to confirm email. Please try the confirmation link again or request a new one below.'
           );
@@ -134,7 +135,7 @@ const Login: React.FC<LoginProps> = ({ title, mode: initialMode }) => {
   };
   */
 
-  const handleEmailAuth = async (e) => {
+  const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -184,7 +185,11 @@ const Login: React.FC<LoginProps> = ({ title, mode: initialMode }) => {
         if (result.error) throw result.error;
       }
     } catch (err) {
-      setError(err.message);
+      setError(
+        typeof err === "object" && err !== null && "message" in err
+          ? String((err as { message?: unknown }).message)
+          : "An unexpected error occurred"
+      );
     } finally {
       setLoading(false);
     }
@@ -204,7 +209,7 @@ const Login: React.FC<LoginProps> = ({ title, mode: initialMode }) => {
               Check Your Email
             </h1>
             <p className="text-white text-center mb-6">
-              We've sent a confirmation email to {email}. Please check your
+              We&apos;ve sent a confirmation email to {email}. Please check your
               inbox and follow the instructions to complete your registration.
             </p>
             <button
@@ -338,6 +343,7 @@ const Login: React.FC<LoginProps> = ({ title, mode: initialMode }) => {
                         if (resendError) throw resendError;
                         setError('New confirmation email sent! Please check your inbox.');
                       } catch (err) {
+                        console.error('Failed to send new confirmation email:', err);
                         setError('Failed to send new confirmation email. Please try again.');
                       } finally {
                         setLoading(false);

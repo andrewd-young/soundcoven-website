@@ -6,19 +6,27 @@ import {
   faMapMarkerAlt,
   faCompactDisc,
   faUser,
-  faClock,
   faMusic,
-  faUsers,
   faGraduationCap,
 } from "@fortawesome/free-solid-svg-icons";
 import { faSpotify, faInstagram } from "@fortawesome/free-brands-svg-icons";
 import Tag from "./components/common/Tag";
-import { AuthImage } from "./components/common/AuthImage";
+import AuthImage from "./components/common/AuthImage";
 import MetaTags from "./components/MetaTags";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 
-const SocialButton = ({
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+
+interface SocialButtonProps {
+  icon: IconDefinition;
+  text: string;
+  link: string;
+  primary?: boolean;
+  instagram?: boolean;
+}
+
+const SocialButton: React.FC<SocialButtonProps> = ({
   icon,
   text,
   link,
@@ -59,7 +67,7 @@ const ArtistBio = () => {
       </div>
     );
 
-  const artist = artists.find((a) => a.id === parseInt(artistId));
+  const artist = artists.find((a) => a.id === artistId);
 
   if (!artist) {
     return <Navigate to="/artists" replace />;
@@ -70,8 +78,8 @@ const ArtistBio = () => {
       <MetaTags
         title={`${artist.name} - Coven`}
         description={artist.bio || "No bio available"}
-        image={artist.image || DEFAULT_IMAGE}
-        type="profile"
+        image={artist.profile_image_url ?? DEFAULT_IMAGE}
+        
       />
       <section
         id="artist-bio"
@@ -86,7 +94,7 @@ const ArtistBio = () => {
 
             {/* Social Links */}
             <div className="flex flex-wrap gap-3 mb-6">
-              {artist.streamingLinks.map((link, index) => (
+              {artist.streaming_links.map((link: string, index: number) => (
                 <SocialButton
                   key={index}
                   icon={faSpotify}
@@ -95,11 +103,11 @@ const ArtistBio = () => {
                   primary
                 />
               ))}
-              {artist.instagramLink && (
+              {artist.instagram_link && (
                 <SocialButton
                   icon={faInstagram}
                   text="Follow"
-                  link={artist.instagramLink}
+                  link={artist.instagram_link}
                   instagram
                 />
               )}
@@ -128,9 +136,7 @@ const ArtistBio = () => {
                   darkMode={false}
                 />
               )}
-              {artist.type && (
-                <Tag icon={faUsers} text={artist.type.charAt(0).toUpperCase() + artist.type.slice(1)} darkMode={false} />
-              )}
+              
               {artist.school && (
                 <Tag
                   icon={faGraduationCap}
@@ -150,7 +156,7 @@ const ArtistBio = () => {
           <div className="relative z-10">
             <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden shadow-2xl">
               <AuthImage
-                src={artist.image || DEFAULT_IMAGE}
+                src={artist.profile_image_url || DEFAULT_IMAGE}
                 alt={artist.name}
                 width={800}
                 height={800}

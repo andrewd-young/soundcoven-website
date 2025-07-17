@@ -7,112 +7,13 @@ import AuthImage from "./common/AuthImage";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
 import { addDays, differenceInDays, format } from 'date-fns';
 import { User } from "@supabase/supabase-js";
+import { ApplicationData, ProfileData, AllProfileKeys, ArtistProfileData, IndustryProfileData, InstrumentalistProfileData, ArtistApplication, IndustryApplication, InstrumentalistApplication } from "../types";
 
-// Define common fields for all application types
-interface BaseApplication {
-  id: string;
-  user_id: string;
-  application_type: "artist" | "industry" | "instrumentalist";
-  name: string;
-  email: string;
-  school: string;
-  note?: string;
-  photo_url?: string;
-  location?: string;
-  bio?: string;
-  social_links?: Record<string, any>;
-  created_at: string;
-  updated_at?: string;
-  reviewed_at?: string;
-  reviewed_by?: string;
-  status_history: Array<{ status: string; timestamp: string; user_id?: string; note?: string }>;
-  modification_requests: string[];
-  current_revision?: number;
-  last_modified_at?: string;
-  last_modified_by?: string;
-  status: "pending" | "pending_user_approval" | "changes_requested" | "approved" | "rejected" | "finalized";
-  admin_approved_profile?: ArtistProfileData | IndustryProfileData | InstrumentalistProfileData | null;
-  finalized_at?: string;
-  finalized_by?: string;
-  user_accepted_at?: string;
-  phone_number?: string;
-}
-
-// Define specific fields for Artist applications
-interface ArtistApplication extends BaseApplication {
-  artist_type?: string;
-  genres?: string | string[];
-  streaming_links?: string | string[];
-  upcoming_show?: string;
-  influences?: string | string[];
-  current_needs?: string;
-  type?: string; // This seems to be a duplicate of artist_type or a different field, clarify if needed
-  years_active?: string;
-}
-
-// Define specific fields for Industry applications
-interface IndustryApplication extends BaseApplication {
-  industry_role?: string;
-  company?: string;
-  years_experience?: number;
-  expertise_areas?: string | string[];
-  favorite_artists?: string | string[];
-  website?: string;
-  linkedin?: string;
-  phone?: string;
-}
-
-// Define specific fields for Instrumentalist applications
-interface InstrumentalistApplication extends BaseApplication {
-  instrument?: string;
-  years_experience?: number;
-  equipment?: string | string[];
-  rate?: string;
-}
-
-// Union type for all possible application structures
-type ApplicationData = ArtistApplication | IndustryApplication | InstrumentalistApplication;
-
-// Define profile data interfaces for admin_approved_profile
-interface BaseProfileData {
-  name: string;
-  photo_url?: string;
-  email: string;
-  location?: string;
-  bio?: string;
-  instagram_link?: string;
-  streaming_link?: string;
-}
-
-interface ArtistProfileData extends BaseProfileData {
-  artist_type?: string;
-  genres?: string[];
-  streaming_links?: string[];
-  influences?: string[];
-  years_active?: string;
-  current_needs?: string;
-  type?: string;
-}
-
-interface IndustryProfileData extends BaseProfileData {
-  industry_role?: string;
-  company?: string;
-  years_experience?: number;
-  expertise_areas?: string[];
-  favorite_artists?: string[];
-  website?: string;
-  linkedin?: string;
-}
-
-interface InstrumentalistProfileData extends BaseProfileData {
-  instrument?: string;
-  years_experience?: number;
-  equipment?: string[];
-  rate?: string;
-}
-
-// Union type for all possible profile data structures
-type ProfileData = ArtistProfileData | IndustryProfileData | InstrumentalistProfileData;
+const parseStringArray = (value: string | string[]): string[] => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") return value.split(",").map((s) => s.trim());
+  return [];
+};
 
 const ApplicationView: React.FC = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -121,7 +22,7 @@ const ApplicationView: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [application, setApplication] = useState<ApplicationData | null>(null);
-  const [profileData, setProfileData] = useState<ProfileData | Record<string, any>>({});
+  const [profileData, setProfileData] = useState<ProfileData>({} as ProfileData);
   const [userRole, setUserRole] = useState<string | null>(null);
 
   const { handleFinalizeProfile, handleUnpublishProfile } = useAdminDashboard(user);
@@ -154,7 +55,7 @@ const ApplicationView: React.FC = () => {
 
         setApplication({
           ...appData,
-          admin_approved_profile: appData.admin_approved_profile || {},
+          admin_approved_profile: appData.admin_approved_profile || ({} as ProfileData),
         });
 
         const initialProfileData: ProfileData = {
@@ -164,24 +65,12 @@ const ApplicationView: React.FC = () => {
           location: appData.location || "",
           bio: appData.bio || "",
           instagram_link: (appData as ArtistApplication).instagram_link || "",
-          streaming_link: (appData as ArtistApplication).streaming_links ? (Array.isArray((appData as ArtistApplication).streaming_links) ? (appData as ArtistApplication).streaming_links[0] : (appData as ArtistApplication).streaming_links) : "",
+          streaming_link: (appData as ArtistApplication).streaming_links?.[0] || "",
           ...(appData.application_type === "artist" && {
             artist_type: (appData as ArtistApplication).artist_type || "",
-            genres: Array.isArray((appData as ArtistApplication).genres)
-              ? (appData as ArtistApplication).genres
-              : (appData as ArtistApplication).genres
-              ? [(appData as ArtistApplication).genres as string]
-              : [],
-            streaming_links: Array.isArray((appData as ArtistApplication).streaming_links)
-              ? (appData as ArtistApplication).streaming_links
-              : (appData as ArtistApplication).streaming_links
-              ? [(appData as ArtistApplication).streaming_links as string]
-              : [],
-            influences: Array.isArray((appData as ArtistApplication).influences)
-              ? (appData as ArtistApplication).influences
-              : (appData as ArtistApplication).influences
-              ? [(appData as ArtistApplication).influences as string]
-              : [],
+            genres: parseStringArray((appData as ArtistApplication).genres || []),
+            streaming_links: parseStringArray((appData as ArtistApplication).streaming_links || []),
+            influences: parseStringArray((appData as ArtistApplication).influences || []),
             years_active: (appData as ArtistApplication).years_active || "",
             current_needs: (appData as ArtistApplication).current_needs || "",
             type: (appData as ArtistApplication).type || "",
@@ -190,28 +79,16 @@ const ApplicationView: React.FC = () => {
             industry_role: (appData as IndustryApplication).industry_role || "",
             company: (appData as IndustryApplication).company || "",
             years_experience: (appData as IndustryApplication).years_experience || "",
-            expertise_areas: Array.isArray((appData as IndustryApplication).expertise_areas)
-              ? (appData as IndustryApplication).expertise_areas
-              : (appData as IndustryApplication).expertise_areas
-              ? [(appData as IndustryApplication).expertise_areas as string]
-              : [],
-            favorite_artists: Array.isArray((appData as IndustryApplication).favorite_artists)
-              ? (appData as IndustryApplication).favorite_artists
-              : (appData as IndustryApplication).favorite_artists
-              ? [(appData as IndustryApplication).favorite_artists as string]
-              : [],
+            expertise_areas: parseStringArray((appData as IndustryApplication).expertise_areas || []),
+            favorite_artists: parseStringArray((appData as IndustryApplication).favorite_artists || []),
             website: (appData as IndustryApplication).website || "",
             linkedin: (appData as IndustryApplication).linkedin || "",
           }),
           ...(appData.application_type === "instrumentalist" && {
             instrument: (appData as InstrumentalistApplication).instrument || "",
-            years_experience:
-              (appData as InstrumentalistApplication).years_experience ||
-              (appData as InstrumentalistApplication).years_experience ||
-              "",
-            equipment:
-              (appData as InstrumentalistApplication).equipment || (appData as InstrumentalistApplication).equipment || "",
-            rate: (appData as InstrumentalistApplication).rate || (appData as InstrumentalistApplication).rate || "",
+            years_experience: (appData as InstrumentalistApplication).years_experience || "",
+            equipment: parseStringArray((appData as InstrumentalistApplication).equipment || []),
+            rate: (appData as InstrumentalistApplication).rate || "",
           }),
         };
         setProfileData(initialProfileData);
@@ -227,21 +104,24 @@ const ApplicationView: React.FC = () => {
 
   useEffect(() => {
     if (application) {
-      setApplication((prev) => ({
-        ...prev,
-        admin_approved_profile: profileData,
-      }));
+      setApplication((prev: ApplicationData | null) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          admin_approved_profile: profileData,
+        };
+      });
     }
   }, [application, profileData]);
 
-  const handleInputChange = (field: keyof ProfileData, value: string | number) => {
+  const handleInputChange = (field: AllProfileKeys, value: string | number) => {
     setProfileData((prev: ProfileData) => ({
       ...prev,
       [field]: field === "years_experience" ? parseInt(value as string) || "" : value,
     }));
   };
 
-  const handleArrayInputChange = (field: keyof ProfileData, value: string) => {
+  const handleArrayInputChange = (field: AllProfileKeys, value: string) => {
     const arrayValue = value.split(",").map((item) => item.trim());
     setProfileData((prev: ProfileData) => ({
       ...prev,
@@ -379,55 +259,6 @@ const ApplicationView: React.FC = () => {
   const daysSinceApplication = application?.sent_for_approval_at ? 
     differenceInDays(new Date(), new Date(application.sent_for_approval_at)) : 0;
   
-  const showApproveButton = application?.status === "pending_user_approval" && daysSinceApplication >= 7;
-
-  const handleManualApprove = async () => {
-    try {
-      setLoading(true);
-      const now = new Date().toISOString();
-
-      if (!application) return;
-
-      const { error: applicationError } = await supabase
-        .from("applications")
-        .update({
-          status: "approved",
-          last_modified_at: now,
-          last_modified_by: user?.id,
-          status_history: [
-            ...(application.status_history || []),
-            {
-              status: "approved",
-              timestamp: now,
-              user_id: user?.id,
-              note: "Manually approved by admin after 7 days"
-            },
-          ],
-        })
-        .eq("id", application.id);
-
-      if (applicationError) throw applicationError;
-      navigate("/admin");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUnpublish = async () => {
-    try {
-      setLoading(true);
-      if (!application) return;
-      await handleUnpublishProfile(application);
-      navigate("/admin");
-    } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading)
     return <div className="text-white text-center mt-8">Loading...</div>;
   if (error)
@@ -856,7 +687,7 @@ const ApplicationView: React.FC = () => {
               )}
               {application?.status === "finalized" && (
                 <Button
-                  onClick={handleUnpublish}
+                  onClick={() => handleUnpublishProfile(application as ApplicationData)}
                   text="Unpublish Page"
                   className="bg-red-600 hover:bg-red-700 px-6"
                   disabled={loading}

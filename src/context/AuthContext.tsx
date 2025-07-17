@@ -2,10 +2,12 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../utils/supabase";
 
-const AuthContext = createContext({});
+import { User } from "../types/User";
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+const AuthContext = createContext<{ user: User | null; loading: boolean }>({ user: null, loading: true });
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 

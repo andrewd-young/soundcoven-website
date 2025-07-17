@@ -3,25 +3,28 @@ import { useAuth } from "../../context/AuthContext";
 import useApplicationForm from "../../hooks/useApplicationForm";
 import ImageUpload from "../ImageUpload";
 import { User } from '@supabase/supabase-js';
-import { FormProps } from "../../ApplyForm";
+import type { FormProps } from "../../types/Application";
 
-interface ArtistFormData {
+interface ArtistFormData extends Record<string, unknown> {
   name: string;
   email: string;
-  artistType: string;
   school: string;
-  location: string;
-  bio: string;
-  phone: string;
-  genres: string;
-  links: string;
-  socialLinks: string;
-  photo: File | null;
-  needs: string;
-  upcomingShow: string;
-  influences: string;
-  note: string;
-  specificConnections: string;
+  artist_type?: string;
+  genres: string[];
+  streaming_links: string[];
+  upcoming_show?: string;
+  influences: string[];
+  current_needs?: string;
+  bio?: string;
+  instagram_link?: string;
+  location?: string;
+  phone_number?: string;
+  photo_url?: string;
+}
+
+interface ArtistFormProps extends FormProps {
+  initialData?: ArtistFormData;
+  onSubmit: (data: ArtistFormData) => void;
 }
 
 interface TransformedArtistData {

@@ -10,7 +10,7 @@ export const useOptimizedImage = (url, options = {}) => {
     format = 'jpeg'
   } = options;
 
-  const optimizedUrl = useMemo(() => {
+  const optimizedUrl = useOptimizedImage(url, options);
     if (!url) return url;
     
     // Create a cache key that includes the URL and options

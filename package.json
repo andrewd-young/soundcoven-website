@@ -28,7 +28,8 @@
   "scripts": {
     "start": "webpack-dev-server --open",
     "build": "webpack --mode production",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "typecheck": "tsc --noEmit"
   },
   "eslintConfig": {
     "extends": [

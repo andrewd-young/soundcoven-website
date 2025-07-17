@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { User } from "../types/User";
+import { ApplicationData } from "../types/Application";
 import supabase from "../utils/supabase";
 import Button from "./common/Button";
-import { AuthImage } from "./common/AuthImage";
+import AuthImage from "./common/AuthImage";
 
 const UserApplicationView = () => {
   const { applicationId } = useParams();
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | null };
   const navigate = useNavigate();
-  const [application, setApplication] = useState(null);
+  const [application, setApplication] = useState<ApplicationData | null>(null);
   const [modificationRequest, setModificationRequest] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchApplication = async () => {
@@ -24,21 +26,21 @@ const UserApplicationView = () => {
           .single();
 
         if (error) throw error;
-        if (data.user_id !== user.id) {
+        if (!data || !user?.id || data.user_id !== user.id) {
           navigate("/");
           return;
         }
 
-        setApplication(data);
+        setApplication(data as ApplicationData);
       } catch (err) {
-        setError(err.message);
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
     };
 
     fetchApplication();
-  }, [applicationId, user.id, navigate]);
+  }, [applicationId, user?.id, navigate]);
 
   const handleApprove = async () => {
     try {
@@ -47,11 +49,11 @@ const UserApplicationView = () => {
         .update({
           status: "approved",
           status_history: [
-            ...(application.status_history || []),
+            ...(application?.status_history || []),
             {
               status: "approved",
               timestamp: new Date().toISOString(),
-              user_id: user.id,
+              user_id: user?.id,
             },
           ],
         })
@@ -60,7 +62,7 @@ const UserApplicationView = () => {
       if (error) throw error;
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -71,15 +73,15 @@ const UserApplicationView = () => {
         .update({
           status: "changes_requested",
           modification_requests: [
-            ...(application.modification_requests || []),
+            ...(application?.modification_requests || []),
             modificationRequest,
           ],
           status_history: [
-            ...(application.status_history || []),
+            ...(application?.status_history || []),
             {
               status: "changes_requested",
               timestamp: new Date().toISOString(),
-              user_id: user.id,
+              user_id: user?.id,
               message: modificationRequest,
             },
           ],
@@ -89,7 +91,7 @@ const UserApplicationView = () => {
       if (error) throw error;
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -150,10 +152,10 @@ const UserApplicationView = () => {
         </div>
 
         {/* Application Photo */}
-        {application.photo_url && (
+        {application?.photo_url && (
           <AuthImage
             src={application.photo_url}
-            alt={`${application.name}'s photo`}
+            alt={`${application.name || ''}'s photo`}
             width={200}
             height={200}
             className="rounded-lg ml-4"

@@ -5,7 +5,7 @@ import supabase from '../utils/supabase';
 import { compressImage } from '../utils/imageUtils';
 import { User } from '@supabase/supabase-js';
 
-const useApplicationForm = <T extends Record<string, any>>(applicationType: string, initialFormData: T) => {
+const useApplicationForm = <T extends Record<string, unknown>>(applicationType: string, initialFormData: T) => {
   const { user } = useAuth() as { user: User | null };
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -57,33 +57,37 @@ const useApplicationForm = <T extends Record<string, any>>(applicationType: stri
       if (uploadError) throw uploadError;
       
       // Properly handle the public URL response
-      const { data, error: publicUrlError } = await supabase.storage
+      const { data } = await supabase.storage
         .from('application-photos')
         .getPublicUrl(filePath);
-        
-      if (publicUrlError) throw publicUrlError;
       
       if (!data?.publicUrl) {
         throw new Error('Failed to get public URL for uploaded file');
       }
 
       return data.publicUrl;
-    } catch (error) {
-      console.error('Error uploading photo:', error);
-      throw error;
+    } catch (err) {
+      console.error('Error uploading photo:', err);
+      throw err;
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, transformData: (formData: T, photoUrl: string | null) => Record<string, unknown>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+    transformData: (_fd: T, _p: string | null) => Record<string, unknown>
+  ) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      let photoUrl = null;
-      if (formData.photo) {
+      let photoUrl: string | null = null;
+      // Type guard for 'photo' property
+      const hasPhoto = (fd: T): fd is T & { photo: File } =>
+        Object.prototype.hasOwnProperty.call(fd, 'photo') && typeof (fd as { [key: string]: unknown }).photo !== 'undefined' && (fd as { [key: string]: unknown }).photo !== null;
+      if (hasPhoto(formData)) {
         try {
-          photoUrl = await uploadPhoto(formData.photo);
-        } catch (error) {
+          photoUrl = await uploadPhoto((formData as { [key: string]: unknown }).photo as File);
+        } catch {
           throw new Error('Photo upload failed. Please try again.');
         }
       }
@@ -134,9 +138,9 @@ const useApplicationForm = <T extends Record<string, any>>(applicationType: stri
       if (profileError) throw profileError;
       
       navigate('/account');
-    } catch (error: unknown) {
-      console.error('Error submitting application:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error submitting application. Please try again.';
+    } catch (err: unknown) {
+      console.error('Error submitting application:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Error submitting application. Please try again.';
       alert(errorMessage);
     } finally {
       setLoading(false);

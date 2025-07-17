@@ -7,7 +7,7 @@ import {
   faMusic,
 } from "@fortawesome/free-solid-svg-icons";
 import Tag from './components/common/Tag';
-import { AuthImage } from "./components/common/AuthImage";
+import AuthImage from "./components/common/AuthImage";
 
 const DEFAULT_IMAGE = 'https://placehold.co/600x400?text=Instrumentalist+Image';
 
@@ -40,7 +40,7 @@ const InstrumentalistBio = () => {
             {instrumentalist.instrument && (
               <Tag 
                 icon={faGuitar} 
-                text={instrumentalist.instrument}
+                text={instrumentalist.instrument ?? 'N/A'}
                 darkMode={false}
               />
             )}

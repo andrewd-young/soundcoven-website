@@ -2,16 +2,25 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import supabase from "../utils/supabase";
 import { differenceInDays } from "date-fns";
+import {
+  ApplicationData,
+  ArtistApplication,
+  IndustryApplication,
+} from '../types/Application';
 
-export const useAdminDashboard = (user: any) => {
+// Remove unused ApplicationHistoryEntry, InstrumentalistApplication, ProfileData
+
+type Application = ApplicationData;
+
+export const useAdminDashboard = (user: { id: string; } | null) => {
   const navigate = useNavigate();
-  const [applications, setApplications] = useState<any[]>([]);
-  const [filteredApplications, setFilteredApplications] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState('pending');
+  const [selectedStatus, setSelectedStatus] = useState<string>('pending');
 
-  const getTableName = (applicationType: string) => {
+  const getTableName = (applicationType: Application['application_type']): string => {
     switch (applicationType) {
       case 'artist':
         return 'artists';
@@ -26,6 +35,11 @@ export const useAdminDashboard = (user: any) => {
 
   const fetchApplications = useCallback(async () => {
     try {
+      if (!user) {
+        navigate("/");
+        return;
+      }
+
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
@@ -52,9 +66,8 @@ export const useAdminDashboard = (user: any) => {
     }
   }, [user, navigate]);
 
-  const handleFinalizeProfile = async (application: any) => {
+  const handleFinalizeProfile = async (application: Application) => {
     try {
-      // Define the allowed fields for each profile type
       const allowedFields = {
         instrumentalist: [
           'name',
@@ -110,7 +123,6 @@ export const useAdminDashboard = (user: any) => {
         ],
       };
 
-      // Define which fields should be arrays
       const arrayFields = [
         'equipment',
         'genres',
@@ -123,13 +135,11 @@ export const useAdminDashboard = (user: any) => {
         'upcoming_shows',
       ];
 
-      // Get the allowed fields for this application type
-      const allowed = allowedFields[application.application_type as keyof typeof allowedFields];
+      const allowed = allowedFields[application.application_type];
       if (!allowed) {
         throw new Error(`Unknown application type: ${application.application_type}`);
       }
       
-      // First, check and delete any existing profiles for this user
       const { error: deleteError } = await supabase
         .from(getTableName(application.application_type))
         .delete()
@@ -140,82 +150,72 @@ export const useAdminDashboard = (user: any) => {
         throw deleteError;
       }
 
-      // Format social links
+      // Use application.social_links and application.school as fallback
       const socialLinks = {
-        ...(application.admin_approved_profile.social_links || {}),
         ...(application.social_links || {}),
       };
-      
-      // Only add website and linkedin if they exist
-      if (application.admin_approved_profile.website) {
-        socialLinks.website = application.admin_approved_profile.website;
+      if ((application.admin_approved_profile as IndustryApplication)?.website) {
+        socialLinks.website = (application.admin_approved_profile as IndustryApplication).website!;
       }
-      if (application.admin_approved_profile.linkedin) {
-        socialLinks.linkedin = application.admin_approved_profile.linkedin;
+      if ((application.admin_approved_profile as IndustryApplication)?.linkedin) {
+        socialLinks.linkedin = (application.admin_approved_profile as IndustryApplication).linkedin!;
       }
 
-      // Filter and format the profile data
-      const profileData = {
+      // Helper to safely get string[] from possible string | string[] | undefined
+      function toStringArray(val: unknown): string[] {
+        if (Array.isArray(val)) return val as string[];
+        if (typeof val === 'string') return val.split(',').map((v) => v.trim());
+        return [];
+      }
+
+      const genresVal = (application as ArtistApplication).genres ?? (application.admin_approved_profile as ArtistApplication)?.genres;
+      const influencesVal = (application as ArtistApplication).influences ?? (application.admin_approved_profile as ArtistApplication)?.influences;
+      const favoriteArtistsVal = (application as IndustryApplication).favorite_artists ?? (application.admin_approved_profile as IndustryApplication)?.favorite_artists;
+
+      const profileData: Record<string, unknown> = {
         ...application.admin_approved_profile,
         user_id: application.user_id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         social_links: socialLinks,
-        streaming_links: application.streaming_links || 
-                        application.admin_approved_profile.streaming_links || [],
-        school: application.school || 
-                application.admin_approved_profile.school || null,
-        // Handle genres from either source, ensuring they're arrays
-        genres: Array.isArray(application.genres) 
-          ? application.genres 
-          : typeof application.genres === 'string'
-          ? application.genres.split(',').map((g: string) => g.trim())
-          : Array.isArray(application.admin_approved_profile.genres)
-          ? application.admin_approved_profile.genres
-          : typeof application.admin_approved_profile.genres === 'string' 
-          ? application.admin_approved_profile.genres.split(',').map((g: string) => g.trim())
+        streaming_links: Array.isArray((application as ArtistApplication).streaming_links)
+          ? (application as ArtistApplication).streaming_links
+          : Array.isArray((application.admin_approved_profile as ArtistApplication)?.streaming_links)
+          ? (application.admin_approved_profile as ArtistApplication)?.streaming_links ?? []
           : [],
-        // Handle influences similarly
-        influences: Array.isArray(application.influences)
-          ? application.influences
-          : typeof application.influences === 'string'
-          ? application.influences.split(',').map((i: string) => i.trim())
-          : Array.isArray(application.admin_approved_profile.influences)
-          ? application.admin_approved_profile.influences
-          : typeof application.admin_approved_profile.influences === 'string' 
-          ? application.admin_approved_profile.influences.split(',').map((i: string) => i.trim())
-          : [],
-        favorite_artists: application.favorite_artists || [],
+        school: application.school || null,
+        genres: toStringArray(genresVal),
+        influences: toStringArray(influencesVal),
+        favorite_artists: toStringArray(favoriteArtistsVal),
         profile_image_url: application.photo_url || null,
       };
 
-      // Special handling for artist_type
       if (application.application_type === 'artist') {
-        // Map common variations to allowed values
-        const artistTypeMap = {
+        const artistTypeMap: Record<string, string> = {
           'solo artist': 'solo',
           'solo': 'solo',
           'band': 'band',
           'duo': 'duo'
         };
 
-        const rawArtistType = (application.admin_approved_profile.artist_type || '').toLowerCase();
-        profileData.artist_type = artistTypeMap[rawArtistType as keyof typeof artistTypeMap] || 'solo';
+        const rawArtistType = ((application.admin_approved_profile as ArtistApplication)?.artist_type || '').toLowerCase();
+        profileData.artist_type = artistTypeMap[rawArtistType] || 'solo';
       }
 
-      // Remove standalone website and linkedin fields as they're now in social_links
       delete profileData.website;
       delete profileData.linkedin;
 
-      // Create a new object with only the allowed fields and proper array formatting
+      // Use Record<string, unknown> for cleanedProfileData
       const cleanedProfileData = Object.keys(profileData)
         .filter(key => allowed.includes(key))
-        .reduce((obj: any, key: string) => {
+        .reduce((obj: Record<string, unknown>, key: string) => {
           if (profileData[key] !== undefined && profileData[key] !== null) {
             if (arrayFields.includes(key)) {
               obj[key] = Array.isArray(profileData[key]) 
                 ? profileData[key]
-                : profileData[key].split(',').map((item: string) => item.trim());
+                : typeof profileData[key] === 'string'
+                ? (profileData[key] as string).split(',').map((item: string) => item.trim())
+                : [];
             } else {
               obj[key] = profileData[key];
             }
@@ -223,11 +223,6 @@ export const useAdminDashboard = (user: any) => {
           return obj;
         }, {});
 
-      // Debug the final data
-      // console.log('Final profile data:', cleanedProfileData);
-      // console.log('Artist type in final data:', cleanedProfileData.artist_type);
-
-      // Create the profile
       const { data: newProfile, error: profileError } = await supabase
         .from(getTableName(application.application_type))
         .insert([cleanedProfileData])
@@ -243,7 +238,6 @@ export const useAdminDashboard = (user: any) => {
         throw new Error('Profile was not created');
       }
 
-      // Update application status to finalized
       const { error: applicationError } = await supabase
         .from('applications')
         .update({
@@ -251,10 +245,10 @@ export const useAdminDashboard = (user: any) => {
           status_history: [...(application.status_history || []), {
             status: 'finalized',
             timestamp: new Date().toISOString(),
-            user_id: user.id
+            user_id: user?.id
           }],
           finalized_at: new Date().toISOString(),
-          finalized_by: user.id
+          finalized_by: user?.id
         })
         .eq('id', application.id);
 
@@ -263,7 +257,6 @@ export const useAdminDashboard = (user: any) => {
         throw applicationError;
       }
 
-      // Update the applications list
       setFilteredApplications(prev => 
         prev.map(app => 
           app.id === application.id 
@@ -278,7 +271,7 @@ export const useAdminDashboard = (user: any) => {
     }
   };
 
-  const handleManualApprove = async (application: any) => {
+  const handleManualApprove = async (application: Application) => {
     try {
       const now = new Date().toISOString();
       
@@ -287,13 +280,13 @@ export const useAdminDashboard = (user: any) => {
         .update({
           status: "approved",
           last_modified_at: now,
-          last_modified_by: user.id,
+          last_modified_by: user?.id,
           status_history: [
             ...(application.status_history || []),
             {
               status: "approved",
               timestamp: now,
-              user_id: user.id,
+              user_id: user?.id,
               note: "Manually approved by admin after 7 days"
             },
           ],
@@ -302,7 +295,6 @@ export const useAdminDashboard = (user: any) => {
 
       if (applicationError) throw applicationError;
       
-      // Update local state
       setFilteredApplications(prev => 
         prev.map(app => 
           app.id === application.id 
@@ -315,9 +307,8 @@ export const useAdminDashboard = (user: any) => {
     }
   };
 
-  const handleUnpublishProfile = async (application: any) => {
+  const handleUnpublishProfile = async (application: Application) => {
     try {
-      // Delete the profile from the appropriate table
       const { error: deleteError } = await supabase
         .from(getTableName(application.application_type))
         .delete()
@@ -325,7 +316,6 @@ export const useAdminDashboard = (user: any) => {
 
       if (deleteError) throw deleteError;
 
-      // Update application status back to approved
       const { error: applicationError } = await supabase
         .from('applications')
         .update({
@@ -335,18 +325,17 @@ export const useAdminDashboard = (user: any) => {
             {
               status: 'approved',
               timestamp: new Date().toISOString(),
-              user_id: user.id,
+              user_id: user?.id,
               note: 'Unpublished by admin'
             }
           ],
           last_modified_at: new Date().toISOString(),
-          last_modified_by: user.id
+          last_modified_by: user?.id
         })
         .eq('id', application.id);
 
       if (applicationError) throw applicationError;
 
-      // Update local state
       setFilteredApplications(prev => 
         prev.map(app => 
           app.id === application.id 
@@ -361,13 +350,11 @@ export const useAdminDashboard = (user: any) => {
     }
   };
 
-  // Filter applications when selected status changes
   useEffect(() => {
     const filtered = applications.filter(app => app.status === selectedStatus);
     setFilteredApplications(filtered);
   }, [selectedStatus, applications]);
 
-  // Initial fetch
   useEffect(() => {
     fetchApplications();
   }, [fetchApplications]);
@@ -385,14 +372,13 @@ export const useAdminDashboard = (user: any) => {
   };
 };
 
-export const shouldShowManualApprove = (application: any) => {
+export const shouldShowManualApprove = (application: Application) => {
   if (!application || application.status !== 'pending_user_approval') {
     return false;
   }
   
-  // Find the pending_user_approval status entry in history
   const pendingUserApprovalEntry = application.status_history?.find(
-    (entry: any) => entry.status === 'pending_user_approval'
+    (entry) => entry.status === 'pending_user_approval'
   );
   
   if (!pendingUserApprovalEntry) {

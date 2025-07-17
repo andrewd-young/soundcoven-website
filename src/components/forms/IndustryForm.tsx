@@ -1,23 +1,28 @@
 import React, { useRef, useEffect } from "react";
 import useApplicationForm from "../../hooks/useApplicationForm";
-import { DEFAULT_PROFILE_IMAGE } from "../../constants/images";
 import ImageUpload from "../ImageUpload";
-import { FormProps } from "../../ApplyForm";
+import type { FormProps } from "../../types/Application";
 
-interface IndustryFormData {
-  role: string;
+interface IndustryFormData extends Record<string, unknown> {
   name: string;
   email: string;
   school: string;
-  location: string;
-  company: string;
-  phone: string;
-  bio: string;
-  photo: File | null;
-  favoriteArtists: string;
-  note: string;
-  socialLinks: string;
-  yearsExperience: string;
+  industry_role?: string;
+  company?: string;
+  years_experience?: number;
+  expertise_areas: string[];
+  favorite_artists: string[];
+  website?: string;
+  linkedin?: string;
+  phone?: string;
+  bio?: string;
+  location?: string;
+  photo_url?: string;
+}
+
+interface IndustryFormProps extends FormProps {
+  initialData?: IndustryFormData;
+  onSubmit: (data: IndustryFormData) => void;
 }
 
 interface TransformedIndustryData {

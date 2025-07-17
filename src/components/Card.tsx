@@ -7,10 +7,11 @@ import {
   faMapMarkerAlt,
   faCompactDisc,
 } from "@fortawesome/free-solid-svg-icons";
-import { OptimizedImage } from "./common/OptimizedImage";
+import OptimizedImage from "./common/OptimizedImage";
+import { Artist } from "../types/Artist";
 
-const Card = ({ artist, className = "", styles = {} }) => {
-  const { dominantColor } = useExtractColors(artist.image);
+const Card = ({ artist, className = "", styles = {} }: { artist: Artist; className?: string; styles?: React.CSSProperties }) => {
+  const { dominantColor } = useExtractColors(artist.profile_image_url || "");
   const bgColor = dominantColor || "#fff";
 
   if (!artist) {
@@ -29,16 +30,12 @@ const Card = ({ artist, className = "", styles = {} }) => {
       }}
     >
       <OptimizedImage
-        src={artist.image}
+        src={artist.profile_image_url || ""}
         alt={artist.name}
         width={320}
         height={315}
         className="mb-6"
         objectFit="cover"
-        style={{
-          borderTopRightRadius: '0.5rem',
-          borderTopLeftRadius: '0.5rem',
-        }}
       />
       <div className="mx-4 mb-6" style={{ overflow: "hidden" }}>
         <h3 className="font-bold text-4xl">{artist.name}</h3>
@@ -48,14 +45,20 @@ const Card = ({ artist, className = "", styles = {} }) => {
         {artist.location}
       </p>
       <p className="card-text mx-4 my-3">
-        <FontAwesomeIcon icon={faCompactDisc} className="w-7" /> {artist.genre}
+        <FontAwesomeIcon icon={faCompactDisc} className="w-7" /> {artist.genres.join(", ")}
       </p>
     </Link>
   );
 };
 
 Card.propTypes = {
-  artist: PropTypes.object.isRequired,
+  artist: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    profile_image_url: PropTypes.string,
+    location: PropTypes.string,
+    genres: PropTypes.arrayOf(PropTypes.string),
+  }).isRequired,
   className: PropTypes.string,
   styles: PropTypes.object,
 };

@@ -1,8 +1,35 @@
 import { useQuery } from '@tanstack/react-query';
 import supabase from '../utils/supabase';
+import { Artist } from '../types/Artist';
+
+interface RawArtistData {
+  id: string;
+  user_id: string;
+  name: string;
+  age?: number;
+  location?: string;
+  school?: string;
+  artist_type?: string;
+  influences: string | string[];
+  bio?: string;
+  profile_image_url?: string;
+  contact_phone?: string;
+  is_featured?: boolean;
+  instagram_link?: string;
+  images_updated_at?: string;
+  email?: string;
+  genres: string | string[];
+  streaming_links: string | string[];
+  current_needs: string | string[];
+  upcoming_shows: string | string[];
+  social_links?: Record<string, string>;
+  created_at?: string;
+  updated_at?: string;
+  years_active?: number;
+}
 
 export const useArtists = () => {
-  const fetchArtists = async () => {
+  const fetchArtists = async (): Promise<Artist[]> => {
     const { data, error } = await supabase
       .from('artists')
       .select('*');
@@ -12,41 +39,44 @@ export const useArtists = () => {
       throw error;
     }
 
-    return data.map(artist => {
-      // Parse social links
-      const socialLinks = artist.social_links || {};
-      const instagramLink = socialLinks.instagram || 
-                           (socialLinks.links ? socialLinks.links.split(',')
-                             .find(link => link.trim().includes('instagram.com')) : null);
+    return data.map((artist: RawArtistData) => {
+      const social_links = artist.social_links || {};
       return {
         id: artist.id,
-        userId: artist.user_id,
+        user_id: artist.user_id,
         name: artist.name,
         age: artist.age,
         location: artist.location,
         school: artist.school,
-        genres: Array.isArray(artist.genres) ? artist.genres :
-                (artist.genres ? artist.genres.split(',').map(g => g.trim()) : []),
-        type: artist.artist_type,
-        yearsActive: artist.years_active,
-        influences: Array.isArray(artist.influences) ? artist.influences : 
-                   (artist.influences ? artist.influences.split(',').map(i => i.trim()) : []),
+        artist_type: artist.artist_type,
+        influences: Array.isArray(artist.influences) ? artist.influences :
+          (artist.influences ? artist.influences.split(',').map((i: string) => i.trim()) : []),
         bio: artist.bio,
-        streamingLinks: Array.isArray(artist.streaming_links) ? artist.streaming_links : 
-                       (artist.streaming_links ? artist.streaming_links.split(',') : []),
-        image: artist.profile_image_url,
-        contactPhone: artist.contact_phone,
-        isFeatured: artist.is_featured,
-        instagramLink: instagramLink,
-        socialLinks: artist.social_links || {},  // Keep the full social_links object just in case
+        profile_image_url: artist.profile_image_url,
+        contact_phone: artist.contact_phone,
+        is_featured: artist.is_featured,
+        instagram_link: artist.instagram_link,
+        images_updated_at: artist.images_updated_at,
+        email: artist.email,
+        genres: Array.isArray(artist.genres) ? artist.genres :
+          (artist.genres ? artist.genres.split(',').map((g: string) => g.trim()) : []),
+        streaming_links: Array.isArray(artist.streaming_links) ? artist.streaming_links :
+          (artist.streaming_links ? (artist.streaming_links as string).split(',').map((s: string) => s.trim()) : []),
+        current_needs: Array.isArray(artist.current_needs) ? artist.current_needs :
+          (artist.current_needs ? (artist.current_needs as string).split(',').map((s: string) => s.trim()) : undefined),
+        upcoming_shows: Array.isArray(artist.upcoming_shows) ? artist.upcoming_shows :
+          (artist.upcoming_shows ? (artist.upcoming_shows as string).split(',').map((s: string) => s.trim()) : undefined),
+        social_links: social_links,
+        created_at: artist.created_at,
+        updated_at: artist.updated_at,
       };
     });
   };
 
-  const { data: artists = [], isLoading, error } = useQuery({
+  const { data: artists = [], isLoading, error } = useQuery<Artist[], Error>({
     queryKey: ['artists'],
     queryFn: fetchArtists,
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    staleTime: 5 * 60 * 1000, 
   });
 
   return {

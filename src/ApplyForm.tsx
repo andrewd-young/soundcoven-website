@@ -7,24 +7,7 @@ import ArtistForm from "./components/forms/ArtistForm";
 import IndustryForm from "./components/forms/IndustryForm";
 import InstrumentalistForm from "./components/forms/InstrumentalistForm";
 import { User } from '@supabase/supabase-js';
-
-// Define a common interface for form props
-export interface FormProps {
-  onBack: () => void;
-  className?: string;
-}
-
-interface ApplicationData {
-  status: string;
-  application_type: string;
-}
-
-interface ProfileData {
-  has_applied: boolean;
-  application_id: string | null;
-  role: string | null;
-  applications: ApplicationData[] | null;
-}
+import { FormProps, UserProfileData } from './types/Application';
 
 const ApplyForm: React.FC = () => {
   const navigate = useNavigate();
@@ -59,16 +42,16 @@ const ApplyForm: React.FC = () => {
 
         if (error) throw error;
         
-        if ((profile as ProfileData)?.has_applied && (profile as ProfileData)?.application_id && 
-            (profile as ProfileData)?.applications?.[0]?.status === 'submitted') {
+        if ((profile as UserProfileData)?.has_applied && (profile as UserProfileData)?.application_id && 
+            (profile as UserProfileData)?.applications?.[0]?.status === 'submitted') {
           navigate('/account');
           return;
         }
 
         if (urlRole && ['artist', 'industry', 'instrumentalist'].includes(urlRole)) {
           setSelectedRole(urlRole);
-        } else if ((profile as ProfileData)?.role && (profile as ProfileData)?.role !== 'other') {
-          setSelectedRole((profile as ProfileData).role);
+        } else if ((profile as UserProfileData)?.role && (profile as UserProfileData)?.role !== 'other') {
+          setSelectedRole((profile as UserProfileData).role);
         }
       } catch (error) {
         console.error('Error checking application status:', error);
@@ -144,7 +127,7 @@ const ApplyForm: React.FC = () => {
           return (
             <div className="text-center text-white">
               <h2 className="text-2xl mb-4">Thanks for your interest!</h2>
-              <p className="mb-6">While we don't have a specific application form for your role yet, we'd love to learn more about what you do.</p>
+              <p className="mb-6">While we don&apos;t have a specific application form for your role yet, we&apos;d love to learn more about what you do.</p>
               <p className="mb-6">Please check back later for updates or feel free to apply under one of our other categories if they better match your needs.</p>
               <Button
                 text="Go Back"

@@ -3,29 +3,7 @@ import ArtistWideCard from "./components/ArtistWideCard";
 import Filter, { FilterConfig } from "./components/Filter";
 import { useArtists } from "./hooks/useArtists";
 
-interface Artist {
-  id: number;
-  userId: string;
-  name: string;
-  age?: number;
-  location?: string;
-  genres: string[];
-  type?: string;
-  school?: string;
-  influences: string[];
-  profile_image_url?: string;
-  contactPhone?: string;
-  isFeatured?: boolean;
-  instagramLink?: string;
-  images_updated_at?: string;
-  email?: string;
-  streamingLinks: string[];
-  current_needs?: string[];
-  upcoming_shows?: string[];
-  socialLinks?: Record<string, any>;
-  created_at?: string;
-  updated_at?: string;
-}
+import { Artist } from "./types/Artist";
 
 const ArtistsPage: React.FC = () => {
   const [filters, setFilters] = useState<Record<string, unknown>>({});
@@ -35,19 +13,16 @@ const ArtistsPage: React.FC = () => {
     () => ({
       genres: {
         type: "select",
-        options: Array.from(new Set(artists.flatMap((artist) => artist.genres))),
+        options: Array.from(new Set(artists.flatMap((artist) => artist.genres))).filter(Boolean) as string[],
       },
-      type: {
-        type: "select",
-        options: Array.from(new Set(artists.map((artist) => artist.type).filter(Boolean))),
-      },
+      
       location: {
         type: "select",
-        options: Array.from(new Set(artists.map((artist) => artist.location).filter(Boolean))),
+        options: Array.from(new Set(artists.map((artist) => artist.location).filter(Boolean))) as string[],
       },
       school: {
         type: "select",
-        options: Array.from(new Set(artists.map((artist) => artist.school).filter(Boolean))),
+        options: Array.from(new Set(artists.map((artist) => artist.school).filter(Boolean))) as string[],
       },
       name: { type: "search" },
     }),

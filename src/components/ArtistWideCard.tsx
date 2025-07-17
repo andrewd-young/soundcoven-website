@@ -9,20 +9,22 @@ import {
   faCompactDisc,
   faSchool,
 } from "@fortawesome/free-solid-svg-icons";
-import { AuthImage } from "./common/AuthImage";
+import AuthImage from "./common/AuthImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Artist+Image";
 const DEFAULT_COLOR = "#4F1D4D"; // covenLightPurple
 
-const ArtistWideCard = ({ artist }) => {
-  const { id, name, genres, location, school } = artist;
+import { Artist } from "../types/Artist";
 
-  const isUsingDefaultImage = !artist.image;
-  const { colors } = useExtractColors(artist.image || DEFAULT_IMAGE, {
-    crossOrigin: "anonymous",
-    defaultColor: DEFAULT_COLOR,
-    skip: isUsingDefaultImage,
-  });
+interface ArtistWideCardProps {
+  artist: Artist;
+}
+
+const ArtistWideCard: React.FC<ArtistWideCardProps> = ({ artist }) => {
+  const { id, name, genres, location, school, profile_image_url } = artist;
+
+  const isUsingDefaultImage = !profile_image_url;
+  const { colors } = useExtractColors(profile_image_url || DEFAULT_IMAGE);
 
   const bgColor = isUsingDefaultImage
     ? DEFAULT_COLOR
@@ -44,8 +46,8 @@ const ArtistWideCard = ({ artist }) => {
         {/* Image Container - Full width on mobile, 1/3 width on desktop */}
         <div className="w-full md:w-1/3 flex-shrink-0">
           <AuthImage
-            src={artist.image || DEFAULT_IMAGE}
-            alt={artist.name}
+            src={profile_image_url || DEFAULT_IMAGE}
+            alt={name}
             className="w-full h-auto md:h-full object-cover"
             fallbackSrc={DEFAULT_IMAGE}
           />
@@ -91,12 +93,12 @@ const ArtistWideCard = ({ artist }) => {
 
 ArtistWideCard.propTypes = {
   artist: PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     genres: PropTypes.arrayOf(PropTypes.string),
     location: PropTypes.string,
     school: PropTypes.string,
-    image: PropTypes.string,
+    profile_image_url: PropTypes.string,
   }).isRequired,
 };
 

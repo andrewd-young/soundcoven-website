@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, Navigate } from "react-router-dom";
-import PropTypes from "prop-types";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useIndustryPros } from "./hooks/useIndustryPros";
 import {
@@ -13,12 +13,18 @@ import {
   faBuilding,
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
-import { AuthImage } from "./components/common/AuthImage";
+import AuthImage from "./components/common/AuthImage";
 
 const DEFAULT_IMAGE = "https://placehold.co/600x400?text=Profile+Image";
 
-const IndustryProBio = () => {
-  const { proId } = useParams();
+import { IndustryProfessional } from "./types/IndustryProfessional";
+
+interface IndustryProBioProps {
+  proId?: string;
+}
+
+const IndustryProBio: React.FC<IndustryProBioProps> = () => {
+  const { proId } = useParams<{ proId: string }>();
   const { industryPros, loading, error } = useIndustryPros();
 
   if (loading)
@@ -34,30 +40,17 @@ const IndustryProBio = () => {
       </div>
     );
 
-  const pro = industryPros.find((p) => p.id === parseInt(proId));
+  const pro = industryPros.find((p) => p.id === parseInt(proId || ''));
 
   if (!pro) {
     return <Navigate to="/industry-pros" replace />;
   }
 
-  // Convert arrays or strings to arrays
-  const favoriteArtistsList = Array.isArray(pro.favorite_artists)
-    ? pro.favorite_artists
-    : pro.favorite_artists
-    ? pro.favorite_artists.split(",").map((artist) => artist.trim())
-    : [];
+  const favoriteArtistsList = pro.favorite_artists || [];
 
-  const expertiseAreas = Array.isArray(pro.expertise_areas)
-    ? pro.expertise_areas
-    : pro.expertise_areas
-    ? pro.expertise_areas.split(",").map((area) => area.trim())
-    : [];
+  const expertiseAreas = pro.expertise_areas || [];
 
-  const socialLinks = Array.isArray(pro.social_links)
-    ? pro.social_links
-    : pro.social_links
-    ? pro.social_links.split(",").map((link) => link.trim())
-    : [];
+  const socialLinks = pro.social_links || [];
 
   return (
     <section id="pro-bio" className="text-white py-8 px-6 md:px-12 lg:px-24">
@@ -130,7 +123,7 @@ const IndustryProBio = () => {
                 Areas of Expertise
               </h3>
               <div className="flex flex-wrap gap-2">
-                {expertiseAreas.map((area, index) => (
+                {expertiseAreas.map((area: string, index: number) => (
                   <span
                     key={index}
                     className="tag bg-purple-200 text-purple-800 px-3 py-1 rounded"
@@ -147,7 +140,7 @@ const IndustryProBio = () => {
             <div className="mb-6">
               <h3 className="text-2xl font-semibold mb-2">Favorite Artists</h3>
               <div className="flex flex-wrap gap-2">
-                {favoriteArtistsList.map((artist, index) => (
+                {favoriteArtistsList.map((artist: string, index: number) => (
                   <span
                     key={index}
                     className="tag bg-teal-200 text-teal-800 px-3 py-1 rounded"
@@ -164,7 +157,7 @@ const IndustryProBio = () => {
             <div className="mb-6">
               <h3 className="text-2xl font-semibold mb-2">Connect</h3>
               <div className="flex flex-wrap gap-2">
-                {socialLinks.map((link, index) => (
+                {socialLinks.map((link: string, index: number) => (
                   <a
                     key={index}
                     href={link.startsWith("http") ? link : `https://${link}`}
@@ -204,34 +197,6 @@ const IndustryProBio = () => {
   );
 };
 
-IndustryProBio.propTypes = {
-  industryPros: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-      industry_role: PropTypes.string,
-      company: PropTypes.string,
-      location: PropTypes.string,
-      email: PropTypes.string,
-      phone: PropTypes.string,
-      school: PropTypes.string,
-      favorite_artists: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.arrayOf(PropTypes.string),
-      ]),
-      expertise_areas: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.arrayOf(PropTypes.string),
-      ]),
-      social_links: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.arrayOf(PropTypes.string),
-      ]),
-      years_experience: PropTypes.number,
-      bio: PropTypes.string,
-      profile_image_url: PropTypes.string,
-    })
-  ).isRequired,
-};
+
 
 export default IndustryProBio;
