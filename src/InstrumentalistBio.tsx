@@ -18,7 +18,7 @@ const InstrumentalistBio = () => {
   if (loading) return <div className="min-h-screen bg-covenPurple text-white p-8">Loading...</div>;
   if (error) return <div className="min-h-screen bg-covenPurple text-white p-8">Error: {error}</div>;
   
-  const instrumentalist = instrumentalists.find((i) => i.id === parseInt(instrumentalistId));
+  const instrumentalist = instrumentalists.find((i) => String(i.id) === String(instrumentalistId));
   
   if (!instrumentalist) {
     return <Navigate to="/instrumentalists" replace />;
@@ -54,7 +54,7 @@ const InstrumentalistBio = () => {
             {instrumentalist.favoriteGenres && (
               <Tag 
                 icon={faMusic} 
-                text={instrumentalist.favoriteGenres.join(', ')}
+                text={(instrumentalist.favoriteGenres ?? []).join(', ')}
                 darkMode={false}
               />
             )}
@@ -63,7 +63,7 @@ const InstrumentalistBio = () => {
         <div className="relative z-10">
           <div className="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden shadow-2xl">
             <AuthImage
-              src={instrumentalist.profileImageUrl}
+              src={instrumentalist.profileImageUrl || DEFAULT_IMAGE}
               alt={`${instrumentalist.name}'s profile`}
               width={800}
               height={800}

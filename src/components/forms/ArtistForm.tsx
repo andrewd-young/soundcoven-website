@@ -1,8 +1,6 @@
 import React, { useRef, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
 import useApplicationForm from "../../hooks/useApplicationForm";
 import ImageUpload from "../ImageUpload";
-import { User } from '@supabase/supabase-js';
 import type { FormProps } from "../../types/Application";
 
 interface ArtistFormData extends Record<string, unknown> {
@@ -10,21 +8,18 @@ interface ArtistFormData extends Record<string, unknown> {
   email: string;
   school: string;
   artist_type?: string;
-  genres: string[];
-  streaming_links: string[];
+  genres: string;
+  streaming_links: string;
   upcoming_show?: string;
-  influences: string[];
+  influences: string;
   current_needs?: string;
   bio?: string;
   instagram_link?: string;
   location?: string;
   phone_number?: string;
   photo_url?: string;
-}
-
-interface ArtistFormProps extends FormProps {
-  initialData?: ArtistFormData;
-  onSubmit: (data: ArtistFormData) => void;
+  socialLinks?: string;
+  note: string;
 }
 
 interface TransformedArtistData {
@@ -47,29 +42,44 @@ interface TransformedArtistData {
 }
 
 const ArtistForm: React.FC<FormProps> = () => {
-  const { user } = useAuth() as { user: User | null };
-
   const initialFormData: ArtistFormData = {
     name: "",
     email: "",
-    artistType: "",
+    artist_type: "",
     school: "",
     location: "",
     bio: "",
-    phone: "",
+    phone_number: "",
     genres: "",
-    links: "",
+    streaming_links: "",
     socialLinks: "",
-    photo: null,
-    needs: "",
-    upcomingShow: "",
+    photo_url: "",
+    current_needs: "",
+    upcoming_show: "",
     influences: "",
     note: "",
-    specificConnections: "",
+    instagram_link: "",
   };
 
   const { loading, formData, handleChange, handleFileChange, handleSubmit } =
     useApplicationForm<ArtistFormData>("artist", initialFormData);
+
+  // Custom handleChange to convert comma-separated strings to arrays for certain fields
+  const customHandleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (name === "genres" || name === "streaming_links" || name === "influences") {
+      handleChange({
+        ...e,
+        target: {
+          ...e.target,
+          value,
+          name,
+        },
+      });
+    } else {
+      handleChange(e);
+    }
+  };
 
   const influencesRef = useRef<HTMLTextAreaElement>(null);
   const noteRef = useRef<HTMLTextAreaElement>(null);
@@ -78,22 +88,22 @@ const ArtistForm: React.FC<FormProps> = () => {
     name: formData.name,
     email: formData.email,
     school: formData.school,
-    location: formData.location,
-    bio: formData.bio,
-    artist_type: formData.artistType,
-    genres: formData.genres,
-    streaming_links: formData.links,
-    social_links: formData.socialLinks ? { links: formData.socialLinks } : null,
+    location: formData.location || "",
+    bio: formData.bio || "",
+    artist_type: formData.artist_type || "",
+    genres: formData.genres || "",
+    streaming_links: formData.streaming_links || "",
+    social_links: formData.socialLinks ? { links: String(formData.socialLinks) } : null,
     photo_url: photoUrl,
-    current_needs: formData.needs,
-    upcoming_show: formData.upcomingShow,
-    influences: formData.influences,
-    industry_role: formData.specificConnections,
-    note: formData.note,
-    phone_number: formData.phone
+    current_needs: formData.current_needs || "",
+    upcoming_show: formData.upcoming_show || "",
+    influences: formData.influences || "",
+    industry_role: "",
+    note: formData.note ? String(formData.note) : "",
+    phone_number: formData.phone_number || "",
   });
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, transformData as any);
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, (fd, photoUrl) => transformData(fd, photoUrl) as unknown as Record<string, unknown>);
 
   const handleImageChange = (file: File | null) => {
     // Create a mock event that the handleFileChange expects
@@ -213,17 +223,17 @@ const ArtistForm: React.FC<FormProps> = () => {
           name="genres"
           type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
+          onChange={customHandleChange}
           required
         />
       </div>
       <div className="mb-4">
         <label className="block mb-2">Links to streaming platforms</label>
         <input
-          name="links"
+          name="streaming_links"
           type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
+          onChange={customHandleChange}
           placeholder="Must provide at least one link to streamable music"
           required
         />
@@ -231,7 +241,7 @@ const ArtistForm: React.FC<FormProps> = () => {
       <div className="mb-4">
         <label className="block mb-2">Upcoming live show</label>
         <input
-          name="upcomingShow"
+          name="upcoming_show"
           type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
           onChange={handleChange}
@@ -243,7 +253,7 @@ const ArtistForm: React.FC<FormProps> = () => {
         <textarea
           name="influences"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
+          onChange={customHandleChange}
           ref={influencesRef}
           placeholder="Artists, producers, creatives, etc."
         ></textarea>
@@ -273,7 +283,7 @@ const ArtistForm: React.FC<FormProps> = () => {
         <textarea
           name="note"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          value={formData.note}
+          value={formData.note ?? ''}
           onChange={handleChange}
           ref={noteRef}
           placeholder="Anything you would want people to know about you?"

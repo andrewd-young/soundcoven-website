@@ -10,19 +10,18 @@ interface IndustryFormData extends Record<string, unknown> {
   industry_role?: string;
   company?: string;
   years_experience?: number;
-  expertise_areas: string[];
-  favorite_artists: string[];
+  expertise_areas: string;
+  favorite_artists: string;
   website?: string;
   linkedin?: string;
   phone?: string;
   bio?: string;
   location?: string;
   photo_url?: string;
-}
-
-interface IndustryFormProps extends FormProps {
-  initialData?: IndustryFormData;
-  onSubmit: (data: IndustryFormData) => void;
+  note: string;
+  socialLinks?: string;
+  role?: string;
+  yearsExperience?: string;
 }
 
 interface TransformedIndustryData {
@@ -51,8 +50,9 @@ const IndustryForm: React.FC<FormProps> = () => {
     company: "",
     phone: "",
     bio: "",
-    photo: null,
-    favoriteArtists: "",
+    photo_url: "",
+    favorite_artists: "",
+    expertise_areas: "",
     note: "",
     socialLinks: "",
     yearsExperience: "",
@@ -63,20 +63,37 @@ const IndustryForm: React.FC<FormProps> = () => {
 
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
+  // Custom handleChange to convert comma-separated strings to arrays for certain fields
+  const customHandleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (name === "favorite_artists" || name === "expertise_areas") {
+      handleChange({
+        ...e,
+        target: {
+          ...e.target,
+          value,
+          name,
+        },
+      });
+    } else {
+      handleChange(e);
+    }
+  };
+
   const transformData = (formData: IndustryFormData, photoUrl: string | null): TransformedIndustryData => ({
     name: formData.name,
     email: formData.email,
     school: formData.school,
-    location: formData.location,
-    company: formData.company,
-    phone: formData.phone,
-    bio: formData.bio,
-    industry_role: formData.role,
+    location: formData.location || "",
+    company: formData.company || "",
+    phone: formData.phone || "",
+    bio: formData.bio || "",
+    industry_role: formData.role || "",
     photo_url: photoUrl,
-    favorite_artists: formData.favoriteArtists,
-    note: formData.note,
-    social_links: formData.socialLinks ? { links: formData.socialLinks } : null,
-    years_experience: parseInt(formData.yearsExperience) || null,
+    favorite_artists: formData.favorite_artists || "",
+    note: formData.note || "",
+    social_links: formData.socialLinks ? { links: String(formData.socialLinks) } : null,
+    years_experience: formData.yearsExperience ? parseInt(formData.yearsExperience) : null,
   });
 
   const validatePhoneNumber = (phone: string): boolean => {
@@ -105,7 +122,7 @@ const IndustryForm: React.FC<FormProps> = () => {
     });
   };
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, transformData as any);
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, (fd, photoUrl) => transformData(fd, photoUrl) as unknown as Record<string, unknown>);
 
   const adjustHeight = (ref: React.RefObject<HTMLTextAreaElement | null>) => {
     if (ref.current) {
@@ -248,11 +265,22 @@ const IndustryForm: React.FC<FormProps> = () => {
       <div className="mb-4">
         <label className="block mb-2">Favorite Artists</label>
         <input
-          name="favoriteArtists"
+          name="favorite_artists"
           type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
+          onChange={customHandleChange}
           placeholder="Separate artists with commas"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block mb-2">Expertise Areas</label>
+        <input
+          name="expertise_areas"
+          type="text"
+          className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
+          onChange={customHandleChange}
+          placeholder="Separate areas with commas"
         />
       </div>
 

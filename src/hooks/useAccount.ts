@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import supabase from "../utils/supabase";
 import { Profile, ApplicationData } from "../types";
+import React from "react";
 
 export const useAccount = () => {
   const { user } = useAuth();
@@ -43,7 +44,7 @@ export const useAccount = () => {
     }
   }, [user, fetchProfileAndApplication]);
 
-  const handleUpdateEmail = async (e) => {
+  const handleUpdateEmail = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
@@ -55,8 +56,12 @@ export const useAccount = () => {
 
       if (error) throw error;
       setMessage("Check your email to confirm the change");
-    } catch (error) {
-      setMessage(`error: ${error.message}`);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setMessage(`error: ${(error as { message: string }).message}`);
+      } else {
+        setMessage('An unknown error occurred');
+      }
     } finally {
       setLoading(false);
     }
@@ -66,7 +71,7 @@ export const useAccount = () => {
     try {
       setLoading(true);
       setMessage("");
-      
+      if (!application) throw new Error("No application found");
       // Get the current application to access status_history
       const { data: currentApp, error: fetchError } = await supabase
         .from("applications")
@@ -77,6 +82,7 @@ export const useAccount = () => {
       if (fetchError) throw fetchError;
 
       // Update application status
+      if (!user) throw new Error("No user found");
       const { error: statusError } = await supabase
         .from("applications")
         .update({
@@ -97,15 +103,19 @@ export const useAccount = () => {
 
       // Refresh profile data
       await fetchProfileAndApplication();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error accepting profile:', error);
-      setMessage(`error: ${error.message}`);
+      if (error && typeof error === 'object' && 'message' in error) {
+        setMessage(`error: ${(error as { message: string }).message}`);
+      } else {
+        setMessage('An unknown error occurred');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const formatRole = (role) => {
+  const formatRole = (role: string) => {
     if (!role) return "Not Set";
     return role.charAt(0).toUpperCase() + role.slice(1);
   };

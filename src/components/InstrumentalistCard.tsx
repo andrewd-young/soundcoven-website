@@ -1,20 +1,14 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import { Instrumentalist } from '../types/Instrumentalist';
+import AuthImage from './common/AuthImage';
 import { faGuitar, faGraduationCap } from '@fortawesome/free-solid-svg-icons';
 import Tag from './common/Tag';
-import AuthImage from './common/AuthImage';
 
 const DEFAULT_IMAGE = 'https://placehold.co/600x400?text=Instrumentalist+Image';
 
 interface InstrumentalistCardProps {
-  instrumentalist: {
-    id: number;
-    name: string;
-    instrument?: string;
-    school?: string;
-    profileImageUrl?: string;
-  };
+  instrumentalist: Instrumentalist;
 }
 
 const InstrumentalistCard: React.FC<InstrumentalistCardProps> = ({ instrumentalist }) => {
@@ -48,14 +42,6 @@ const InstrumentalistCard: React.FC<InstrumentalistCardProps> = ({ instrumentali
   );
 };
 
-InstrumentalistCard.propTypes = {
-  instrumentalist: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired,
-    instrument: PropTypes.string,
-    school: PropTypes.string,
-    profileImageUrl: PropTypes.string,
-  }).isRequired,
-};
+// No PropTypes needed, using TypeScript
 
 export default InstrumentalistCard; 

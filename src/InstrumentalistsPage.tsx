@@ -8,23 +8,25 @@ const InstrumentalistsPage: React.FC = () => {
   const [filters, setFilters] = useState<Record<string, unknown>>({});
   const { instrumentalists, loading, error } = useInstrumentalists();
 
+  const validInstrumentalists = useMemo(() => instrumentalists.filter(i => typeof i.userId === 'string') as Instrumentalist[], [instrumentalists]);
+
   const filterConfig: FilterConfig = useMemo(
     () => ({
       instrument: {
         type: "select",
-        options: Array.from(new Set(instrumentalists.map((pro) => pro.instrument).filter(Boolean))),
+        options: Array.from(new Set(validInstrumentalists.map((pro) => pro.instrument).filter((v): v is string => typeof v === 'string'))),
       },
       school: {
         type: "select",
-        options: Array.from(new Set(instrumentalists.map((pro) => pro.school).filter(Boolean))),
+        options: Array.from(new Set(validInstrumentalists.map((pro) => pro.school).filter((v): v is string => typeof v === 'string'))),
       },
       name: { type: "search" },
     }),
-    [instrumentalists]
+    [validInstrumentalists]
   );
 
   const filteredInstrumentalists = useMemo(() => {
-    return instrumentalists.filter((instrumentalist: Instrumentalist) => {
+    return validInstrumentalists.filter((instrumentalist: Instrumentalist) => {
       return Object.entries(filters).every(([key, value]) => {
         if (!value) return true;
         
@@ -44,16 +46,16 @@ const InstrumentalistsPage: React.FC = () => {
         }
         
         // Handle array fields (favoriteGenres, equipment)
-        if (Array.isArray((instrumentalist as any)[key])) {
-          return ((instrumentalist as any)[key] as string[]).some(item => 
+        if (Array.isArray((instrumentalist as unknown as Record<string, unknown>)[key])) {
+          return ((instrumentalist as unknown as Record<string, unknown>)[key] as string[]).some(item => 
             (value as string).toLowerCase().includes(item.toLowerCase())
           );
         }
 
-        return (instrumentalist as any)[key] === value;
+        return (instrumentalist as unknown as Record<string, unknown>)[key] === value;
       });
     });
-  }, [instrumentalists, filters]);
+  }, [validInstrumentalists, filters]);
 
   if (loading)
     return (

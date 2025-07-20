@@ -93,8 +93,8 @@ const Account = () => {
                 {application.application_type === "instrumentalist" && application.admin_approved_profile && (
                   <div className="space-y-3">
                     <p><strong className="text-white">Instrument:</strong> {(application.admin_approved_profile as InstrumentalistApplication)?.instrument}</p>
-                    <p className="break-words"><strong className="text-white">Favorite Genres:</strong> {Array.isArray((application.admin_approved_profile as InstrumentalistApplication)?.favorite_genres) && (application.admin_approved_profile as InstrumentalistApplication)?.favorite_genres?.length > 0 ? (application.admin_approved_profile as InstrumentalistApplication)?.favorite_genres.join(", ") : 'N/A'}</p>
-                    <p><strong className="text-white">Equipment:</strong> {Array.isArray((application.admin_approved_profile as InstrumentalistApplication)?.equipment) ? (application.admin_approved_profile as InstrumentalistApplication)?.equipment.join(", ") : 'N/A'}</p>
+                    <p className="break-words"><strong className="text-white">Favorite Genres:</strong> {Array.isArray((application.admin_approved_profile as InstrumentalistApplication)?.favorite_genres) && ((application.admin_approved_profile as InstrumentalistApplication)?.favorite_genres ?? []).length > 0 ? ((application.admin_approved_profile as InstrumentalistApplication)?.favorite_genres ?? []).join(", ") : 'N/A'}</p>
+                    <p><strong className="text-white">Equipment:</strong> {Array.isArray((application.admin_approved_profile as InstrumentalistApplication)?.equipment) && ((application.admin_approved_profile as InstrumentalistApplication)?.equipment ?? []).length > 0 ? ((application.admin_approved_profile as InstrumentalistApplication)?.equipment ?? []).join(", ") : 'N/A'}</p>
                   </div>
                 )}
               </div>
@@ -122,7 +122,7 @@ const Account = () => {
           <div className="space-y-3 text-gray-300">
             <p>
               <span className="font-semibold text-white">Role:</span>{" "}
-              {formatRole(profile?.role)}
+              {formatRole(profile?.role ?? "")}
             </p>
             {profile?.role === "other" && profile?.other_description && (
               <p>
@@ -195,7 +195,6 @@ const Account = () => {
               disabled={loading}
               text={loading ? "Updating..." : "Change Email"}
               className="w-full disabled:opacity-50"
-              onClick={handleUpdateEmail}
             />
           </div>
         </form>

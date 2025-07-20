@@ -9,18 +9,17 @@ interface InstrumentalistFormData extends Record<string, unknown> {
   school: string;
   instrument?: string;
   years_experience?: number;
-  equipment: string[];
+  equipment: string;
   rate?: string;
-  favorite_genres: string[];
+  favorite_genres: string;
+  favorite_artists: string;
   bio?: string;
   location?: string;
   phone_number?: string;
   photo_url?: string;
-}
-
-interface InstrumentalistFormProps extends FormProps {
-  initialData?: InstrumentalistFormData;
-  onSubmit: (data: InstrumentalistFormData) => void;
+  note: string;
+  socialLinks?: string;
+  yearsExperience?: string;
 }
 
 interface TransformedInstrumentalistData {
@@ -48,10 +47,10 @@ const InstrumentalistForm: React.FC<FormProps> = () => {
     school: "",
     location: "",
     bio: "",
-    favoriteGenres: "",
-    favoriteArtists: "",
+    favorite_genres: "",
+    favorite_artists: "",
     note: "",
-    photo: null,
+    photo_url: "",
     socialLinks: "",
     yearsExperience: "",
     equipment: "",
@@ -63,24 +62,41 @@ const InstrumentalistForm: React.FC<FormProps> = () => {
 
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
+  // Custom handleChange to handle comma-separated strings for certain fields
+  const customHandleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (name === "favorite_genres" || name === "favorite_artists" || name === "equipment") {
+      handleChange({
+        ...e,
+        target: {
+          ...e.target,
+          value,
+          name,
+        },
+      });
+    } else {
+      handleChange(e);
+    }
+  };
+
   const transformData = (formData: InstrumentalistFormData, photoUrl: string | null): TransformedInstrumentalistData => ({
     name: formData.name,
     email: formData.email,
     school: formData.school,
-    location: formData.location,
-    bio: formData.bio,
-    instrument: formData.instrument,
-    favorite_genres: formData.favoriteGenres,
-    favorite_artists: formData.favoriteArtists,
+    location: formData.location || "",
+    bio: formData.bio || "",
+    instrument: formData.instrument || "",
+    favorite_genres: formData.favorite_genres || "",
+    favorite_artists: formData.favorite_artists || "",
     photo_url: photoUrl,
-    note: formData.note,
-    social_links: formData.socialLinks ? { links: formData.socialLinks } : null,
-    years_experience: parseInt(formData.yearsExperience) || null,
-    equipment: formData.equipment,
-    rate: formData.rate,
+    note: formData.note || "",
+    social_links: formData.socialLinks ? { links: String(formData.socialLinks) } : null,
+    years_experience: formData.yearsExperience ? parseInt(formData.yearsExperience) : null,
+    equipment: formData.equipment || "",
+    rate: formData.rate || "",
   });
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, transformData as unknown as (formData: InstrumentalistFormData, photoUrl: string | null) => Record<string, unknown>);
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => handleSubmit(e, (fd, photoUrl) => transformData(fd, photoUrl) as unknown as Record<string, unknown>);
 
   const adjustHeight = (ref: React.RefObject<HTMLTextAreaElement | null>) => {
     if (ref.current) {
@@ -184,10 +200,10 @@ const InstrumentalistForm: React.FC<FormProps> = () => {
       <div className="mb-4">
         <label className="block mb-2">Favorite Artists</label>
         <input
-          name="favoriteArtists"
+          name="favorite_artists"
           type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
+          onChange={customHandleChange}
           placeholder="Separate artists with commas"
           required
         />
@@ -195,10 +211,10 @@ const InstrumentalistForm: React.FC<FormProps> = () => {
       <div className="mb-4">
         <label className="block mb-2">Favorite genres to play</label>
         <input
-          name="favoriteGenres"
+          name="favorite_genres"
           type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
+          onChange={customHandleChange}
           required
         />
       </div>
@@ -230,7 +246,7 @@ const InstrumentalistForm: React.FC<FormProps> = () => {
           name="equipment"
           type="text"
           className="w-full px-3 py-2 bg-[#432347] border border-white rounded"
-          onChange={handleChange}
+          onChange={customHandleChange}
           placeholder="Equipment you use (separate with commas)"
         />
       </div>
