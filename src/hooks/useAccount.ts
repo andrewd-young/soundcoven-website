@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import supabase from "../utils/supabase";
-import { Profile, ApplicationData } from "../types";
+import { useCallback, useEffect, useState } from "react";
 import React from "react";
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext";
+import { ApplicationData, Profile } from "../types";
+import supabase from "../utils/supabase";
 
 export const useAccount = () => {
   const { user } = useAuth();
@@ -57,10 +58,10 @@ export const useAccount = () => {
       if (error) throw error;
       setMessage("Check your email to confirm the change");
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'message' in error) {
+      if (error && typeof error === "object" && "message" in error) {
         setMessage(`error: ${(error as { message: string }).message}`);
       } else {
-        setMessage('An unknown error occurred');
+        setMessage("An unknown error occurred");
       }
     } finally {
       setLoading(false);
@@ -93,9 +94,9 @@ export const useAccount = () => {
             {
               status: "approved",
               timestamp: new Date().toISOString(),
-              user_id: user.id
-            }
-          ]
+              user_id: user.id,
+            },
+          ],
         })
         .eq("id", application.id);
 
@@ -104,11 +105,11 @@ export const useAccount = () => {
       // Refresh profile data
       await fetchProfileAndApplication();
     } catch (error: unknown) {
-      console.error('Error accepting profile:', error);
-      if (error && typeof error === 'object' && 'message' in error) {
+      console.error("Error accepting profile:", error);
+      if (error && typeof error === "object" && "message" in error) {
         setMessage(`error: ${(error as { message: string }).message}`);
       } else {
-        setMessage('An unknown error occurred');
+        setMessage("An unknown error occurred");
       }
     } finally {
       setLoading(false);
@@ -140,6 +141,6 @@ export const useAccount = () => {
     handleAcceptProfile,
     formatRole,
     formatApplicationStatus,
-    navigate
+    navigate,
   };
-}; 
+};

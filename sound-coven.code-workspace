@@ -1,12 +1,12 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"name": "sound-coven",
-			"path": "sound-coven"
-		}
-	],
-	"settings": {}
+  "folders": [
+    {
+      "path": ".",
+    },
+    {
+      "name": "sound-coven",
+      "path": "sound-coven",
+    },
+  ],
+  "settings": {},
 }

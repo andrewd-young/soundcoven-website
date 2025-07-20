@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
 // Create a cache outside the hook to persist across renders
 const imageCache = new Map<string, string>();
@@ -11,13 +11,9 @@ interface OptimizedImageOptions {
 
 export const useOptimizedImage = (
   url: string | undefined,
-  options: OptimizedImageOptions = {}
+  options: OptimizedImageOptions = {},
 ): string | undefined => {
-  const {
-    width = 1200,
-    quality = 75,
-    format = 'jpeg',
-  } = options;
+  const { width = 1200, quality = 75, format = "jpeg" } = options;
 
   const optimizedUrl = useMemo(() => {
     if (!url) return url;
@@ -31,11 +27,11 @@ export const useOptimizedImage = (
     }
 
     // Handle Supabase storage URLs
-    if (url.includes('supabase')) {
+    if (url.includes("supabase")) {
       // Check if it's from the public bucket
-      if (url.includes('/public/public/')) {
+      if (url.includes("/public/public/")) {
         // For public bucket, we need to remove the duplicate 'public'
-        const cleanUrl = url.replace('/public/public/', '/public/');
+        const cleanUrl = url.replace("/public/public/", "/public/");
         const params = new URLSearchParams({
           width: width.toString(),
           quality: quality.toString(),
@@ -63,4 +59,4 @@ export const useOptimizedImage = (
   }, [url, width, quality, format]);
 
   return optimizedUrl;
-}; 
+};

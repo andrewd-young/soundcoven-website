@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import supabase from '../utils/supabase';
-import type { IndustryProfessional } from '../types/IndustryProfessional';
+import { useQuery } from "@tanstack/react-query";
+
+import type { IndustryProfessional } from "../types/IndustryProfessional";
+import supabase from "../utils/supabase";
 
 interface RawIndustryProfessionalData {
   id: number;
@@ -26,17 +27,17 @@ interface RawIndustryProfessionalData {
 export const useIndustryPros = () => {
   const fetchIndustryPros = async (): Promise<IndustryProfessional[]> => {
     const { data, error } = await supabase
-      .from('industry_professionals')
-      .select('*');
+      .from("industry_professionals")
+      .select("*");
 
     if (error) {
-      console.error('Supabase error:', error);
+      console.error("Supabase error:", error);
       throw error;
     }
 
     return data.map((pro: RawIndustryProfessionalData) => ({
       id: pro.id,
-      userId: pro.user_id ?? '',
+      userId: pro.user_id ?? "",
       name: pro.name,
       role: pro.role,
       industry_role: pro.industry_role,
@@ -49,26 +50,30 @@ export const useIndustryPros = () => {
       bio: pro.bio,
       favorite_artists: Array.isArray(pro.favorite_artists)
         ? pro.favorite_artists
-        : typeof pro.favorite_artists === 'string'
-        ? pro.favorite_artists.split(',').map((a: string) => a.trim())
-        : [],
+        : typeof pro.favorite_artists === "string"
+          ? pro.favorite_artists.split(",").map((a: string) => a.trim())
+          : [],
       expertise_areas: Array.isArray(pro.expertise_areas)
         ? pro.expertise_areas
-        : typeof pro.expertise_areas === 'string'
-        ? pro.expertise_areas.split(',').map((a: string) => a.trim())
-        : [],
+        : typeof pro.expertise_areas === "string"
+          ? pro.expertise_areas.split(",").map((a: string) => a.trim())
+          : [],
       social_links: Array.isArray(pro.social_links)
         ? pro.social_links
-        : typeof pro.social_links === 'string'
-        ? pro.social_links.split(',').map((a: string) => a.trim())
-        : [],
+        : typeof pro.social_links === "string"
+          ? pro.social_links.split(",").map((a: string) => a.trim())
+          : [],
       created_at: pro.created_at,
       updated_at: pro.updated_at,
     }));
   };
 
-  const { data: industryPros = [], isLoading, error } = useQuery<IndustryProfessional[], Error>({
-    queryKey: ['industryPros'],
+  const {
+    data: industryPros = [],
+    isLoading,
+    error,
+  } = useQuery<IndustryProfessional[], Error>({
+    queryKey: ["industryPros"],
     queryFn: fetchIndustryPros,
     staleTime: 5 * 60 * 1000,
   });
@@ -76,6 +81,6 @@ export const useIndustryPros = () => {
   return {
     industryPros,
     loading: isLoading,
-    error: error?.message
+    error: error?.message,
   };
 };

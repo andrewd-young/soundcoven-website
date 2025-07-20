@@ -1,4 +1,3 @@
-
 // --- Application Types matching Prisma schema ---
 
 export interface BaseApplication {
@@ -17,13 +16,28 @@ export interface BaseApplication {
   updated_at?: string;
   reviewed_at?: string;
   reviewed_by?: string;
-  status_history: Array<{ status: string; timestamp: string; user_id?: string; note?: string }>;
+  status_history: Array<{
+    status: string;
+    timestamp: string;
+    user_id?: string;
+    note?: string;
+  }>;
   modification_requests: string[];
   current_revision?: number;
   last_modified_at?: string;
   last_modified_by?: string;
-  status: "pending" | "pending_user_approval" | "changes_requested" | "approved" | "rejected" | "finalized";
-  admin_approved_profile?: ArtistProfileData | IndustryProfileData | InstrumentalistProfileData | null;
+  status:
+    | "pending"
+    | "pending_user_approval"
+    | "changes_requested"
+    | "approved"
+    | "rejected"
+    | "finalized";
+  admin_approved_profile?:
+    | ArtistProfileData
+    | IndustryProfileData
+    | InstrumentalistProfileData
+    | null;
   finalized_at?: string;
   finalized_by?: string;
   user_accepted_at?: string;
@@ -67,7 +81,10 @@ export interface InstrumentalistApplication extends BaseApplication {
 }
 
 // Canonical ApplicationData (used for application records)
-export type ApplicationData = ArtistApplication | IndustryApplication | InstrumentalistApplication;
+export type ApplicationData =
+  | ArtistApplication
+  | IndustryApplication
+  | InstrumentalistApplication;
 
 // --- Profile Data Types ---
 
@@ -109,8 +126,14 @@ export interface InstrumentalistProfileData extends BaseProfileData {
 }
 
 // Canonical ProfileData (used for admin_approved_profile, etc.)
-export type ProfileData = ArtistProfileData | IndustryProfileData | InstrumentalistProfileData;
-export type AllProfileKeys = keyof ArtistProfileData | keyof IndustryProfileData | keyof InstrumentalistProfileData;
+export type ProfileData =
+  | ArtistProfileData
+  | IndustryProfileData
+  | InstrumentalistProfileData;
+export type AllProfileKeys =
+  | keyof ArtistProfileData
+  | keyof IndustryProfileData
+  | keyof InstrumentalistProfileData;
 
 // FormProps for forms
 export interface FormProps {
